@@ -1,0 +1,164 @@
+﻿:root {
+  color: #201a17;
+  background: #fbf4ec;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(215, 154, 92, 0.28), transparent 28rem),
+    linear-gradient(135deg, #fffaf3 0%, #f7eadb 54%, #ead7c2 100%);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.25rem clamp(1rem, 5vw, 4rem);
+  border-bottom: 1px solid rgba(63, 43, 31, 0.12);
+  background: rgba(255, 250, 243, 0.78);
+  backdrop-filter: blur(14px);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.logo {
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  color: #6f4e37;
+  font-size: 0.95rem;
+}
+
+.nav a.active {
+  color: #201a17;
+  font-weight: 700;
+}
+
+.page {
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 3rem 0 4rem;
+}
+
+.hero,
+.card {
+  border: 1px solid rgba(63, 43, 31, 0.12);
+  border-radius: 28px;
+  background: rgba(255, 250, 243, 0.76);
+  box-shadow: 0 22px 70px rgba(69, 45, 27, 0.1);
+}
+
+.hero {
+  padding: clamp(2rem, 7vw, 5rem);
+}
+
+.hero h1,
+.page h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(2.2rem, 6vw, 5.4rem);
+  line-height: 0.94;
+  letter-spacing: -0.07em;
+}
+
+.lead {
+  max-width: 740px;
+  color: #6f4e37;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.7;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.card {
+  padding: 1.25rem;
+}
+
+.card h2,
+.card h3 {
+  margin-top: 0;
+}
+
+.badge {
+  display: inline-flex;
+  border-radius: 999px;
+  background: #3c2a20;
+  color: #fff7ed;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1rem;
+  max-width: 560px;
+}
+
+.input {
+  border: 1px solid rgba(63, 43, 31, 0.18);
+  border-radius: 16px;
+  background: #fffaf3;
+  padding: 0.85rem 1rem;
+}
+
+.button {
+  border: 0;
+  border-radius: 999px;
+  background: #9b5f32;
+  color: white;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 0.9rem 1.3rem;
+}
+
+@media (max-width: 760px) {
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .nav {
+    justify-content: flex-start;
+  }
+}

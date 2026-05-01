@@ -1,0 +1,14 @@
+node_modules
+.pnpm-store
+.env
+.env.local
+.env.*.local
+dist
+build
+coverage
+.vite
+.cache
+.DS_Store
+*.log
+*.tsbuildinfo
+.vite-*

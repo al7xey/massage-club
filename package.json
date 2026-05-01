@@ -1,0 +1,16 @@
+{
+  "name": "massage-subscription-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fullstack monorepo for a massage chain subscription platform.",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "build": "pnpm --filter @massage/shared build && pnpm --filter server build && pnpm --filter client build",
+    "build:shared": "pnpm --filter @massage/shared build",
+    "dev": "pnpm --filter @massage/shared build && pnpm --parallel --filter server --filter client dev",
+    "seed": "pnpm --filter server seed",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "typecheck": "pnpm --filter @massage/shared build && pnpm --filter server build && pnpm --filter client typecheck"
+  }
+}
