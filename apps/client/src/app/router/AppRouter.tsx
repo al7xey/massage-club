@@ -11,6 +11,7 @@ import { AuthPage } from '@/pages/public/AuthPage';
 import { BookingPage } from '@/pages/public/BookingPage';
 import { CertificatesPage } from '@/pages/public/CertificatesPage';
 import { HomePage } from '@/pages/public/HomePage';
+import { MastersPage } from '@/pages/public/MastersPage';
 import { ServiceDetailsPage } from '@/pages/public/ServiceDetailsPage';
 import { ServicesCatalogPage } from '@/pages/public/ServicesCatalogPage';
 import { StudiosPage } from '@/pages/public/StudiosPage';
@@ -23,6 +24,7 @@ export function AppRouter() {
         <Route index element={<HomePage />} />
         <Route path="services" element={<ServicesCatalogPage />} />
         <Route path="services/:id" element={<ServiceDetailsPage />} />
+        <Route path="masters" element={<MastersPage />} />
         <Route path="subscriptions" element={<SubscriptionPlansPage />} />
         <Route path="studios" element={<StudiosPage />} />
         <Route path="booking" element={<BookingPage />} />

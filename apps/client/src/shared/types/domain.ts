@@ -3,6 +3,7 @@
 export interface ServiceDto {
   id: Id;
   title: string;
+  slug?: string;
   description: string;
   durationMinutes: number;
   priceRub: number;
@@ -13,6 +14,7 @@ export interface StudioDto {
   name: string;
   address: string;
   city: string;
+  phone?: string;
 }
 
 export interface SubscriptionPlanDto {
@@ -22,4 +24,14 @@ export interface SubscriptionPlanDto {
   monthlyPriceRub: number;
   discountPercent: number;
   includedCredits: number;
+}
+
+export interface MasterDto {
+  id: Id;
+  firstName: string;
+  lastName: string;
+  bio?: string;
+  studio?: StudioDto;
+  services: ServiceDto[];
+  isActive: boolean;
 }

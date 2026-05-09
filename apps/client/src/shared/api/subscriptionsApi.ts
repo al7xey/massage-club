@@ -1,6 +1,7 @@
-﻿import { createApi } from '@reduxjs/toolkit/query/react';
+import { createApi } from '@reduxjs/toolkit/query/react';
 import type { SubscriptionPlanDto } from '../types/domain';
 import { baseQuery } from './baseApi';
+import { mockSubscriptionPlans } from './mockData';
 
 export const subscriptionsApi = createApi({
   reducerPath: 'subscriptionsApi',
@@ -8,7 +9,13 @@ export const subscriptionsApi = createApi({
   tagTypes: ['SubscriptionPlans', 'MySubscription'],
   endpoints: (builder) => ({
     getSubscriptionPlans: builder.query<SubscriptionPlanDto[], void>({
-      query: () => '/subscription-plans',
+      async queryFn(_arg, _api, _extraOptions, fetchWithBaseQuery) {
+        const result = await fetchWithBaseQuery('/subscription-plans');
+        if (result.error) {
+          return { data: mockSubscriptionPlans };
+        }
+        return { data: (result.data as SubscriptionPlanDto[]) ?? mockSubscriptionPlans };
+      },
       providesTags: ['SubscriptionPlans'],
     }),
     createSubscription: builder.mutation<unknown, { planId: string }>({

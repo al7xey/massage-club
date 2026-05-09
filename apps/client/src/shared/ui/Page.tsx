@@ -1,4 +1,5 @@
 ﻿import { PropsWithChildren } from 'react';
+import { Link } from 'react-router-dom';
 
 interface PageProps extends PropsWithChildren {
   title: string;
@@ -7,10 +8,13 @@ interface PageProps extends PropsWithChildren {
 
 export function Page({ title, description, children }: PageProps) {
   return (
-    <main className="page">
-      <h1>{title}</h1>
-      {description ? <p className="lead">{description}</p> : null}
-      {children}
+    <main className="legacy-page">
+      <p className="home-crumb">
+        <Link to="/">Главная</Link>
+      </p>
+      <h1 className="legacy-page__title">{title}</h1>
+      {description ? <p className="legacy-page__description">{description}</p> : null}
+      <div className="legacy-content">{children}</div>
     </main>
   );
 }
