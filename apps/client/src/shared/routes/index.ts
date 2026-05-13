@@ -1,0 +1,18 @@
+﻿export const appRoutes = {
+  home: () => '/',
+  services: () => '/services',
+  serviceDetails: (id: string) => `/services/${id}`,
+  masters: () => '/masters',
+  subscriptions: () => '/subscriptions',
+  studios: () => '/studios',
+  booking: () => '/booking',
+  auth: () => '/auth',
+  certificates: () => '/certificates',
+  account: () => '/account',
+  accountSubscription: () => '/account/subscription',
+  accountAppointments: () => '/account/appointments',
+  accountPayments: () => '/account/payments',
+  accountSupport: () => '/account/support',
+  admin: () => '/admin',
+  adminSection: (section: string) => `/admin/${section}`,
+} as const;

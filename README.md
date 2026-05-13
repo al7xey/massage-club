@@ -14,7 +14,7 @@
 1. Установить зависимости:
 
 ```bash
-pnpm install
+npm install
 ```
 
 2. Создать `.env` из шаблона:
@@ -26,13 +26,13 @@ cp .env.example .env
 3. Поднять PostgreSQL (опционально через Docker):
 
 ```bash
-pnpm docker:up
+npm run docker:up
 ```
 
 4. Запустить проект:
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 Клиент по умолчанию: `http://localhost:5173`  
@@ -42,12 +42,12 @@ Swagger: `http://localhost:3000/api/docs`
 ## Полезные команды
 
 ```bash
-pnpm dev
-pnpm build
-pnpm typecheck
-pnpm seed
-pnpm docker:up
-pnpm docker:down
+npm run dev
+npm run build
+npm run typecheck
+npm run seed
+npm run docker:up
+npm run docker:down
 ```
 
 ## Переменные окружения

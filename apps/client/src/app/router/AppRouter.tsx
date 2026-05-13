@@ -1,21 +1,22 @@
 ﻿import { Navigate, Route, Routes } from 'react-router-dom';
-import { MainLayout } from '@/widgets/layout/MainLayout';
-import { AccountPage } from '@/pages/account/AccountPage';
-import { MyAppointmentsPage } from '@/pages/account/MyAppointmentsPage';
-import { MyPaymentsPage } from '@/pages/account/MyPaymentsPage';
-import { MySubscriptionPage } from '@/pages/account/MySubscriptionPage';
-import { SupportTicketsPage } from '@/pages/account/SupportTicketsPage';
-import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage';
-import { AdminSectionPage } from '@/pages/admin/AdminSectionPage';
-import { AuthPage } from '@/pages/public/AuthPage';
-import { BookingPage } from '@/pages/public/BookingPage';
-import { CertificatesPage } from '@/pages/public/CertificatesPage';
-import { HomePage } from '@/pages/public/HomePage';
-import { MastersPage } from '@/pages/public/MastersPage';
-import { ServiceDetailsPage } from '@/pages/public/ServiceDetailsPage';
-import { ServicesCatalogPage } from '@/pages/public/ServicesCatalogPage';
-import { StudiosPage } from '@/pages/public/StudiosPage';
-import { SubscriptionPlansPage } from '@/pages/public/SubscriptionPlansPage';
+import { MainLayout } from '@/widgets/main-layout';
+import { AccountPage } from '@/pages/account';
+import { AdminDashboardPage } from '@/pages/admin-dashboard';
+import { AdminSectionPage } from '@/pages/admin-section';
+import { AuthPage } from '@/pages/auth';
+import { BookingPage } from '@/pages/booking';
+import { CertificatesPage } from '@/pages/certificates';
+import { HomePage } from '@/pages/home';
+import { MastersPage } from '@/pages/masters';
+import { MyAppointmentsPage } from '@/pages/my-appointments';
+import { MyPaymentsPage } from '@/pages/my-payments';
+import { MySubscriptionPage } from '@/pages/my-subscription';
+import { ServiceDetailsPage } from '@/pages/service-details';
+import { ServicesCatalogPage } from '@/pages/services-catalog';
+import { StudiosPage } from '@/pages/studios';
+import { SubscriptionPlansPage } from '@/pages/subscription-plans';
+import { SupportTicketsPage } from '@/pages/support-tickets';
+import { appRoutes } from '@/shared/routes';
 
 export function AppRouter() {
   return (
@@ -37,7 +38,7 @@ export function AppRouter() {
         <Route path="account/support" element={<SupportTicketsPage />} />
         <Route path="admin" element={<AdminDashboardPage />} />
         <Route path="admin/:section" element={<AdminSectionPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to={appRoutes.home()} replace />} />
       </Route>
     </Routes>
   );
