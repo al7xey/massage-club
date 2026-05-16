@@ -1,4 +1,5 @@
-﻿import type { ReviewCardModel } from '../model/types';
+import type { ReviewCardModel } from '../model/types';
+import styles from './ReviewCard.module.css';
 
 interface ReviewCardProps {
   review: ReviewCardModel;
@@ -11,12 +12,12 @@ function stars(rating: number): string {
 
 export function ReviewCard({ review }: ReviewCardProps) {
   return (
-    <article className="review-card">
-      <p className="review-card__author">{review.author}</p>
-      <p className="review-card__stars">{stars(review.rating)}</p>
-      <p className="review-card__text">"{review.text}"</p>
-      <p className="review-card__meta">{review.role}</p>
-      <p className="review-card__meta">{review.date}</p>
+    <article className={styles.card}>
+      <p className={styles.author}>{review.author}</p>
+      <p className={styles.stars}>{stars(review.rating)}</p>
+      <p className={styles.text}>"{review.text}"</p>
+      <p className={styles.meta}>{review.role}</p>
+      <p className={styles.meta}>{review.date}</p>
     </article>
   );
 }

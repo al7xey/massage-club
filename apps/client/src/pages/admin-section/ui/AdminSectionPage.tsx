@@ -1,5 +1,6 @@
-﻿import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
+import styles from './AdminSectionPage.module.css';
 
 const titles: Record<string, string> = {
   services: 'Админ: услуги',
@@ -19,7 +20,7 @@ export function AdminSectionPage() {
 
   return (
     <PageShell title={title} description="CRUD-интерфейс будет подключен к REST API на следующем этапе.">
-      <div className="card">Раздел: {section}</div>
+      <div className={styles.card}>Раздел: {section}</div>
     </PageShell>
   );
 }

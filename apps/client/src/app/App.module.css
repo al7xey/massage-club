@@ -1,0 +1,101 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap");
+
+.app {
+  --color-bg: #ffffff;
+  --color-text: #20232a;
+  --color-muted: #6f7680;
+  --color-subtle: #8c929a;
+  --color-surface: #ffffff;
+  --color-surface-soft: #fafbf8;
+  --color-soft: #f5f7f2;
+  --color-soft-strong: #edf2e8;
+  --color-line: #dfe5da;
+  --color-line-strong: #cfd8c8;
+  --color-primary: #6f8d4e;
+  --color-primary-hover: #5f7b41;
+  --color-accent: #d99a22;
+  --color-danger: #b54b4b;
+  --color-danger-bg: #fff3f3;
+  --container-page: min(1160px, calc(100% - 56px));
+  --page-padding-top: 58px;
+  --page-padding-bottom: 84px;
+  --section-gap: 64px;
+  --grid-gap: 22px;
+  --radius-card: 18px;
+  --radius-card-small: 12px;
+  --radius-control: 999px;
+  --shadow-card: 0 12px 30px rgba(32, 35, 42, 0.055);
+  --shadow-hover: 0 18px 40px rgba(32, 35, 42, 0.09);
+  --shadow-green: 0 18px 42px rgba(111, 141, 78, 0.16);
+  --font-h1: 42px;
+  --font-h2: 28px;
+  --font-h3: 18px;
+  --font-body: 15px;
+  --font-small: 13px;
+  --control-height: 46px;
+  --catalog-card-height: 388px;
+  position: fixed;
+  inset: 0;
+  overflow: auto;
+  overflow-x: hidden;
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Montserrat", "Segoe UI", Arial, sans-serif;
+  font-size: var(--font-body);
+  line-height: 1.55;
+}
+
+.app *,
+.app *::before,
+.app *::after {
+  box-sizing: border-box;
+}
+
+.app a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app button,
+.app input,
+.app select,
+.app textarea {
+  font: inherit;
+}
+
+.app button,
+.app select {
+  cursor: pointer;
+}
+
+.app input,
+.app select,
+.app textarea {
+  color: var(--color-text);
+}
+
+.app :focus-visible {
+  outline: 3px solid rgba(111, 141, 78, 0.24);
+  outline-offset: 3px;
+}
+
+.app button:disabled,
+.app input:disabled,
+.app textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+@media (max-width: 760px) {
+  .app {
+    --container-page: calc(100% - 28px);
+    --page-padding-top: 30px;
+    --page-padding-bottom: 64px;
+    --section-gap: 54px;
+    --font-h1: 32px;
+    --font-h2: 24px;
+    --font-h3: 18px;
+    --catalog-card-height: auto;
+  }
+}

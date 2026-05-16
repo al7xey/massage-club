@@ -15,6 +15,7 @@ export interface MasterCardModel {
   id: string;
   fullName: string;
   roleLabel: string;
+  summary: string;
   experienceLabel: string;
   rating: number;
   reviewsCount: number;

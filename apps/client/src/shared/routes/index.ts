@@ -8,6 +8,7 @@
   booking: () => '/booking',
   auth: () => '/auth',
   certificates: () => '/certificates',
+  contacts: () => '/contacts',
   account: () => '/account',
   accountSubscription: () => '/account/subscription',
   accountAppointments: () => '/account/appointments',

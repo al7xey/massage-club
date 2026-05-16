@@ -1,4 +1,7 @@
-﻿import type { StudioCardModel } from '../model/types';
+import { Link } from 'react-router-dom';
+import { appRoutes } from '@/shared/routes';
+import type { StudioCardModel } from '../model/types';
+import styles from './StudioCard.module.css';
 
 interface StudioCardProps {
   studio: StudioCardModel;
@@ -6,18 +9,16 @@ interface StudioCardProps {
 
 export function StudioCard({ studio }: StudioCardProps) {
   return (
-    <article className="studio-card">
-      <div className="studio-card__icon" aria-hidden>
-        •
-      </div>
-      <div className="studio-card__content">
+    <article className={styles.card}>
+      <div className={styles.media} aria-hidden />
+      <div className={styles.content}>
         <h3>{studio.title}</h3>
         <p>{studio.address}</p>
         <p>{studio.openLabel}</p>
       </div>
-      <button className="ui-btn ui-btn-outline" type="button">
+      <Link className={styles.button} to={appRoutes.booking()}>
         Записаться
-      </button>
+      </Link>
     </article>
   );
 }

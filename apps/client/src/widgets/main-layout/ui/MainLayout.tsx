@@ -1,5 +1,6 @@
-﻿import { NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import { appRoutes } from '@/shared/routes';
+import styles from './MainLayout.module.css';
 
 const links = [
   [appRoutes.services(), 'Услуги'],
@@ -11,69 +12,72 @@ const links = [
 
 export function MainLayout() {
   return (
-    <div className="app-shell">
-      <div className="layout-frame">
-        <header className="header">
-          <NavLink to={appRoutes.home()} className="logo">
-            <span className="logo-mark" aria-hidden>
-              ♡
-            </span>
-            Для себя
+    <div className={styles.shell}>
+      <header className={styles.header}>
+        <NavLink to={appRoutes.home()} className={styles.logo}>
+          <span aria-hidden="true">♡</span>
+          Для себя
+        </NavLink>
+
+        <nav className={styles.nav} aria-label="Основная навигация">
+          {links.map(([to, label]) => (
+            <NavLink key={to} to={to} className={({ isActive }) => (isActive ? styles.activeLink : undefined)}>
+              {label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className={styles.actions}>
+          <NavLink className={styles.login} to={appRoutes.auth()}>
+            Войти
           </NavLink>
+          <NavLink className={styles.primaryButton} to={appRoutes.booking()}>
+            Купить подписку
+          </NavLink>
+        </div>
+      </header>
 
-          <nav className="nav" aria-label="Основная навигация">
-            {links.map(([to, label]) => (
-              <NavLink key={to} to={to} end={to === appRoutes.home()}>
-                {label}
-              </NavLink>
-            ))}
-          </nav>
+      <Outlet />
 
-          <div className="header-actions">
-            <NavLink className="header-login" to={appRoutes.auth()}>
-              Войти
-            </NavLink>
-            <NavLink className="ui-btn ui-btn-primary" to={appRoutes.subscriptions()}>
-              Купить подписку
-            </NavLink>
+      <footer className={styles.footer}>
+        <div className={styles.footerMain}>
+          <div>
+            <p className={styles.footerBrand}>
+              <span aria-hidden="true">♡</span>
+              Для себя
+            </p>
+            <p>Сеть wellness-клубов с заботой о вашем теле и ментальном здоровье. Работаем по системе подписки.</p>
           </div>
-        </header>
-
-        <Outlet />
-
-        <footer className="footer">
-          <div className="footer-main">
-            <div>
-              <p className="footer-brand">Для себя</p>
-              <p>Сеть wellness-клубов с заботой о вашем теле и ментальном здоровье.</p>
-            </div>
-            <div>
-              <h4>Клуб</h4>
-              <a href="/about">О клубе</a>
-              <a href="/blog">Блог</a>
-              <a href="/faq">FAQ</a>
-            </div>
-            <div>
-              <h4>Услуги</h4>
-              <a href={appRoutes.services()}>Массаж</a>
-              <a href={appRoutes.services()}>SPA-программы</a>
-              <a href={appRoutes.services()}>Уход за лицом</a>
-            </div>
-            <div>
-              <h4>Контакты</h4>
-              <p>8 (800) 555-35-35</p>
-              <p>hello@dlyasebya.ru</p>
-            </div>
+          <div>
+            <h4>Клуб</h4>
+            <Link to={appRoutes.studios()}>Студии</Link>
+            <Link to={appRoutes.subscriptions()}>Членство</Link>
+            <Link to={appRoutes.contacts()}>Контакты</Link>
           </div>
-          <div className="footer-bottom">
-            <span>© 2024 Dlya Sebya Wellness. Все права защищены.</span>
-            <div className="footer-policies">
-              <a href="/privacy">Политика конфиденциальности</a>
-              <a href="/offer">Публичная оферта</a>
-            </div>
+          <div>
+            <h4>Услуги</h4>
+            <Link to={appRoutes.services()}>Массаж</Link>
+            <Link to={appRoutes.services()}>SPA-программы</Link>
+            <Link to={appRoutes.services()}>Уход за лицом</Link>
           </div>
-        </footer>
-      </div>
+          <div>
+            <h4>Контакты</h4>
+            <p>8 (800) 555-35-35</p>
+            <p>hello@dlyasebya.ru</p>
+            <Link to={appRoutes.contacts()} className={styles.socials} aria-label="Социальные сети">
+              <span>☆</span>
+              <span>□</span>
+            </Link>
+          </div>
+        </div>
+        <div className={styles.footerBottom}>
+          <span>© 2024 Dlya Sebya Wellness. Все права защищены.</span>
+          <div className={styles.footerPolicies}>
+            <Link to={appRoutes.contacts()}>Политика конфиденциальности</Link>
+            <Link to={appRoutes.certificates()}>Подарочные сертификаты</Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

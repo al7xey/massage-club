@@ -1,0 +1,144 @@
+.segment {
+  display: flex;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: #ffffff;
+  padding: 4px;
+  box-shadow: var(--shadow-card);
+}
+
+.segmentItem,
+.segmentActive {
+  min-height: 42px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  padding: 0 22px;
+  cursor: pointer;
+  color: var(--color-muted);
+  font-weight: 700;
+}
+
+.segmentActive {
+  background: var(--color-soft);
+  color: var(--color-primary);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 56px;
+  align-items: start;
+}
+
+.statusPanel {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+  padding: 24px;
+}
+
+.statusPanel h2,
+.statusPanel p {
+  margin: 0;
+}
+
+.statusPanel h2 {
+  font-size: var(--font-h2);
+}
+
+.statusPanel p {
+  color: var(--color-muted);
+}
+
+.statusPanel input,
+.statusPanel button {
+  min-height: var(--control-height);
+  border-radius: var(--radius-control);
+}
+
+.statusPanel input {
+  border: 1px solid var(--color-line);
+  padding: 0 16px;
+}
+
+.statusPanel button {
+  border: 0;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.statusPanel button:hover {
+  background: var(--color-primary-hover);
+}
+
+.preview {
+  position: sticky;
+  top: 104px;
+  min-height: 260px;
+  border-radius: var(--radius-card);
+  background: var(--color-primary);
+  color: #ffffff;
+  box-shadow: var(--shadow-hover);
+  padding: 34px;
+}
+
+.preview::before {
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin: 42px 0 26px;
+  background: rgba(255, 255, 255, 0.28);
+  content: "";
+}
+
+.preview p,
+.preview div {
+  margin: 0;
+}
+
+.preview p {
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.preview div {
+  margin-top: 22px;
+}
+
+.preview span {
+  display: block;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+}
+
+.preview strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 30px;
+  line-height: 1;
+}
+
+@media (max-width: 900px) {
+  .layout,
+  .segment {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .preview {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .segment {
+    width: 100%;
+  }
+}

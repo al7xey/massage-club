@@ -1,0 +1,1 @@
+export { IssueCertificateForm } from './IssueCertificateForm';

@@ -1,6 +1,7 @@
-﻿import type { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import type { TariffItem } from '../model/types';
+import styles from './PricingCard.module.css';
 
 interface PricingCardProps {
   item: TariffItem;
@@ -8,20 +9,25 @@ interface PricingCardProps {
 }
 
 export function PricingCard({ item, actionSlot }: PricingCardProps) {
+  const isFeatured = item.title.toLowerCase().includes('super') && !item.title.toLowerCase().includes('family');
+
   return (
-    <article className="pricing-card">
-      <p className="pricing-card__title">{item.title}</p>
-      <div className="pricing-card__price-row">
+    <article className={styles.card} data-featured={isFeatured ? 'true' : undefined}>
+      <div>
+        <p className={styles.title}>{item.title}</p>
+        <p className={styles.subtitle}>{item.planMeta.subtitle}</p>
+      </div>
+      <div className={styles.priceRow}>
         <strong>{formatPrice(item.priceRub)}</strong>
         <span>/ 30 дней</span>
       </div>
-      <ul className="pricing-card__features">
+      <ul className={styles.features}>
         {item.planMeta.features.map((feature) => (
           <li key={feature}>{feature}</li>
         ))}
       </ul>
       {actionSlot ?? (
-        <button className="ui-btn ui-btn-primary ui-btn-block" type="button">
+        <button className={styles.button} type="button">
           Выбрать тариф
         </button>
       )}

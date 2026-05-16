@@ -1,19 +1,23 @@
-﻿import { PropsWithChildren } from 'react';
-import { HomeBreadcrumb } from '../breadcrumbs/HomeBreadcrumb';
+import { PropsWithChildren, type ReactNode } from 'react';
+import styles from './PageShell.module.css';
 
 interface PageShellProps extends PropsWithChildren {
   title: string;
   description?: string;
-  showBreadcrumb?: boolean;
+  actions?: ReactNode;
 }
 
-export function PageShell({ title, description, showBreadcrumb = true, children }: PageShellProps) {
+export function PageShell({ actions, title, description, children }: PageShellProps) {
   return (
-    <main className="legacy-page">
-      {showBreadcrumb ? <HomeBreadcrumb /> : null}
-      <h1 className="legacy-page__title">{title}</h1>
-      {description ? <p className="legacy-page__description">{description}</p> : null}
-      <div className="legacy-content">{children}</div>
+    <main className={styles.page}>
+      <header className={styles.header}>
+        <div>
+          <h1 className={styles.title}>{title}</h1>
+          {description ? <p className={styles.description}>{description}</p> : null}
+        </div>
+        {actions ? <div className={styles.actions}>{actions}</div> : null}
+      </header>
+      <div className={styles.content}>{children}</div>
     </main>
   );
 }

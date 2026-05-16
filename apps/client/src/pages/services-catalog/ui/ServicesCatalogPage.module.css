@@ -1,0 +1,227 @@
+.catalog {
+  display: grid;
+  gap: 28px;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.searchWrap {
+  min-width: 0;
+}
+
+.search {
+  width: 100%;
+  min-height: var(--control-height);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: #ffffff;
+  padding: 0 18px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.search:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(111, 141, 78, 0.12);
+  outline: 0;
+}
+
+.filterButton,
+.filtersHeader button,
+.toolbar select {
+  min-height: var(--control-height);
+  border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-control);
+  background: #ffffff;
+  color: var(--color-text);
+  padding: 0 18px;
+  font-weight: 800;
+  transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.filterButton:hover,
+.filtersHeader button:hover:not(:disabled),
+.toolbar select:hover {
+  border-color: var(--color-primary);
+  background: var(--color-soft);
+}
+
+.toolbarMeta {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--color-line);
+  padding-top: 18px;
+  color: var(--color-muted);
+}
+
+.toolbarMeta p {
+  margin: 0;
+}
+
+.toolbarMeta label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar select {
+  min-height: 40px;
+  padding-inline: 14px;
+}
+
+.body {
+  display: grid;
+  gap: 36px;
+}
+
+.withFilters {
+  grid-template-columns: 280px minmax(0, 1fr);
+  align-items: start;
+}
+
+.filters {
+  position: sticky;
+  top: 96px;
+  display: grid;
+  gap: 24px;
+  align-content: start;
+  min-width: 0;
+  color: var(--color-text);
+}
+
+.filtersHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.filtersHeader strong {
+  font-size: 16px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.filtersHeader button {
+  min-height: 34px;
+  padding-inline: 14px;
+  font-size: 12px;
+}
+
+.filtersHeader button:disabled {
+  opacity: 0.5;
+}
+
+.filterGroup {
+  display: grid;
+  gap: 10px;
+}
+
+.filterGroup h3 {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.checkRow,
+.switchRow {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.checkRow input,
+.switchRow input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+.range {
+  width: 100%;
+  accent-color: var(--color-primary);
+}
+
+.priceFields {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--color-subtle);
+  font-size: 13px;
+}
+
+.switchRow {
+  min-height: var(--control-height);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  padding: 0 16px;
+}
+
+.results {
+  min-width: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 36px 30px;
+}
+
+.state {
+  margin: 0 0 18px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-soft);
+  color: var(--color-muted);
+  padding: 18px;
+  text-align: center;
+}
+
+@media (max-width: 1080px) {
+  .withFilters {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .toolbar,
+  .toolbarMeta,
+  .toolbarMeta label,
+  .withFilters,
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbarMeta {
+    align-items: stretch;
+  }
+
+  .filters {
+    position: static;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    background: #ffffff;
+    padding: 18px;
+  }
+
+  .filterButton {
+    width: 100%;
+  }
+}

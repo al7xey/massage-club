@@ -1,107 +1,84 @@
-﻿import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
+import { Link } from 'react-router-dom';
+import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { mockReviews } from '@/entities/review';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
+import { appRoutes } from '@/shared/routes';
 import { PlansCarousel } from '@/widgets/plans-carousel';
 import { ReviewsShowcase } from '@/widgets/reviews-showcase';
 import { ServiceShowcase } from '@/widgets/service-showcase';
 import { StudioShowcase } from '@/widgets/studio-showcase';
+import styles from './HomePage.module.css';
 
 export function HomePage() {
   const { data: services = [] } = useGetServicesQuery();
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
   const { data: studios = [] } = useGetStudiosQuery();
 
-  const popularServices = services
-    .slice(0, 4)
-    .map((service, index) => createServiceCardModel(service, index));
+  const popularServices = services.slice(0, 4).map((service, index) => createServiceCardModel(service, index));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
   const tariffs = buildTariffs(plans);
 
   return (
-    <main className="page home-page">
-      <section className="hero-split home-hero">
-        <div className="home-hero__content">
-          <p className="home-hero__kicker">wellness-клуб по подписке</p>
+    <main className={styles.page}>
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
           <h1>
             Время для себя
             <br />
             <span>каждый месяц</span>
           </h1>
           <p>
-            Позаботьтесь о своем теле и ментальном здоровье в атмосфере
-            абсолютного спокойствия. Массаж, SPA и уход по единой подписке.
+            Позаботьтесь о своем теле и ментальном здоровье в атмосфере абсолютного спокойствия.
+            Массаж, SPA и уход по единой подписке.
           </p>
-          <div className="hero-actions">
-            <button className="ui-btn ui-btn-primary" type="button">
+          <div className={styles.heroActions}>
+            <Link className={styles.primaryButton} to={appRoutes.booking()}>
               Записаться
-            </button>
-            <button className="ui-btn ui-btn-outline" type="button">
+            </Link>
+            <Link className={styles.outlineButton} to={appRoutes.subscriptions()}>
               Выбрать подписку
-            </button>
-          </div>
-          <div className="home-hero__facts">
-            <span>15 000+ довольных клиентов</span>
-            <span>Рейтинг 4.9</span>
-            <span>2 студии в городе</span>
+            </Link>
           </div>
         </div>
-        <div className="hero-media home-hero__media">
-          <div className="hero-media__image" />
-          <div className="hero-media__badge">15 000+ довольных клиентов</div>
+        <div className={styles.heroMedia}>
+          <div className={styles.heroBadge}>
+            <span>★★★★★</span>
+            <strong>15 000+ довольных клиентов</strong>
+          </div>
         </div>
       </section>
 
       <PlansCarousel
-        title="Тарифы"
+        title="Стань членом клуба"
         subtitle="Подписка — это не только выгода, но и дисциплина любви к себе."
         items={tariffs}
-        sectionClassName="section home-section"
-        carouselClassName="plans-carousel home-plans-carousel"
         dotIdPrefix="home-plans-page"
       />
 
-      <section className="gift-banner home-gift-banner">
+      <section className={styles.giftBanner}>
         <div>
           <h2>Подарите время для себя своим близким</h2>
-          <p>Электронные и бумажные сертификаты на любую сумму или услугу.</p>
-          <button className="ui-btn ui-btn-primary" type="button">
+          <p>Электронные и бумажные сертификаты на любую сумму или конкретную услугу.</p>
+          <Link className={styles.primaryButton} to={appRoutes.certificates()}>
             Оформить сертификат
-          </button>
-        </div>
-        <div className="gift-banner__icon" aria-hidden>
-          🎁
+          </Link>
         </div>
       </section>
 
-      <ServiceShowcase
-        title="Популярные услуги"
-        actionLabel="Смотреть все"
-        services={popularServices}
-        sectionClassName="section home-section"
-        gridClassName="services-grid home-services-grid"
-      />
-      <StudioShowcase
-        title="Наши студии"
-        actionLabel="Посмотреть на карте"
-        studios={popularStudios}
-        sectionClassName="section home-section"
-        listClassName="studios-list home-studios-list"
-      />
+      <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={popularServices} />
+      <StudioShowcase title="Наши студии" actionLabel="Посмотреть на карте" studios={popularStudios} />
       <ReviewsShowcase
         title="Отзывы наших гостей"
         subtitle="Честные мнения тех, кто уже попробовал"
-        actionLabel="Смотреть все"
         reviews={mockReviews}
-        sectionClassName="section home-section"
-        gridClassName="reviews-grid home-reviews-grid"
       />
 
-      <section className="cta-band home-cta">
+      <section className={styles.cta}>
         <h2>Начните свой путь к гармонии сегодня</h2>
-        <button className="ui-btn ui-btn-white" type="button">
+        <Link className={styles.whiteButton} to={appRoutes.booking()}>
           Записаться онлайн
-        </button>
+        </Link>
       </section>
     </main>
   );

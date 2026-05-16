@@ -1,0 +1,205 @@
+.root,
+.form {
+  display: grid;
+  gap: 24px;
+}
+
+.step h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  font-size: var(--font-h3);
+  font-weight: 900;
+}
+
+.step h2 span {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: var(--radius-control);
+  background: var(--color-soft);
+  color: var(--color-primary);
+  font-size: 18px;
+}
+
+.optionRow,
+.valueRow,
+.formRow,
+.totalMeta {
+  display: grid;
+  gap: 12px;
+}
+
+.optionRow,
+.formRow {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.valueRow,
+.totalMeta {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.optionCard,
+.valueButton,
+.total {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(35, 38, 47, 0.05);
+}
+
+.optionCard {
+  min-height: 88px;
+  cursor: pointer;
+  padding: 16px;
+  text-align: left;
+  transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.optionCard:hover,
+.valueButton:hover {
+  border-color: var(--color-primary);
+  background: var(--color-soft);
+}
+
+.optionCard strong,
+.optionCard span {
+  display: block;
+}
+
+.optionCard strong {
+  font-size: 18px;
+}
+
+.optionCard span {
+  margin-top: 8px;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.optionActive,
+.valueActive {
+  border-color: var(--color-primary);
+  background: var(--color-soft);
+}
+
+.valueButton {
+  min-height: 58px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 900;
+  transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  border: 1px solid var(--color-line);
+  background: #ffffff;
+  padding: 0 16px;
+}
+
+.input {
+  min-height: var(--control-height);
+  border-radius: var(--radius-control);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.textarea {
+  min-height: 110px;
+  border-radius: var(--radius-card);
+  padding-top: 12px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.form label > span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(111, 141, 78, 0.12);
+  outline: 0;
+}
+
+.total {
+  padding: 18px;
+}
+
+.totalTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.totalTop h3,
+.totalTop strong {
+  margin: 0;
+}
+
+.totalTop strong {
+  color: var(--color-primary);
+  font-size: 36px;
+}
+
+.totalMeta {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 12px;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.payButton {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 16px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 900;
+  transition: background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.payButton:hover {
+  background: var(--color-primary-hover);
+  box-shadow: 0 10px 20px rgba(111, 141, 78, 0.16);
+}
+
+.error,
+.success {
+  margin: 14px 0 0;
+  border-radius: var(--radius-card);
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.success {
+  background: #eef4e8;
+  color: var(--color-primary-hover);
+}
+
+@media (max-width: 760px) {
+  .optionRow,
+  .valueRow,
+  .formRow,
+  .totalMeta {
+    grid-template-columns: 1fr;
+  }
+}

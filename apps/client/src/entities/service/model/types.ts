@@ -12,6 +12,13 @@ export interface ServiceDto {
 export interface ServiceCardModel extends ServiceDto {
   tone: ServiceTone;
   categoryLabel: string;
-  oldPriceRub?: number;
-  badgeText?: string;
+  goalLabel: string;
+  studioLabel: string;
+  rating: number;
+  reviewCount: number;
+  isAvailableToday: boolean;
+  clubLabel: string;
+  benefit: string;
+  oldPriceRub: number;
+  badgeText: string;
 }
