@@ -6,16 +6,16 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true, nullable: true })
+  @Column({ type: 'text', unique: true, nullable: true })
   email?: string | null;
 
   @Column({ name: 'password_hash' })
   passwordHash: string;
 
-  @Column({ name: 'full_name' })
+  @Column({ name: 'full_name', type: 'text', default: '' })
   fullName: string;
 
-  @Column({ nullable: true, unique: true })
+  @Column({ type: 'text', nullable: true, unique: true })
   phone?: string | null;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.CLIENT })

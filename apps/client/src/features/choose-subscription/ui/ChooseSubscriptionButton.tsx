@@ -1,3 +1,4 @@
+import { resolveSubscriptionPurchaseMode } from '@massage/shared/lib/subscription-benefits';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -31,9 +32,12 @@ export function ChooseSubscriptionButton({ planId }: ChooseSubscriptionButtonPro
       return;
     }
 
-    const confirmText = activeSubscription
-      ? `У вас уже активен тариф ${activeSubscription.plan.name}. Заменить его тарифом ${plan.name}?`
-      : `Подтвердить покупку тарифа ${plan.name} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`;
+    const purchaseMode = resolveSubscriptionPurchaseMode(activeSubscription?.plan.id, planId);
+    const confirmText = purchaseMode === 'EXTEND'
+      ? `Продлить тариф ${plan.name} ещё на 30 дней за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
+      : purchaseMode === 'SWITCH'
+        ? `Заменить текущую подписку тарифом ${plan.name} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
+        : `Подтвердить покупку тарифа ${plan.name} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`;
 
     if (!window.confirm(confirmText)) {
       return;
@@ -41,9 +45,8 @@ export function ChooseSubscriptionButton({ planId }: ChooseSubscriptionButtonPro
 
     try {
       const subscription = await createSubscription({ planId }).unwrap();
-      setMessage(
-        `Тариф ${subscription.plan.name} активен. Доступных посещений: ${subscription.credits.remainingCredits}.`,
-      );
+      const remainingCredits = subscription.credits.reduce((sum, credit) => sum + credit.remainingCredits, 0);
+      setMessage(`Тариф ${subscription.plan.name} активен. Доступных визитов: ${remainingCredits}.`);
     } catch (error) {
       setMessage(getApiErrorMessage(error, 'Не удалось купить тариф'));
     }

@@ -13,6 +13,7 @@
     "build:shared": "npm run build --workspace @massage/shared",
     "dev": "npm run build --workspace @massage/shared && concurrently \"npm run dev --workspace server\" \"npm run dev --workspace client\"",
     "seed": "npm run seed --workspace server",
+    "test": "node --test tests/subscription-benefits.test.mjs",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "typecheck": "npm run build --workspace @massage/shared && npm run build --workspace server && npm run typecheck --workspace client"

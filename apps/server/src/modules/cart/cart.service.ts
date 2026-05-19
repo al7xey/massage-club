@@ -1,3 +1,4 @@
+import { applySubscriptionBenefits } from '@massage/shared';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
@@ -112,6 +113,18 @@ export class CartService {
             order: { id: 'ASC' },
           })
         : [];
+      const remainingCredits = creditPool.reduce((sum, credit) => sum + credit.remainingCredits, 0);
+      const pricingPlan = applySubscriptionBenefits(
+        cartItems.map((item) => ({
+          id: item.id,
+          priceRub: item.service.priceRub,
+        })),
+        {
+          discountPercent: activeSubscription?.plan.discountPercent ?? 0,
+          remainingCredits,
+        },
+      );
+      const pricingByItemId = new Map(pricingPlan.items.map((item) => [item.id, item]));
 
       const configByItemId = new Map(dto.items.map((item) => [item.cartItemId, item]));
       const appointments: Appointment[] = [];
@@ -154,12 +167,13 @@ export class CartService {
         const endsAt = new Date(startsAt.getTime() + cartItem.service.durationMinutes * 60_000);
         await this.ensureSlotAvailable(appointmentsRepository, shiftsRepository, master.id, startsAt, endsAt);
 
-        const discountPercent = activeSubscription?.plan.discountPercent ?? 0;
-        const discountedPrice = Math.round(cartItem.service.priceRub * (1 - discountPercent / 100));
-        const useSubscriptionCredit = Boolean(config.useSubscriptionCredit);
+        const pricing = pricingByItemId.get(cartItem.id);
+        if (!pricing) {
+          throw new BadRequestException('Missing pricing config for cart item');
+        }
 
         let selectedCredit: SubscriptionCredit | undefined;
-        if (useSubscriptionCredit) {
+        if (pricing.paidBySubscriptionCredit) {
           selectedCredit = creditPool.find((credit) => credit.remainingCredits > 0);
           if (!selectedCredit) {
             throw new BadRequestException('No included visits available in active subscription');
@@ -177,22 +191,22 @@ export class CartService {
             master,
             startsAt,
             endsAt,
-            priceRub: useSubscriptionCredit ? 0 : discountedPrice,
+            priceRub: pricing.finalPriceRub,
             basePriceRub: cartItem.service.priceRub,
-            discountPercent,
-            paidBySubscriptionCredit: useSubscriptionCredit,
+            discountPercent: pricing.discountPercent,
+            paidBySubscriptionCredit: pricing.paidBySubscriptionCredit,
             status: AppointmentStatus.SCHEDULED,
           }),
         );
 
         appointments.push(appointment);
 
-        if (!useSubscriptionCredit) {
-          totalAmountRub += discountedPrice;
+        if (!pricing.paidBySubscriptionCredit) {
+          totalAmountRub += pricing.finalPriceRub;
           const payment = await paymentsRepository.save(
             paymentsRepository.create({
               user: { id: userId } as User,
-              amountRub: discountedPrice,
+              amountRub: pricing.finalPriceRub,
               purpose: `SERVICE:${cartItem.service.title}`,
               relatedEntityId: appointment.id,
               provider: 'mock',

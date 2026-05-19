@@ -8,10 +8,13 @@ import { normalizePhone } from '../common/utils/normalize-contact.util';
 import { GiftCertificate } from '../modules/gift-certificates/entities/gift-certificate.entity';
 import { MasterShift } from '../modules/masters/entities/master-shift.entity';
 import { Master } from '../modules/masters/entities/master.entity';
+import { Payment, PaymentStatus } from '../modules/payments/entities/payment.entity';
 import { ServiceCategory } from '../modules/services/entities/service-category.entity';
 import { Service } from '../modules/services/entities/service.entity';
 import { Studio } from '../modules/studios/entities/studio.entity';
 import { SubscriptionPlan } from '../modules/subscription-plans/entities/subscription-plan.entity';
+import { SubscriptionCredit } from '../modules/subscriptions/entities/subscription-credit.entity';
+import { Subscription, SubscriptionStatus } from '../modules/subscriptions/entities/subscription.entity';
 import { User } from '../modules/users/entities/user.entity';
 
 async function findOrCreate<T extends { id: string }>(
@@ -39,7 +42,10 @@ async function seed() {
   const masters = dataSource.getRepository(Master);
   const shifts = dataSource.getRepository(MasterShift);
   const plans = dataSource.getRepository(SubscriptionPlan);
+  const subscriptions = dataSource.getRepository(Subscription);
+  const subscriptionCredits = dataSource.getRepository(SubscriptionCredit);
   const certificates = dataSource.getRepository(GiftCertificate);
+  const payments = dataSource.getRepository(Payment);
 
   const passwordHash = await hash('password123', 10);
   const userTestPasswordHash = await hash('user123', 10);
@@ -206,6 +212,80 @@ async function seed() {
       description: `Тариф ${name}: ${includedCredits} процедур и скидка ${discountPercent}%.`,
       isActive: true,
     }));
+  }
+
+  const demoPlan = await plans.findOneByOrFail({ code: 'LADY_SUPER' });
+  const demoUser = await users.findOneByOrFail({ email: 'user@test.ru' });
+  const activeStartsAt = new Date();
+  activeStartsAt.setDate(activeStartsAt.getDate() - 3);
+  const activeEndsAt = new Date(activeStartsAt);
+  activeEndsAt.setMonth(activeEndsAt.getMonth() + 1);
+
+  let demoSubscription = await subscriptions.findOne({
+    where: {
+      user: { id: demoUser.id },
+      status: SubscriptionStatus.ACTIVE,
+    },
+    order: { createdAt: 'DESC' },
+  });
+
+  if (!demoSubscription) {
+    demoSubscription = await subscriptions.save(
+      subscriptions.create({
+        user: demoUser,
+        plan: demoPlan,
+        status: SubscriptionStatus.ACTIVE,
+        startsAt: activeStartsAt,
+        endsAt: activeEndsAt,
+      }),
+    );
+  } else {
+    demoSubscription.plan = demoPlan;
+    demoSubscription.status = SubscriptionStatus.ACTIVE;
+    demoSubscription.startsAt = activeStartsAt;
+    demoSubscription.endsAt = activeEndsAt;
+    demoSubscription.frozenUntil = undefined;
+    demoSubscription = await subscriptions.save(demoSubscription);
+  }
+
+  const targetRemainingCredits = Math.max(1, demoPlan.includedCredits - 1);
+  const existingCredit = await subscriptionCredits.findOne({
+    where: { subscription: { id: demoSubscription.id } },
+  });
+
+  if (!existingCredit) {
+    await subscriptionCredits.save(
+      subscriptionCredits.create({
+        subscription: demoSubscription,
+        totalCredits: demoPlan.includedCredits,
+        remainingCredits: targetRemainingCredits,
+      }),
+    );
+  } else {
+    existingCredit.totalCredits = demoPlan.includedCredits;
+    existingCredit.remainingCredits = targetRemainingCredits;
+    await subscriptionCredits.save(existingCredit);
+  }
+
+  const existingSubscriptionPayment = await payments.findOne({
+    where: {
+      user: { id: demoUser.id },
+      purpose: `SUBSCRIPTION:${demoPlan.name}`,
+      relatedEntityId: demoSubscription.id,
+    },
+  });
+
+  if (!existingSubscriptionPayment) {
+    await payments.save(
+      payments.create({
+        user: demoUser,
+        amountRub: demoPlan.monthlyPriceRub,
+        purpose: `SUBSCRIPTION:${demoPlan.name}`,
+        relatedEntityId: demoSubscription.id,
+        provider: 'mock',
+        status: PaymentStatus.PAID,
+      }),
+    );
   }
 
   if (!(await certificates.findOne({ where: { code: 'GIFT-DEMO01' } }))) {

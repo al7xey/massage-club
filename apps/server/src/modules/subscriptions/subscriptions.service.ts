@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { resolveSubscriptionPurchaseMode } from '@massage/shared';
 import { MoreThan, Repository } from 'typeorm';
 import { Payment, PaymentStatus } from '../payments/entities/payment.entity';
 import { SubscriptionPlan } from '../subscription-plans/entities/subscription-plan.entity';
@@ -22,23 +23,31 @@ export class SubscriptionsService {
   async create(userId: string, dto: CreateSubscriptionDto) {
     const user = await this.usersRepository.findOneByOrFail({ id: userId });
     const plan = await this.plansRepository.findOneByOrFail({ id: dto.planId, isActive: true });
+    const activeSubscription = await this.findCurrentActiveSubscription(user.id);
+    const purchaseMode = resolveSubscriptionPurchaseMode(activeSubscription?.plan.id, plan.id);
     const startsAt = new Date();
-    const endsAt = new Date(startsAt);
-    endsAt.setMonth(endsAt.getMonth() + 1);
+    let subscription: Subscription;
 
-    await this.cancelActiveSubscriptions(user.id);
+    if (purchaseMode === 'EXTEND' && activeSubscription) {
+      const nextEndsAt = new Date(activeSubscription.endsAt > startsAt ? activeSubscription.endsAt : startsAt);
+      nextEndsAt.setMonth(nextEndsAt.getMonth() + 1);
+      activeSubscription.endsAt = nextEndsAt;
+      activeSubscription.status = SubscriptionStatus.ACTIVE;
+      activeSubscription.frozenUntil = undefined;
+      subscription = await this.subscriptionsRepository.save(activeSubscription);
+    } else {
+      if (activeSubscription) {
+        await this.cancelActiveSubscriptions(user.id);
+      }
 
-    const subscription = await this.subscriptionsRepository.save(
-      this.subscriptionsRepository.create({ user, plan, startsAt, endsAt, status: SubscriptionStatus.ACTIVE }),
-    );
+      const endsAt = new Date(startsAt);
+      endsAt.setMonth(endsAt.getMonth() + 1);
+      subscription = await this.subscriptionsRepository.save(
+        this.subscriptionsRepository.create({ user, plan, startsAt, endsAt, status: SubscriptionStatus.ACTIVE }),
+      );
+    }
 
-    const credits = await this.creditsRepository.save(
-      this.creditsRepository.create({
-        subscription,
-        totalCredits: plan.includedCredits,
-        remainingCredits: plan.includedCredits,
-      }),
-    );
+    const credits = await this.upsertCredits(subscription, plan.includedCredits, purchaseMode === 'EXTEND');
 
     const payment = await this.paymentsRepository.save(
       this.paymentsRepository.create({
@@ -51,7 +60,12 @@ export class SubscriptionsService {
       }),
     );
 
-    return { ...subscription, credits, payment };
+    return {
+      ...subscription,
+      credits,
+      payment,
+      purchaseMode,
+    };
   }
 
   findMine(userId: string) {
@@ -66,20 +80,13 @@ export class SubscriptionsService {
   }
 
   async findActive(userId: string) {
-    const subscription = await this.subscriptionsRepository.findOne({
-      where: {
-        user: { id: userId },
-        status: SubscriptionStatus.ACTIVE,
-        endsAt: MoreThan(new Date()),
-      },
-      order: { createdAt: 'DESC' },
-    });
+    const subscription = await this.findCurrentActiveSubscription(userId);
 
     if (!subscription) {
       return null;
     }
 
-    const credits = await this.creditsRepository.find({ where: { subscription: { id: subscription.id } } });
+    const credits = await this.findCredits(subscription.id);
     return { ...subscription, credits };
   }
 
@@ -110,6 +117,51 @@ export class SubscriptionsService {
         this.subscriptionsRepository.save({ ...subscription, status: SubscriptionStatus.CANCELLED }),
       ),
     );
+  }
+
+  private async findCurrentActiveSubscription(userId: string) {
+    return this.subscriptionsRepository.findOne({
+      where: {
+        user: { id: userId },
+        status: SubscriptionStatus.ACTIVE,
+        endsAt: MoreThan(new Date()),
+      },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  private findCredits(subscriptionId: string) {
+    return this.creditsRepository.find({
+      where: { subscription: { id: subscriptionId } },
+      order: { id: 'ASC' },
+    });
+  }
+
+  private async upsertCredits(subscription: Subscription, includedCredits: number, shouldAccumulate: boolean) {
+    const existingCredits = await this.findCredits(subscription.id);
+
+    if (existingCredits.length === 0) {
+      return [
+        await this.creditsRepository.save(
+          this.creditsRepository.create({
+            subscription,
+            totalCredits: includedCredits,
+            remainingCredits: includedCredits,
+          }),
+        ),
+      ];
+    }
+
+    if (!shouldAccumulate) {
+      return existingCredits;
+    }
+
+    const [primaryCredit, ...restCredits] = existingCredits;
+    primaryCredit.totalCredits += includedCredits;
+    primaryCredit.remainingCredits += includedCredits;
+    await this.creditsRepository.save(primaryCredit);
+
+    return [primaryCredit, ...restCredits];
   }
 
   private async findOwnedSubscription(userId: string, id: string) {

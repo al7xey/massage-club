@@ -152,6 +152,37 @@
   gap: 10px;
 }
 
+.masterPanel {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.masterGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.masterButton {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card-small);
+  background: #ffffff;
+  padding: 18px;
+  text-align: left;
+}
+
+.masterButton span {
+  color: var(--color-muted);
+}
+
+.masterButtonSelected {
+  border-color: var(--color-primary);
+  background: var(--color-soft);
+}
+
 .slotGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
@@ -191,7 +222,7 @@
 
 .summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 14px;
 }
 

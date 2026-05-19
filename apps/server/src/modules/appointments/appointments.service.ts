@@ -1,3 +1,4 @@
+import { applySubscriptionBenefits } from '@massage/shared';
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
@@ -10,7 +11,9 @@ import { SubscriptionCredit } from '../subscriptions/entities/subscription-credi
 import { Subscription, SubscriptionStatus } from '../subscriptions/entities/subscription.entity';
 import { User } from '../users/entities/user.entity';
 import { AppointmentSlotsQueryDto } from './dto/appointment-slots-query.dto';
+import { AvailableMastersQueryDto } from './dto/available-masters-query.dto';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { ServiceSlotsQueryDto } from './dto/service-slots-query.dto';
 import { Appointment, AppointmentStatus } from './entities/appointment.entity';
 
 const SLOT_STEP_MINUTES = 30;
@@ -56,13 +59,13 @@ export class AppointmentsService {
 
     const activeSubscription = await this.findActiveSubscription(user.id);
     const credit = activeSubscription ? await this.findUsableCredit(activeSubscription.id) : null;
-    const discountPercent = activeSubscription?.plan.discountPercent ?? 0;
-    const discountedPrice = Math.round(service.priceRub * (1 - discountPercent / 100));
-    const paidBySubscriptionCredit = Boolean(dto.useSubscriptionCredit);
-
-    if (paidBySubscriptionCredit && !credit) {
-      throw new BadRequestException('No included visits available in active subscription');
-    }
+    const pricing = applySubscriptionBenefits(
+      [{ id: service.id, priceRub: service.priceRub }],
+      {
+        discountPercent: activeSubscription?.plan.discountPercent ?? 0,
+        remainingCredits: credit ? 1 : 0,
+      },
+    ).items[0];
 
     const appointment = await this.appointmentsRepository.save(
       this.appointmentsRepository.create({
@@ -72,23 +75,23 @@ export class AppointmentsService {
         master,
         startsAt,
         endsAt,
-        priceRub: paidBySubscriptionCredit ? 0 : discountedPrice,
+        priceRub: pricing.finalPriceRub,
         basePriceRub: service.priceRub,
-        discountPercent,
-        paidBySubscriptionCredit,
+        discountPercent: pricing.discountPercent,
+        paidBySubscriptionCredit: pricing.paidBySubscriptionCredit,
         note: dto.note,
         status: AppointmentStatus.SCHEDULED,
       }),
     );
 
-    if (paidBySubscriptionCredit && credit) {
+    if (pricing.paidBySubscriptionCredit && credit) {
       credit.remainingCredits -= 1;
       await this.creditsRepository.save(credit);
     } else {
       await this.paymentsRepository.save(
         this.paymentsRepository.create({
           user,
-          amountRub: discountedPrice,
+          amountRub: pricing.finalPriceRub,
           purpose: `SERVICE:${service.title}`,
           relatedEntityId: appointment.id,
           provider: 'mock',
@@ -144,6 +147,103 @@ export class AppointmentsService {
     });
 
     return availableSlots.map((slot) => slot.toISOString());
+  }
+
+  async findServiceSlots(query: ServiceSlotsQueryDto) {
+    const service = await this.servicesRepository.findOneByOrFail({ id: query.serviceId });
+    await this.studiosRepository.findOneByOrFail({ id: query.studioId });
+    const masters = await this.findEligibleMasters(query.studioId, service.id);
+
+    if (masters.length === 0) {
+      return [];
+    }
+
+    const dayStart = new Date(`${query.date}T00:00:00.000Z`);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+    const masterIds = masters.map((master) => master.id);
+
+    const shifts = await this.shiftsRepository.find({
+      where: {
+        master: { id: In(masterIds) },
+        isAvailable: true,
+        startsAt: LessThan(dayEnd),
+        endsAt: MoreThan(dayStart),
+      },
+      order: { startsAt: 'ASC' },
+    });
+
+    const appointments = await this.appointmentsRepository.find({
+      where: {
+        master: { id: In(masterIds) },
+        status: In([AppointmentStatus.SCHEDULED, AppointmentStatus.CONFIRMED]),
+        startsAt: LessThan(dayEnd),
+        endsAt: MoreThan(dayStart),
+      },
+    });
+
+    const availableSlots = new Set<string>();
+
+    for (const shift of shifts) {
+      const masterAppointments = appointments.filter((appointment) => appointment.master.id === shift.master.id);
+      const slots = buildSlots(shift.startsAt, shift.endsAt, service.durationMinutes);
+
+      for (const slot of slots) {
+        const slotEnd = new Date(slot.getTime() + service.durationMinutes * 60_000);
+        const hasConflict = masterAppointments.some((appointment) => appointment.startsAt < slotEnd && appointment.endsAt > slot);
+
+        if (!hasConflict) {
+          availableSlots.add(slot.toISOString());
+        }
+      }
+    }
+
+    return [...availableSlots].sort((left, right) => new Date(left).getTime() - new Date(right).getTime());
+  }
+
+  async findAvailableMasters(query: AvailableMastersQueryDto) {
+    const [service] = await Promise.all([
+      this.servicesRepository.findOneByOrFail({ id: query.serviceId }),
+      this.studiosRepository.findOneByOrFail({ id: query.studioId }),
+    ]);
+
+    const startsAt = new Date(query.startsAt);
+    if (Number.isNaN(startsAt.getTime())) {
+      throw new BadRequestException('Invalid appointment start time');
+    }
+
+    const endsAt = new Date(startsAt.getTime() + service.durationMinutes * 60_000);
+    const masters = await this.findEligibleMasters(query.studioId, service.id);
+
+    if (masters.length === 0) {
+      return [];
+    }
+
+    const masterIds = masters.map((master) => master.id);
+    const shifts = await this.shiftsRepository.find({
+      where: {
+        master: { id: In(masterIds) },
+        isAvailable: true,
+        startsAt: LessThanOrEqual(startsAt),
+        endsAt: MoreThanOrEqual(endsAt),
+      },
+    });
+    const appointments = await this.appointmentsRepository.find({
+      where: {
+        master: { id: In(masterIds) },
+        status: In([AppointmentStatus.SCHEDULED, AppointmentStatus.CONFIRMED]),
+        startsAt: LessThan(endsAt),
+        endsAt: MoreThan(startsAt),
+      },
+    });
+
+    return masters
+      .filter((master) => {
+        const hasShift = shifts.some((shift) => shift.master.id === master.id);
+        const hasConflict = appointments.some((appointment) => appointment.master.id === master.id);
+        return hasShift && !hasConflict;
+      })
+      .sort((left, right) => left.lastName.localeCompare(right.lastName) || left.firstName.localeCompare(right.firstName));
   }
 
   async cancel(userId: string, id: string) {
@@ -214,6 +314,19 @@ export class AppointmentsService {
         remainingCredits: MoreThan(0),
       },
     });
+  }
+
+  private async findEligibleMasters(studioId: string, serviceId: string) {
+    const masters = await this.mastersRepository.find({
+      where: {
+        isActive: true,
+        studio: { id: studioId },
+      },
+      relations: ['services'],
+      order: { lastName: 'ASC' },
+    });
+
+    return masters.filter((master) => master.services.some((service) => service.id === serviceId));
   }
 }
 

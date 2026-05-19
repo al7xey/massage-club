@@ -12,7 +12,6 @@ export interface CheckoutCartItemRequest {
   cartItemId: string;
   masterId: string;
   startsAt: string;
-  useSubscriptionCredit?: boolean;
 }
 
 export interface CheckoutCartRequest {

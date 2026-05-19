@@ -2,9 +2,11 @@ export interface SubscriptionPlanDto {
   id: string;
   code: string;
   name: string;
+  description?: string;
   monthlyPriceRub: number;
   discountPercent: number;
   includedCredits: number;
+  familyMembersLimit: number;
 }
 
 export interface SubscriptionCreditDto {
@@ -21,6 +23,19 @@ export interface MySubscriptionDto {
   frozenUntil?: string | null;
   plan: SubscriptionPlanDto;
   credits: SubscriptionCreditDto[];
+}
+
+export interface SubscriptionPurchaseDto extends MySubscriptionDto {
+  payment: {
+    id: string;
+    amountRub: number;
+    status: string;
+    provider: string;
+    purpose: string;
+    relatedEntityId?: string;
+    createdAt: string;
+  };
+  purchaseMode: 'ACTIVATE' | 'EXTEND' | 'SWITCH';
 }
 
 export interface PlanMeta {

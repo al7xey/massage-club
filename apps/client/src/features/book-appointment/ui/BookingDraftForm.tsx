@@ -1,9 +1,12 @@
+import { applySubscriptionBenefits } from '@massage/shared/lib/subscription-benefits';
+import type { SubscriptionBenefitItemResult } from '@massage/shared/lib/subscription-benefits';
+import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useGetAppointmentSlotsQuery } from '@/entities/appointment';
+import { useGetAvailableMastersQuery, useGetServiceSlotsQuery } from '@/entities/appointment';
 import { useAddCartItemMutation, useCheckoutCartMutation, useGetCartQuery, useRemoveCartItemMutation } from '@/entities/cart';
 import type { CartCheckoutResponseDto, CartItemDto } from '@/entities/cart';
-import { useGetMastersQuery } from '@/entities/master';
+import type { MasterDto } from '@/entities/master';
 import { useGetStudiosQuery } from '@/entities/studio';
 import { useGetMySubscriptionQuery } from '@/entities/subscription';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
@@ -12,12 +15,10 @@ import { appRoutes } from '@/shared/routes';
 import styles from './BookingDraftForm.module.css';
 
 const today = new Date().toISOString().slice(0, 10);
-const STEPS = ['Корзина', 'Студия и дата', 'Настройка услуг', 'Подтверждение', 'Готово'] as const;
+const STEPS = ['Корзина', 'Студия и дата', 'Время и мастер', 'Подтверждение', 'Готово'] as const;
 
 interface CartItemConfig {
-  masterId: string;
   startsAt: string;
-  useSubscriptionCredit: boolean;
 }
 
 export function BookingDraftForm() {
@@ -26,7 +27,6 @@ export function BookingDraftForm() {
   const addServiceId = searchParams.get('serviceId');
   const { data: cartItems = [], isLoading: isLoadingCart } = useGetCartQuery();
   const { data: studios = [] } = useGetStudiosQuery();
-  const { data: masters = [] } = useGetMastersQuery();
   const { data: activeSubscription } = useGetMySubscriptionQuery();
   const [addCartItem, { isLoading: isAddingToCart }] = useAddCartItemMutation();
   const [removeCartItem, { isLoading: isRemovingFromCart }] = useRemoveCartItemMutation();
@@ -35,6 +35,9 @@ export function BookingDraftForm() {
   const [studioId, setStudioId] = useState('');
   const [date, setDate] = useState(today);
   const [configs, setConfigs] = useState<Record<string, CartItemConfig>>({});
+  const [selectedMasterId, setSelectedMasterId] = useState('');
+  const [availableMastersByItem, setAvailableMastersByItem] = useState<Record<string, MasterDto[]>>({});
+  const [mastersLoadingByItem, setMastersLoadingByItem] = useState<Record<string, boolean>>({});
   const [error, setError] = useState('');
   const [success, setSuccess] = useState<CartCheckoutResponseDto | null>(null);
 
@@ -62,9 +65,7 @@ export function BookingDraftForm() {
 
       for (const item of cartItems) {
         next[item.id] = current[item.id] ?? {
-          masterId: '',
           startsAt: '',
-          useSubscriptionCredit: false,
         };
       }
 
@@ -72,29 +73,72 @@ export function BookingDraftForm() {
     });
   }, [cartItems]);
 
+  useEffect(() => {
+    const validItemIds = new Set(cartItems.map((item) => item.id));
+
+    setAvailableMastersByItem((current) => {
+      const nextEntries = Object.entries(current).filter(([itemId]) => validItemIds.has(itemId));
+      return nextEntries.length === Object.keys(current).length ? current : Object.fromEntries(nextEntries);
+    });
+
+    setMastersLoadingByItem((current) => {
+      const nextEntries = Object.entries(current).filter(([itemId]) => validItemIds.has(itemId));
+      return nextEntries.length === Object.keys(current).length ? current : Object.fromEntries(nextEntries);
+    });
+  }, [cartItems]);
+
   const selectedStudio = studios.find((studio) => studio.id === studioId) ?? null;
+  const discountPercent = activeSubscription?.plan.discountPercent ?? 0;
   const remainingCredits = useMemo(
     () => activeSubscription?.credits.reduce((sum, credit) => sum + credit.remainingCredits, 0) ?? 0,
     [activeSubscription],
   );
-  const selectedCreditCount = useMemo(
-    () => Object.values(configs).filter((config) => config.useSubscriptionCredit).length,
-    [configs],
-  );
-  const discountPercent = activeSubscription?.plan.discountPercent ?? 0;
-
-  const totalAmountRub = useMemo(
+  const pricingPreview = useMemo(
     () =>
-      cartItems.reduce((sum, item) => {
-        const config = configs[item.id];
-        if (config?.useSubscriptionCredit) {
-          return sum;
-        }
-
-        return sum + Math.round(item.service.priceRub * (1 - discountPercent / 100));
-      }, 0),
-    [cartItems, configs, discountPercent],
+      applySubscriptionBenefits(
+        cartItems.map((item) => ({
+          id: item.id,
+          priceRub: item.service.priceRub,
+        })),
+        {
+          discountPercent,
+          remainingCredits,
+        },
+      ),
+    [cartItems, discountPercent, remainingCredits],
   );
+  const pricingByItemId = useMemo(
+    () => new Map(pricingPreview.items.map((item) => [item.id, item])),
+    [pricingPreview.items],
+  );
+  const allSlotsSelected = cartItems.length > 0 && cartItems.every((item) => Boolean(configs[item.id]?.startsAt));
+  const isLoadingCommonMasters =
+    allSlotsSelected && cartItems.some((item) => mastersLoadingByItem[item.id] ?? !availableMastersByItem[item.id]);
+  const commonAvailableMasters = useMemo(() => {
+    if (!allSlotsSelected || cartItems.length === 0) {
+      return [];
+    }
+
+    const masterLists = cartItems.map((item) => availableMastersByItem[item.id]).filter(Boolean);
+    if (masterLists.length !== cartItems.length) {
+      return [];
+    }
+
+    const commonIds = new Set(masterLists[0].map((master) => master.id));
+    for (const masters of masterLists.slice(1)) {
+      const ids = new Set(masters.map((master) => master.id));
+      for (const masterId of [...commonIds]) {
+        if (!ids.has(masterId)) {
+          commonIds.delete(masterId);
+        }
+      }
+    }
+
+    return masterLists[0]
+      .filter((master) => commonIds.has(master.id))
+      .sort((left, right) => left.lastName.localeCompare(right.lastName) || left.firstName.localeCompare(right.firstName));
+  }, [allSlotsSelected, availableMastersByItem, cartItems]);
+  const selectedMaster = commonAvailableMasters.find((master) => master.id === selectedMasterId) ?? null;
 
   useEffect(() => {
     if (cartItems.length === 0) {
@@ -102,11 +146,23 @@ export function BookingDraftForm() {
     }
   }, [cartItems.length]);
 
+  useEffect(() => {
+    if (selectedMasterId && !commonAvailableMasters.some((master) => master.id === selectedMasterId)) {
+      setSelectedMasterId('');
+    }
+  }, [commonAvailableMasters, selectedMasterId]);
+
+  useEffect(() => {
+    if (!selectedMasterId && commonAvailableMasters.length === 1) {
+      setSelectedMasterId(commonAvailableMasters[0].id);
+    }
+  }, [commonAvailableMasters, selectedMasterId]);
+
   const updateConfig = (itemId: string, patch: Partial<CartItemConfig>) => {
     setConfigs((current) => ({
       ...current,
       [itemId]: {
-        ...(current[itemId] ?? { masterId: '', startsAt: '', useSubscriptionCredit: false }),
+        ...(current[itemId] ?? { startsAt: '' }),
         ...patch,
       },
     }));
@@ -125,18 +181,20 @@ export function BookingDraftForm() {
     }
 
     if (index === 2) {
-      if (selectedCreditCount > remainingCredits) {
-        setError('Выбрано больше посещений по подписке, чем доступно');
+      const hasIncompleteItem = cartItems.some((item) => !configs[item.id]?.startsAt);
+
+      if (hasIncompleteItem) {
+        setError('Для каждой услуги выберите время');
         return false;
       }
 
-      const hasIncompleteItem = cartItems.some((item) => {
-        const config = configs[item.id];
-        return !config?.masterId || !config?.startsAt;
-      });
+      if (isLoadingCommonMasters) {
+        setError('Подождите, пока мы подберем мастеров на выбранные слоты');
+        return false;
+      }
 
-      if (hasIncompleteItem) {
-        setError('Настройте мастера и время для каждой услуги');
+      if (!selectedMasterId || !selectedMaster) {
+        setError('Выберите одного мастера на весь заказ');
         return false;
       }
     }
@@ -159,7 +217,7 @@ export function BookingDraftForm() {
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(0) || !validateStep(1) || !validateStep(2)) {
+    if (!validateStep(0) || !validateStep(1) || !validateStep(2) || !selectedMasterId) {
       return;
     }
 
@@ -169,9 +227,8 @@ export function BookingDraftForm() {
         date,
         items: cartItems.map((item) => ({
           cartItemId: item.id,
-          masterId: configs[item.id].masterId,
+          masterId: selectedMasterId,
           startsAt: configs[item.id].startsAt,
-          useSubscriptionCredit: configs[item.id].useSubscriptionCredit,
         })),
       }).unwrap();
 
@@ -215,7 +272,7 @@ export function BookingDraftForm() {
         <section className={styles.stage}>
           <div className={styles.stageHeader}>
             <h3>Услуги в корзине</h3>
-            <p>Проверьте состав заказа. На следующем шаге вы выберете общую студию и дату для всего заказа.</p>
+            <p>Проверьте состав заказа. Дальше вы выберете студию, дату, время для каждой услуги и одного общего мастера на весь заказ.</p>
           </div>
 
           {cartItems.length === 0 ? (
@@ -227,21 +284,30 @@ export function BookingDraftForm() {
             </div>
           ) : (
             <div className={styles.cards}>
-              {cartItems.map((item) => (
-                <article className={styles.card} key={item.id}>
-                  <div>
-                    <span className={styles.cardMeta}>{item.service.durationMinutes} минут</span>
-                    <strong>{item.service.title}</strong>
-                    <p>{item.service.description}</p>
-                  </div>
-                  <div className={styles.cardSide}>
-                    <em>{formatPrice(item.service.priceRub)}</em>
-                    <button type="button" className={styles.secondaryButton} disabled={isRemovingFromCart} onClick={() => void removeCartItem(item.id)}>
-                      Удалить
-                    </button>
-                  </div>
-                </article>
-              ))}
+              {cartItems.map((item) => {
+                const pricing = pricingByItemId.get(item.id);
+
+                return (
+                  <article className={styles.card} key={item.id}>
+                    <div>
+                      <span className={styles.cardMeta}>{item.service.durationMinutes} минут</span>
+                      <strong>{item.service.title}</strong>
+                      <p>{item.service.description}</p>
+                    </div>
+                    <div className={styles.cardSide}>
+                      <em>{formatItemPrice(pricing)}</em>
+                      <button
+                        type="button"
+                        className={styles.secondaryButton}
+                        disabled={isRemovingFromCart}
+                        onClick={() => void removeCartItem(item.id)}
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>
@@ -251,7 +317,7 @@ export function BookingDraftForm() {
         <section className={styles.stage}>
           <div className={styles.stageHeader}>
             <h3>Общие параметры заказа</h3>
-            <p>Студия и дата будут общими для всех услуг из корзины.</p>
+            <p>Студия и дата общие для всего заказа. После этого вы выберете время для услуг и увидите один список мастеров, доступных на весь заказ.</p>
           </div>
 
           <div className={styles.studioGrid}>
@@ -283,14 +349,16 @@ export function BookingDraftForm() {
       {step === 2 ? (
         <section className={styles.stage}>
           <div className={styles.stageHeader}>
-            <h3>Настройка услуг</h3>
-            <p>Для каждой услуги отдельно выберите мастера и время в студии {selectedStudio?.name ?? '—'} на дату {formatDate(date)}.</p>
+            <h3>Время и мастер</h3>
+            <p>Сначала выберите время для каждой услуги, затем мы покажем только тех мастеров, которые могут провести весь заказ целиком в студии {selectedStudio?.name ?? '—'}.</p>
           </div>
 
           {activeSubscription ? (
             <div className={styles.subscriptionHint}>
               <strong>Подписка {activeSubscription.plan.name}</strong>
-              <span>Осталось посещений: {remainingCredits}. Выбрано по подписке: {selectedCreditCount}.</span>
+              <span>
+                Автоматически применим {pricingPreview.subscriptionCreditsUsed} визита по подписке и скидку {discountPercent}% на остальные услуги.
+              </span>
             </div>
           ) : null}
 
@@ -299,15 +367,50 @@ export function BookingDraftForm() {
               <CartBookingItem
                 key={item.id}
                 date={date}
-                discountPercent={discountPercent}
                 item={item}
-                remainingCredits={remainingCredits}
+                preview={pricingByItemId.get(item.id)}
                 selectedStudioId={studioId}
-                config={configs[item.id] ?? { masterId: '', startsAt: '', useSubscriptionCredit: false }}
-                masters={masters}
+                config={configs[item.id] ?? { startsAt: '' }}
                 onChange={(patch) => updateConfig(item.id, patch)}
+                setAvailableMastersByItem={setAvailableMastersByItem}
+                setMastersLoadingByItem={setMastersLoadingByItem}
               />
             ))}
+          </div>
+
+          <div className={styles.masterPanel}>
+            <div className={styles.stageHeader}>
+              <h3>Общий мастер на весь заказ</h3>
+              <p>В списке ниже только мастера, которые свободны во все выбранные слоты и ведут все услуги из корзины.</p>
+            </div>
+
+            {!allSlotsSelected ? <p className={styles.hint}>Сначала выберите время для всех услуг.</p> : null}
+            {allSlotsSelected && isLoadingCommonMasters ? <p className={styles.hint}>Подбираем мастеров на весь заказ...</p> : null}
+            {allSlotsSelected && !isLoadingCommonMasters && commonAvailableMasters.length === 0 ? (
+              <p className={styles.hint}>На выбранные слоты нет одного мастера, который сможет взять весь заказ. Попробуйте изменить время.</p>
+            ) : null}
+
+            {allSlotsSelected && !isLoadingCommonMasters && commonAvailableMasters.length > 0 ? (
+              <div className={styles.masterGrid}>
+                {commonAvailableMasters.map((master) => {
+                  const isSelected = master.id === selectedMasterId;
+
+                  return (
+                    <button
+                      key={master.id}
+                      type="button"
+                      className={`${styles.masterButton} ${isSelected ? styles.masterButtonSelected : ''}`}
+                      onClick={() => setSelectedMasterId(master.id)}
+                    >
+                      <strong>
+                        {master.firstName} {master.lastName}
+                      </strong>
+                      <span>{master.bio?.trim() || 'Доступен для всех выбранных услуг'}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
           </div>
         </section>
       ) : null}
@@ -316,24 +419,27 @@ export function BookingDraftForm() {
         <section className={styles.stage}>
           <div className={styles.stageHeader}>
             <h3>Подтверждение заказа</h3>
-            <p>Проверьте все услуги, выбранную студию, дату и индивидуальные слоты перед оплатой.</p>
+            <p>Проверьте выбранные студию, дату, время и общего мастера перед оплатой.</p>
           </div>
 
           <div className={styles.cards}>
             {cartItems.map((item) => {
               const config = configs[item.id];
-              const master = masters.find((candidate) => candidate.id === config?.masterId);
-              const itemPrice = config?.useSubscriptionCredit ? 0 : Math.round(item.service.priceRub * (1 - discountPercent / 100));
+              const pricing = pricingByItemId.get(item.id);
 
               return (
                 <article className={styles.card} key={item.id}>
                   <div>
-                    <span className={styles.cardMeta}>{selectedStudio?.name ?? '—'} · {formatDateTime(config?.startsAt)}</span>
+                    <span className={styles.cardMeta}>
+                      {selectedStudio?.name ?? '—'} · {formatDateTime(config?.startsAt)}
+                    </span>
                     <strong>{item.service.title}</strong>
-                    <p>{master ? `${master.firstName} ${master.lastName}` : 'Мастер не выбран'}</p>
+                    <p>
+                      {selectedMaster ? `${selectedMaster.firstName} ${selectedMaster.lastName}` : 'Мастер не выбран'}
+                    </p>
                   </div>
                   <div className={styles.cardSide}>
-                    <em>{config?.useSubscriptionCredit ? 'По подписке' : formatPrice(itemPrice)}</em>
+                    <em>{formatItemPrice(pricing)}</em>
                   </div>
                 </article>
               );
@@ -350,12 +456,16 @@ export function BookingDraftForm() {
               <strong>{formatDate(date)}</strong>
             </div>
             <div>
-              <span>По подписке</span>
-              <strong>{selectedCreditCount}</strong>
+              <span>Мастер</span>
+              <strong>{selectedMaster ? `${selectedMaster.firstName} ${selectedMaster.lastName}` : '—'}</strong>
+            </div>
+            <div>
+              <span>Визиты по подписке</span>
+              <strong>{pricingPreview.subscriptionCreditsUsed}</strong>
             </div>
             <div>
               <span>К оплате</span>
-              <strong>{formatPrice(totalAmountRub)}</strong>
+              <strong>{formatPrice(pricingPreview.totalAmountRub)}</strong>
             </div>
           </div>
         </section>
@@ -365,7 +475,7 @@ export function BookingDraftForm() {
         <section className={styles.stage}>
           <div className={styles.stageHeader}>
             <h3>Заказ оформлен</h3>
-            <p>Мы сохранили все записи из корзины и подготовили оплату по выбранным позициям.</p>
+            <p>Мы сохранили все записи из корзины и автоматически применили выгоды подписки там, где это было выгоднее всего.</p>
           </div>
 
           <div className={styles.cards}>
@@ -374,10 +484,12 @@ export function BookingDraftForm() {
                 <div>
                   <span className={styles.cardMeta}>{formatDateTime(appointment.startsAt)}</span>
                   <strong>{appointment.service.title}</strong>
-                  <p>{appointment.studio.name} · {appointment.master.firstName} {appointment.master.lastName}</p>
+                  <p>
+                    {appointment.studio.name} · {appointment.master.firstName} {appointment.master.lastName}
+                  </p>
                 </div>
                 <div className={styles.cardSide}>
-                  <em>{appointment.paidBySubscriptionCredit ? 'По подписке' : formatPrice(appointment.priceRub)}</em>
+                  <em>{appointment.paidBySubscriptionCredit ? 'Включено в подписку' : formatPrice(appointment.priceRub)}</em>
                 </div>
               </article>
             ))}
@@ -389,8 +501,12 @@ export function BookingDraftForm() {
               <strong>{success.appointments.length}</strong>
             </div>
             <div>
-              <span>По подписке</span>
+              <span>Визитов списано</span>
               <strong>{success.subscriptionCreditsUsed}</strong>
+            </div>
+            <div>
+              <span>Платежей</span>
+              <strong>{success.payments.length}</strong>
             </div>
             <div>
               <span>К оплате</span>
@@ -439,46 +555,81 @@ export function BookingDraftForm() {
 function CartBookingItem({
   config,
   date,
-  discountPercent,
   item,
-  masters,
   onChange,
-  remainingCredits,
+  preview,
   selectedStudioId,
+  setAvailableMastersByItem,
+  setMastersLoadingByItem,
 }: {
   config: CartItemConfig;
   date: string;
-  discountPercent: number;
   item: CartItemDto;
-  masters: Array<{
-    id: string;
-    firstName: string;
-    lastName: string;
-    isActive: boolean;
-    studio?: { id: string } | undefined;
-    services: Array<{ id: string }>;
-  }>;
   onChange: (patch: Partial<CartItemConfig>) => void;
-  remainingCredits: number;
+  preview?: SubscriptionBenefitItemResult;
   selectedStudioId: string;
+  setAvailableMastersByItem: Dispatch<SetStateAction<Record<string, MasterDto[]>>>;
+  setMastersLoadingByItem: Dispatch<SetStateAction<Record<string, boolean>>>;
 }) {
-  const availableMasters = useMemo(
-    () =>
-      masters.filter(
-        (master) =>
-          master.isActive &&
-          master.studio?.id === selectedStudioId &&
-          master.services.some((service) => service.id === item.service.id),
-      ),
-    [item.service.id, masters, selectedStudioId],
+  const itemId = item.id;
+  const { data: availableSlots = [], isFetching: isLoadingSlots } = useGetServiceSlotsQuery(
+    { serviceId: item.service.id, studioId: selectedStudioId, date },
+    { skip: !selectedStudioId || !date },
+  );
+  const { data: availableMasters = [], isFetching: isLoadingMasters } = useGetAvailableMastersQuery(
+    { serviceId: item.service.id, studioId: selectedStudioId, startsAt: config.startsAt },
+    { skip: !selectedStudioId || !config.startsAt },
   );
 
-  const { data: availableSlots = [], isFetching: isLoadingSlots } = useGetAppointmentSlotsQuery(
-    { masterId: config.masterId, date, durationMinutes: item.service.durationMinutes },
-    { skip: !config.masterId || !date },
-  );
+  useEffect(() => {
+    if (!config.startsAt || isLoadingSlots) {
+      return;
+    }
 
-  const finalPrice = Math.round(item.service.priceRub * (1 - discountPercent / 100));
+    if (!availableSlots.includes(config.startsAt)) {
+      onChange({ startsAt: '' });
+    }
+  }, [availableSlots, config.startsAt, isLoadingSlots, onChange]);
+
+  useEffect(() => {
+    setMastersLoadingByItem((current) => {
+      if (current[itemId] === isLoadingMasters) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [itemId]: isLoadingMasters,
+      };
+    });
+  }, [isLoadingMasters, itemId, setMastersLoadingByItem]);
+
+  useEffect(() => {
+    if (!config.startsAt) {
+      setAvailableMastersByItem((current) => {
+        if (!current[itemId]) {
+          return current;
+        }
+
+        const next = { ...current };
+        delete next[itemId];
+        return next;
+      });
+      return;
+    }
+
+    setAvailableMastersByItem((current) => {
+      const previous = current[itemId] ?? [];
+      if (sameMasters(previous, availableMasters)) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [itemId]: availableMasters,
+      };
+    });
+  }, [availableMasters, config.startsAt, itemId, setAvailableMastersByItem]);
 
   return (
     <article className={styles.card}>
@@ -487,23 +638,11 @@ function CartBookingItem({
           <span className={styles.cardMeta}>{item.service.durationMinutes} минут</span>
           <strong>{item.service.title}</strong>
         </div>
-        <em>{config.useSubscriptionCredit ? 'По подписке' : formatPrice(finalPrice)}</em>
+        <em>{formatItemPrice(preview)}</em>
       </div>
 
-      <label className={styles.field}>
-        <span>Мастер</span>
-        <select className={styles.input} value={config.masterId} onChange={(event) => onChange({ masterId: event.target.value, startsAt: '' })}>
-          <option value="">Выберите мастера</option>
-          {availableMasters.map((master) => (
-            <option key={master.id} value={master.id}>
-              {master.firstName} {master.lastName}
-            </option>
-          ))}
-        </select>
-      </label>
-
       <div className={styles.slotGroup}>
-        <span className={styles.fieldLabel}>Свободные слоты</span>
+        <span className={styles.fieldLabel}>Свободное время</span>
         <div className={styles.slotGrid}>
           {availableSlots.map((slot) => {
             const isSelected = config.startsAt === slot;
@@ -520,24 +659,34 @@ function CartBookingItem({
             );
           })}
         </div>
-        {isLoadingSlots ? <p className={styles.hint}>Загружаем слоты...</p> : null}
-        {!isLoadingSlots && config.masterId && availableSlots.length === 0 ? (
-          <p className={styles.hint}>На выбранную дату у этого мастера нет свободных слотов.</p>
+        {isLoadingSlots ? <p className={styles.hint}>Загружаем доступное время...</p> : null}
+        {!isLoadingSlots && availableSlots.length === 0 ? (
+          <p className={styles.hint}>На выбранную дату для этой услуги пока нет свободного времени.</p>
         ) : null}
       </div>
 
-      {remainingCredits > 0 ? (
-        <label className={styles.creditToggle}>
-          <input
-            type="checkbox"
-            checked={config.useSubscriptionCredit}
-            onChange={(event) => onChange({ useSubscriptionCredit: event.target.checked })}
-          />
-          <span>Оплатить эту услугу посещением по подписке</span>
-        </label>
+      {config.startsAt && isLoadingMasters ? <p className={styles.hint}>Проверяем, какие мастера свободны на это время...</p> : null}
+      {config.startsAt && !isLoadingMasters && availableMasters.length === 0 ? (
+        <p className={styles.hint}>На это время нет свободных мастеров для этой услуги. Выберите другой слот.</p>
       ) : null}
     </article>
   );
+}
+
+function sameMasters(left: MasterDto[], right: MasterDto[]) {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  return left.every((master, index) => master.id === right[index]?.id);
+}
+
+function formatItemPrice(item?: SubscriptionBenefitItemResult) {
+  if (!item) {
+    return '—';
+  }
+
+  return item.paidBySubscriptionCredit ? 'Включено в подписку' : formatPrice(item.finalPriceRub);
 }
 
 function formatDate(value: string) {

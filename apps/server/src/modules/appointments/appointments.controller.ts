@@ -8,7 +8,9 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { JwtUserPayload } from '../../common/types/authenticated-request.type';
 import { AppointmentsService } from './appointments.service';
 import { AppointmentSlotsQueryDto } from './dto/appointment-slots-query.dto';
+import { AvailableMastersQueryDto } from './dto/available-masters-query.dto';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { ServiceSlotsQueryDto } from './dto/service-slots-query.dto';
 import { UpdateAppointmentStatusDto } from './dto/update-appointment-status.dto';
 
 @ApiTags('Appointments')
@@ -31,6 +33,16 @@ export class AppointmentsController {
   @Get('slots')
   findSlots(@Query() query: AppointmentSlotsQueryDto) {
     return this.appointmentsService.findSlots(query);
+  }
+
+  @Get('service-slots')
+  findServiceSlots(@Query() query: ServiceSlotsQueryDto) {
+    return this.appointmentsService.findServiceSlots(query);
+  }
+
+  @Get('available-masters')
+  findAvailableMasters(@Query() query: AvailableMastersQueryDto) {
+    return this.appointmentsService.findAvailableMasters(query);
   }
 
   @Patch(':id/cancel')

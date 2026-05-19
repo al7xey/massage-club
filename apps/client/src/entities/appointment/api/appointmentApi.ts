@@ -1,4 +1,5 @@
 import { baseApi } from '@/shared/api/baseApi';
+import type { MasterDto } from '@/entities/master';
 import type { AppointmentDto, CreateAppointmentRequest } from '../model/types';
 
 export const appointmentApi = baseApi.injectEndpoints({
@@ -11,6 +12,18 @@ export const appointmentApi = baseApi.injectEndpoints({
       query: ({ date, durationMinutes, masterId }) => ({
         url: '/appointments/slots',
         params: { masterId, date, durationMinutes },
+      }),
+    }),
+    getServiceSlots: builder.query<string[], { serviceId: string; studioId: string; date: string }>({
+      query: ({ date, serviceId, studioId }) => ({
+        url: '/appointments/service-slots',
+        params: { serviceId, studioId, date },
+      }),
+    }),
+    getAvailableMasters: builder.query<MasterDto[], { serviceId: string; studioId: string; startsAt: string }>({
+      query: ({ serviceId, startsAt, studioId }) => ({
+        url: '/appointments/available-masters',
+        params: { serviceId, studioId, startsAt },
       }),
     }),
     createAppointment: builder.mutation<AppointmentDto, CreateAppointmentRequest>({
@@ -34,8 +47,10 @@ export const appointmentApi = baseApi.injectEndpoints({
 
 export const {
   useCancelAppointmentMutation,
+  useGetAvailableMastersQuery,
   useCreateAppointmentMutation,
   useGetAppointmentSlotsQuery,
   useGetMyAppointmentsQuery,
+  useGetServiceSlotsQuery,
   useUpdateAppointmentStatusMutation,
 } = appointmentApi;
