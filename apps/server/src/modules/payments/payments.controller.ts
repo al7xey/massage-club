@@ -18,6 +18,11 @@ export class PaymentsController {
     return this.paymentsService.mockCheckout(user.sub, dto);
   }
 
+  @Get('my')
+  findMine(@CurrentUser() user: JwtUserPayload) {
+    return this.paymentsService.findMine(user.sub);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.paymentsService.findOne(id);

@@ -1,4 +1,4 @@
-﻿import { baseApi } from '@/shared/api/baseApi';
+import { baseApi } from '@/shared/api/baseApi';
 import type { MySubscriptionDto, SubscriptionPlanDto } from '../model/types';
 import { mockSubscriptionPlans } from '../model/mock';
 
@@ -16,7 +16,7 @@ export const subscriptionApi = baseApi.injectEndpoints({
       providesTags: ['SubscriptionPlans'],
     }),
     getMySubscription: builder.query<MySubscriptionDto | null, void>({
-      query: () => '/subscriptions/me',
+      query: () => '/subscriptions/me/active',
       providesTags: ['MySubscription'],
     }),
   }),

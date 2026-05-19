@@ -10,15 +10,15 @@ interface StudioCardProps {
 export function StudioCard({ studio }: StudioCardProps) {
   return (
     <article className={styles.card}>
-      <div className={styles.media} aria-hidden />
+      <div className={styles.media} aria-hidden="true" />
       <div className={styles.content}>
         <h3>{studio.title}</h3>
         <p>{studio.address}</p>
         <p>{studio.openLabel}</p>
+        <Link className={styles.button} to={appRoutes.booking()}>
+          Записаться в филиал
+        </Link>
       </div>
-      <Link className={styles.button} to={appRoutes.booking()}>
-        Записаться
-      </Link>
     </article>
   );
 }

@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "build": "npm run build --workspace @massage/shared && nest build",
-    "dev": "npm run build --workspace @massage/shared && nest start --watch",
+    "dev": "nest start --watch",
     "start": "node dist/main.js",
-    "start:dev": "npm run build --workspace @massage/shared && nest start --watch",
+    "start:dev": "nest start --watch",
     "seed": "npm run build --workspace @massage/shared && ts-node -r tsconfig-paths/register src/database/seed.ts"
   },
   "dependencies": {

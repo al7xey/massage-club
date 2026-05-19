@@ -1,6 +1,6 @@
 .card {
   display: flex;
-  min-height: 338px;
+  min-height: 318px;
   flex-direction: column;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
@@ -8,12 +8,6 @@
   box-shadow: var(--shadow-card);
   padding: 26px;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
-}
-
-.card[data-featured="true"] {
-  border-color: rgba(111, 141, 78, 0.2);
-  background: linear-gradient(180deg, #ffffff 0%, var(--color-surface-soft) 100%);
-  box-shadow: var(--shadow-green);
 }
 
 .card:hover {
@@ -24,7 +18,7 @@
 
 .title {
   display: -webkit-box;
-  min-height: 34px;
+  min-height: 20px;
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -34,14 +28,6 @@
   font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
-}
-
-.subtitle {
-  min-height: 20px;
-  margin: 8px 0 0;
-  color: var(--color-muted);
-  font-size: 13px;
-  font-weight: 600;
 }
 
 .priceRow {
@@ -88,7 +74,7 @@
   left: 0;
   width: 6px;
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-round);
   background: var(--color-primary);
   content: "";
 }
@@ -123,8 +109,8 @@
   min-height: var(--control-height);
   border: 0;
   border-radius: var(--radius-control);
-  background: var(--color-primary);
-  color: #ffffff;
+  background: var(--gradient-primary);
+  color: var(--color-on-primary);
   cursor: pointer;
   font-size: 13px;
   font-weight: 900;

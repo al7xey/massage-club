@@ -1,12 +1,13 @@
-import { useMemo, useState } from 'react';
+import { type CSSProperties, useMemo, useState } from 'react';
 import { repeatToLength } from '@/shared/lib/collection/repeatToLength';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import { createServiceCardModel, ServiceCard, useGetServicesQuery } from '@/entities/service';
 import styles from './ServicesCatalogPage.module.css';
 
-const categories = ['Массаж', 'Уход за лицом', 'SPA-программы', 'Коррекция фигуры'];
-const studios = ['Центральный филиал', 'Виктория Палас', 'На Набережной'];
-const membershipOptions = ['Любая подписка', 'Lady', 'Master', 'Семейная'];
+const membershipOptions = ['Lady', 'Master', 'Семейная'];
+const priceMin = 2000;
+const priceMax = 8000;
+const priceStep = 500;
 const durationOptions = [
   ['short', 'До 60 минут'],
   ['medium', '60-90 минут'],
@@ -18,13 +19,14 @@ type DurationFilter = (typeof durationOptions)[number][0];
 export function ServicesCatalogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('popular');
-  const [isFiltersOpen, setIsFiltersOpen] = useState(true);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedStudios, setSelectedStudios] = useState<string[]>([]);
   const [selectedDurations, setSelectedDurations] = useState<DurationFilter[]>([]);
   const [selectedMemberships, setSelectedMemberships] = useState<string[]>([]);
   const [availableTodayOnly, setAvailableTodayOnly] = useState(false);
-  const [maxPrice, setMaxPrice] = useState(8000);
+  const [minPrice, setMinPrice] = useState(priceMin);
+  const [maxPrice, setMaxPrice] = useState(priceMax);
   const { data = [], isLoading } = useGetServicesQuery();
 
   const cards = useMemo(
@@ -36,11 +38,13 @@ export function ServicesCatalogPage() {
     () =>
       cards.map((service, index) => ({
         service,
-        membershipLabel: membershipOptions[(index % (membershipOptions.length - 1)) + 1],
+        membershipLabel: membershipOptions[index % membershipOptions.length],
         durationBand: getDurationBand(service.durationMinutes),
       })),
     [cards],
   );
+  const categoryOptions = useMemo(() => uniqueSorted(cards.map((service) => service.categoryLabel)), [cards]);
+  const studioOptions = useMemo(() => uniqueSorted(cards.map((service) => service.studioLabel)), [cards]);
 
   const visibleCards = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -50,10 +54,8 @@ export function ServicesCatalogPage() {
       const matchesStudio = selectedStudios.length === 0 || selectedStudios.includes(service.studioLabel);
       const matchesDuration = selectedDurations.length === 0 || selectedDurations.includes(durationBand);
       const matchesMembership =
-        selectedMemberships.length === 0 ||
-        selectedMemberships.includes('Любая подписка') ||
-        selectedMemberships.includes(membershipLabel);
-      const matchesPrice = service.priceRub <= maxPrice;
+        selectedMemberships.length === 0 || selectedMemberships.includes(membershipLabel);
+      const matchesPrice = service.priceRub >= minPrice && service.priceRub <= maxPrice;
       const matchesAvailable = !availableTodayOnly || service.isAvailableToday;
       const matchesSearch = [service.title, service.categoryLabel, service.description].join(' ').toLowerCase().includes(query);
 
@@ -76,6 +78,7 @@ export function ServicesCatalogPage() {
   }, [
     availableTodayOnly,
     catalogItems,
+    minPrice,
     maxPrice,
     searchQuery,
     selectedCategories,
@@ -91,7 +94,12 @@ export function ServicesCatalogPage() {
     selectedDurations.length > 0 ||
     selectedMemberships.length > 0 ||
     availableTodayOnly ||
-    maxPrice < 8000;
+    minPrice > priceMin ||
+    maxPrice < priceMax;
+  const priceRangeStyle = {
+    '--range-start': `${((minPrice - priceMin) / (priceMax - priceMin)) * 100}%`,
+    '--range-end': `${100 - ((maxPrice - priceMin) / (priceMax - priceMin)) * 100}%`,
+  } as CSSProperties;
 
   const resetFilters = () => {
     setSelectedCategories([]);
@@ -99,7 +107,8 @@ export function ServicesCatalogPage() {
     setSelectedDurations([]);
     setSelectedMemberships([]);
     setAvailableTodayOnly(false);
-    setMaxPrice(8000);
+    setMinPrice(priceMin);
+    setMaxPrice(priceMax);
   };
 
   return (
@@ -126,6 +135,7 @@ export function ServicesCatalogPage() {
             Фильтры{hasActiveFilters ? ` (${activeFiltersCount({
               availableTodayOnly,
               maxPrice,
+              minPrice,
               selectedCategories,
               selectedDurations,
               selectedMemberships,
@@ -145,7 +155,7 @@ export function ServicesCatalogPage() {
           </div>
         </div>
 
-        <div className={`${styles.body} ${isFiltersOpen ? styles.withFilters : ''}`}>
+        <div className={styles.body}>
           {isFiltersOpen ? (
             <aside className={styles.filters}>
               <div className={styles.filtersHeader}>
@@ -154,23 +164,34 @@ export function ServicesCatalogPage() {
                   Сбросить
                 </button>
               </div>
-              <FilterGroup title="Категории" values={categories} selected={selectedCategories} onToggle={toggleString(setSelectedCategories)} />
-              <FilterGroup title="Студии" values={studios} selected={selectedStudios} onToggle={toggleString(setSelectedStudios)} />
+              <FilterGroup title="Категории" values={categoryOptions} selected={selectedCategories} onToggle={toggleString(setSelectedCategories)} />
+              <FilterGroup title="Студии" values={studioOptions} selected={selectedStudios} onToggle={toggleString(setSelectedStudios)} />
               <FilterGroup title="Подписка" values={membershipOptions} selected={selectedMemberships} onToggle={toggleString(setSelectedMemberships)} />
               <div className={styles.filterGroup}>
                 <h3>Стоимость</h3>
-                <input
-                  className={styles.range}
-                  type="range"
-                  min="2000"
-                  max="8000"
-                  step="500"
-                  value={maxPrice}
-                  onChange={(event) => setMaxPrice(Number(event.target.value))}
-                />
+                <div className={styles.rangeWrap} style={priceRangeStyle}>
+                  <input
+                    className={styles.range}
+                    type="range"
+                    min={priceMin}
+                    max={priceMax}
+                    step={priceStep}
+                    value={minPrice}
+                    onChange={(event) => setMinPrice(Math.min(Number(event.target.value), maxPrice - priceStep))}
+                  />
+                  <input
+                    className={styles.range}
+                    type="range"
+                    min={priceMin}
+                    max={priceMax}
+                    step={priceStep}
+                    value={maxPrice}
+                    onChange={(event) => setMaxPrice(Math.max(Number(event.target.value), minPrice + priceStep))}
+                  />
+                </div>
                 <div className={styles.priceFields}>
+                  <span>от {minPrice.toLocaleString('ru-RU')} ₽</span>
                   <span>до {maxPrice.toLocaleString('ru-RU')} ₽</span>
-                  <span>8 000 ₽</span>
                 </div>
               </div>
               <FilterGroup
@@ -224,6 +245,7 @@ function toggleString<T extends string>(setter: (value: (current: T[]) => T[]) =
 function activeFiltersCount({
   availableTodayOnly,
   maxPrice,
+  minPrice,
   selectedCategories,
   selectedDurations,
   selectedMemberships,
@@ -231,6 +253,7 @@ function activeFiltersCount({
 }: {
   availableTodayOnly: boolean;
   maxPrice: number;
+  minPrice: number;
   selectedCategories: string[];
   selectedDurations: string[];
   selectedMemberships: string[];
@@ -242,8 +265,12 @@ function activeFiltersCount({
     selectedMemberships.length +
     selectedStudios.length +
     (availableTodayOnly ? 1 : 0) +
-    (maxPrice < 8000 ? 1 : 0)
+    (minPrice > priceMin || maxPrice < priceMax ? 1 : 0)
   );
+}
+
+function uniqueSorted(values: string[]) {
+  return Array.from(new Set(values)).sort((first, second) => first.localeCompare(second, 'ru'));
 }
 
 function FilterGroup({

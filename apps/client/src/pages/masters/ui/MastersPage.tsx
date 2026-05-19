@@ -7,7 +7,7 @@ import styles from './MastersPage.module.css';
 export function MastersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const { data = [], isLoading } = useGetMastersQuery();
-  const cards = useMemo(() => repeatToLength(data, 4).map(createMasterCardModel), [data]);
+  const cards = useMemo(() => repeatToLength(data, 4).map((master, index) => createMasterCardModel(master, index)), [data]);
   const visibleCards = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
@@ -48,7 +48,7 @@ export function MastersPage() {
 
       <section className={styles.grid}>
         {visibleCards.map((master, index) => (
-          <MasterCard key={`${master.id}-${index}`} master={master} imageVariant={index % 2 === 0 ? 'a' : 'b'} />
+          <MasterCard key={`${master.id}-${index}`} master={master} />
         ))}
       </section>
     </PageShell>

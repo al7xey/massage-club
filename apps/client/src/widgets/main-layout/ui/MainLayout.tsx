@@ -1,4 +1,6 @@
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { useGetCartQuery } from '@/entities/cart';
 import { appRoutes } from '@/shared/routes';
 import styles from './MainLayout.module.css';
 
@@ -11,12 +13,23 @@ const links = [
 ] as const;
 
 export function MainLayout() {
+  const navigate = useNavigate();
+  const { isAuthLoading, logout, user } = useAuth();
+  const { data: cartItems = [] } = useGetCartQuery(undefined, { skip: !user });
+  const logoRoute = user ? appRoutes.account() : appRoutes.home();
+  const accountInitial = (user?.fullName?.trim()?.[0] ?? 'Р').toUpperCase();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate(appRoutes.home());
+  };
+
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <NavLink to={appRoutes.home()} className={styles.logo}>
-          <span aria-hidden="true">♡</span>
-          Для себя
+        <NavLink to={logoRoute} className={styles.logo}>
+          <span aria-hidden="true">♥</span>
+          RelaxUp
         </NavLink>
 
         <nav className={styles.nav} aria-label="Основная навигация">
@@ -28,12 +41,39 @@ export function MainLayout() {
         </nav>
 
         <div className={styles.actions}>
-          <NavLink className={styles.login} to={appRoutes.auth()}>
-            Войти
-          </NavLink>
-          <NavLink className={styles.primaryButton} to={appRoutes.booking()}>
-            Купить подписку
-          </NavLink>
+          {!user && !isAuthLoading ? (
+            <>
+              <NavLink className={styles.ghostButton} to={appRoutes.login()}>
+                Войти
+              </NavLink>
+              <NavLink className={styles.primaryButton} to={appRoutes.subscriptions()}>
+                Стать частью клуба
+              </NavLink>
+            </>
+          ) : null}
+
+          {user ? (
+            <>
+              <NavLink className={styles.cartButton} to={appRoutes.cart()}>
+                <span>Корзина</span>
+                <strong>{cartItems.length}</strong>
+              </NavLink>
+              {user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' ? (
+                <NavLink className={styles.ghostButton} to={appRoutes.admin()}>
+                  Админ-панель
+                </NavLink>
+              ) : null}
+              <NavLink className={styles.accountLink} to={appRoutes.account()}>
+                <span className={styles.avatar} aria-hidden="true">
+                  {accountInitial}
+                </span>
+                <span>Личный кабинет</span>
+              </NavLink>
+              <button className={styles.ghostButton} type="button" onClick={handleLogout}>
+                Выйти
+              </button>
+            </>
+          ) : null}
         </div>
       </header>
 
@@ -43,8 +83,8 @@ export function MainLayout() {
         <div className={styles.footerMain}>
           <div>
             <p className={styles.footerBrand}>
-              <span aria-hidden="true">♡</span>
-              Для себя
+              <span aria-hidden="true">♥</span>
+              RelaxUp
             </p>
             <p>Сеть wellness-клубов с заботой о вашем теле и ментальном здоровье. Работаем по системе подписки.</p>
           </div>
@@ -64,17 +104,6 @@ export function MainLayout() {
             <h4>Контакты</h4>
             <p>8 (800) 555-35-35</p>
             <p>hello@dlyasebya.ru</p>
-            <Link to={appRoutes.contacts()} className={styles.socials} aria-label="Социальные сети">
-              <span>☆</span>
-              <span>□</span>
-            </Link>
-          </div>
-        </div>
-        <div className={styles.footerBottom}>
-          <span>© 2024 Dlya Sebya Wellness. Все права защищены.</span>
-          <div className={styles.footerPolicies}>
-            <Link to={appRoutes.contacts()}>Политика конфиденциальности</Link>
-            <Link to={appRoutes.certificates()}>Подарочные сертификаты</Link>
           </div>
         </div>
       </footer>

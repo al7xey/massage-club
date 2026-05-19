@@ -93,6 +93,8 @@
   cursor: grab;
   touch-action: pan-y;
   user-select: none;
+  padding: 8px 8px 16px;
+  margin: -8px -8px -16px;
 }
 
 .viewport::-webkit-scrollbar {
@@ -126,7 +128,7 @@
   width: 9px;
   height: 9px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-round);
   background: var(--color-line-strong);
   cursor: pointer;
 }

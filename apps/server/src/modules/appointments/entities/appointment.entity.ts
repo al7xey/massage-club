@@ -44,6 +44,15 @@ export class Appointment {
   @Column({ name: 'price_rub' })
   priceRub: number;
 
+  @Column({ name: 'base_price_rub', default: 0 })
+  basePriceRub: number;
+
+  @Column({ name: 'discount_percent', default: 0 })
+  discountPercent: number;
+
+  @Column({ name: 'paid_by_subscription_credit', default: false })
+  paidBySubscriptionCredit: boolean;
+
   @Column({ type: 'text', nullable: true })
   note?: string;
 

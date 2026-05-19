@@ -9,6 +9,7 @@ import { CreateMasterDto } from '../masters/dto/create-master.dto';
 import { UpdateMasterShiftDto } from '../masters/dto/update-master-shift.dto';
 import { UpdateMasterDto } from '../masters/dto/update-master.dto';
 import { MastersService } from '../masters/masters.service';
+import { PaymentsService } from '../payments/payments.service';
 import { CreateServiceDto } from '../services/dto/create-service.dto';
 import { UpdateServiceDto } from '../services/dto/update-service.dto';
 import { ServicesService } from '../services/services.service';
@@ -18,6 +19,7 @@ import { StudiosService } from '../studios/studios.service';
 import { CreateSubscriptionPlanDto } from '../subscription-plans/dto/create-subscription-plan.dto';
 import { UpdateSubscriptionPlanDto } from '../subscription-plans/dto/update-subscription-plan.dto';
 import { SubscriptionPlansService } from '../subscription-plans/subscription-plans.service';
+import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -30,7 +32,9 @@ export class AdminService {
     private readonly studiosService: StudiosService,
     private readonly mastersService: MastersService,
     private readonly subscriptionPlansService: SubscriptionPlansService,
+    private readonly subscriptionsService: SubscriptionsService,
     private readonly giftCertificatesService: GiftCertificatesService,
+    private readonly paymentsService: PaymentsService,
   ) {}
 
   getAppointments() {
@@ -113,6 +117,10 @@ export class AdminService {
     return this.subscriptionPlansService.findAll();
   }
 
+  getSubscriptions() {
+    return this.subscriptionsService.findAll();
+  }
+
   createSubscriptionPlan(dto: CreateSubscriptionPlanDto) {
     return this.subscriptionPlansService.create(dto);
   }
@@ -127,6 +135,10 @@ export class AdminService {
 
   getGiftCertificates() {
     return this.giftCertificatesService.findAll();
+  }
+
+  getPayments() {
+    return this.paymentsService.findAll();
   }
 
   createGiftCertificate(dto: CreateGiftCertificateDto) {

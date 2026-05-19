@@ -4,6 +4,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AppointmentsModule } from './modules/appointments/appointments.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CartModule } from './modules/cart/cart.module';
 import { GiftCertificatesModule } from './modules/gift-certificates/gift-certificates.module';
 import { MastersModule } from './modules/masters/masters.module';
 import { PaymentsModule } from './modules/payments/payments.module';
@@ -31,6 +32,7 @@ import { DatabaseModule } from './database/database.module';
     SubscriptionPlansModule,
     SubscriptionsModule,
     AppointmentsModule,
+    CartModule,
     GiftCertificatesModule,
     PaymentsModule,
     ReviewsModule,

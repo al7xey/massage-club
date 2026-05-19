@@ -15,7 +15,7 @@ export function HomePage() {
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
   const { data: studios = [] } = useGetStudiosQuery();
 
-  const popularServices = services.slice(0, 4).map((service, index) => createServiceCardModel(service, index));
+  const popularServices = services.slice(0, 3).map((service, index) => createServiceCardModel(service, index));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
   const tariffs = buildTariffs(plans);
 
@@ -77,7 +77,7 @@ export function HomePage() {
       <section className={styles.cta}>
         <h2>Начните свой путь к гармонии сегодня</h2>
         <Link className={styles.whiteButton} to={appRoutes.booking()}>
-          Записаться онлайн
+          Записаться
         </Link>
       </section>
     </main>

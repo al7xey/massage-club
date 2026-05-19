@@ -1,10 +1,11 @@
-﻿import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compare, hash } from 'bcryptjs';
 import { Repository } from 'typeorm';
 import { PublicUserDto, UserRole } from '@massage/shared';
+import { normalizeEmail, normalizePhone, isEmailIdentifier } from '../../common/utils/normalize-contact.util';
 import { User } from '../users/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -20,17 +21,22 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
-    const existingUser = await this.usersRepository.findOne({ where: { email: dto.email.toLowerCase() } });
-    if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+    const email = normalizeEmail(dto.email);
+    const phone = normalizePhone(dto.phone);
+    const fullName = dto.fullName.trim();
+
+    if (!fullName) {
+      throw new BadRequestException('Full name is required');
     }
 
+    this.ensureAtLeastOneContact(email, phone);
+    await this.ensureUniqueContacts(email, phone);
+
     const user = this.usersRepository.create({
-      email: dto.email.toLowerCase(),
+      email,
       passwordHash: await hash(dto.password, 10),
-      firstName: dto.firstName,
-      lastName: dto.lastName,
-      phone: dto.phone,
+      fullName,
+      phone,
       role: UserRole.CLIENT,
     });
 
@@ -39,9 +45,17 @@ export class AuthService {
   }
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
-    const user = await this.usersRepository.findOne({ where: { email: dto.email.toLowerCase(), isActive: true } });
+    const identifier = dto.identifier.trim();
+    const user = isEmailIdentifier(identifier)
+      ? await this.usersRepository.findOne({
+          where: { email: normalizeEmail(identifier) ?? undefined, isActive: true },
+        })
+      : await this.usersRepository.findOne({
+          where: { phone: normalizePhone(identifier) ?? undefined, isActive: true },
+        });
+
     if (!user || !(await compare(dto.password, user.passwordHash))) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException('Invalid phone/email or password');
     }
 
     return this.buildAuthResponse(user);
@@ -69,9 +83,8 @@ export class AuthService {
   toPublicUser(user: User): PublicUserDto {
     return {
       id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      fullName: user.fullName,
+      email: user.email ?? null,
       phone: user.phone ?? null,
       role: user.role,
     };
@@ -86,7 +99,12 @@ export class AuthService {
   }
 
   private async issueTokens(user: User): Promise<AuthTokensDto> {
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = {
+      sub: user.id,
+      email: user.email ?? null,
+      phone: user.phone ?? null,
+      role: user.role,
+    };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('JWT_ACCESS_SECRET', 'dev_access_secret_change_me'),
@@ -99,5 +117,27 @@ export class AuthService {
     ]);
 
     return { accessToken, refreshToken };
+  }
+
+  private ensureAtLeastOneContact(email: null | string, phone: null | string) {
+    if (!email && !phone) {
+      throw new BadRequestException('Email or phone is required');
+    }
+  }
+
+  private async ensureUniqueContacts(email: null | string, phone: null | string, currentUserId?: string) {
+    if (email) {
+      const existingByEmail = await this.usersRepository.findOne({ where: { email } });
+      if (existingByEmail && existingByEmail.id !== currentUserId) {
+        throw new ConflictException('User with this email already exists');
+      }
+    }
+
+    if (phone) {
+      const existingByPhone = await this.usersRepository.findOne({ where: { phone } });
+      if (existingByPhone && existingByPhone.id !== currentUserId) {
+        throw new ConflictException('User with this phone already exists');
+      }
+    }
   }
 }

@@ -1,6 +1,6 @@
 ﻿import type { ServiceCardModel, ServiceDto, ServiceTone } from '../model/types';
 
-const serviceTones: ServiceTone[] = ['massage', 'care', 'spa', 'neutral'];
+const serviceTones: ServiceTone[] = ['massage', 'massage', 'massage', 'massage'];
 const serviceLabels = ['Массаж', 'Уход за лицом', 'SPA-программы', 'Коррекция фигуры'];
 const serviceGoals = ['Расслабление', 'Для спины', 'Восстановление', 'Антистресс'];
 const serviceStudios = ['Центральный филиал', 'Виктория Палас', 'На Набережной'];

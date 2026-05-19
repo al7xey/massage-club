@@ -1,27 +1,38 @@
-import { PageShell } from '@/shared/ui/page-shell/PageShell';
+import { Link } from 'react-router-dom';
+import { useGetAdminSummaryQuery } from '@/pages/admin-dashboard/api/adminDashboardApi';
+import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import { appRoutes } from '@/shared/routes';
-import { useGetAdminSummaryQuery } from '../api/adminDashboardApi';
+import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import styles from './AdminDashboardPage.module.css';
 
 export function AdminDashboardPage() {
-  useGetAdminSummaryQuery();
+  const { data: summary, isLoading } = useGetAdminSummaryQuery();
 
   return (
-    <PageShell title="Админ-панель" description="Операционное управление сетью, записью, клиентами и сертификатами.">
+    <PageShell title="Админ-панель" description="Операционное управление сетью, записями, клиентами и сертификатами.">
+      <div className={styles.metrics}>
+        <Metric title="Пользователи" value={isLoading ? '...' : String(summary?.users ?? 0)} />
+        <Metric title="Активные подписки" value={isLoading ? '...' : String(summary?.activeSubscriptions ?? 0)} />
+        <Metric title="Записи" value={isLoading ? '...' : String(summary?.appointments ?? 0)} />
+        <Metric title="Продажи" value={isLoading ? '...' : formatPrice(summary?.paymentsRub ?? 0)} />
+      </div>
+
       <div className={styles.grid}>
-        <a className={styles.card} href={appRoutes.adminSection('services')}>
-          Услуги
-        </a>
-        <a className={styles.card} href={appRoutes.adminSection('masters')}>
-          Мастера
-        </a>
-        <a className={styles.card} href={appRoutes.adminSection('appointments')}>
-          Записи
-        </a>
-        <a className={styles.card} href={appRoutes.adminSection('analytics')}>
-          Аналитика
-        </a>
+        <Link className={styles.card} to={appRoutes.adminSection('users')}>Пользователи</Link>
+        <Link className={styles.card} to={appRoutes.adminSection('services')}>Услуги</Link>
+        <Link className={styles.card} to={appRoutes.adminSection('subscriptions')}>Подписки</Link>
+        <Link className={styles.card} to={appRoutes.adminSection('appointments')}>Записи</Link>
+        <Link className={styles.card} to={appRoutes.adminSection('certificates')}>Сертификаты</Link>
       </div>
     </PageShell>
+  );
+}
+
+function Metric({ title, value }: { title: string; value: string }) {
+  return (
+    <div className={styles.metric}>
+      <span>{title}</span>
+      <strong>{value}</strong>
+    </div>
   );
 }

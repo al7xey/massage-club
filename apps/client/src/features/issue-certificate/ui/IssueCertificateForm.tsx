@@ -1,37 +1,80 @@
-import { FormEvent, useState } from 'react';
-import { certificatePresets } from '@/entities/certificate';
+import { FormEvent, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { certificatePresets, useCreateGiftCertificateMutation } from '@/entities/certificate';
+import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
+import { appRoutes } from '@/shared/routes';
 import styles from './IssueCertificateForm.module.css';
 
+const customMinAmount = 1000;
+const customStep = 500;
+
 export function IssueCertificateForm() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [createGiftCertificate, { isLoading }] = useCreateGiftCertificateMutation();
   const [type, setType] = useState<'amount' | 'service'>('amount');
   const [format, setFormat] = useState<'email' | 'paper'>('email');
+  const [amountMode, setAmountMode] = useState<'preset' | 'custom'>('preset');
   const [presetIndex, setPresetIndex] = useState(1);
+  const [customAmount, setCustomAmount] = useState('1500');
   const [recipient, setRecipient] = useState('');
   const [sender, setSender] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [isReady, setIsReady] = useState(false);
+  const [success, setSuccess] = useState('');
 
   const selectedPreset = certificatePresets[presetIndex] ?? certificatePresets[1];
+  const resolvedAmount = useMemo(() => {
+    if (amountMode === 'preset') {
+      return selectedPreset.value;
+    }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const parsed = Number(customAmount);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }, [amountMode, customAmount, selectedPreset.value]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!user) {
+      navigate(appRoutes.login(), { state: { from: appRoutes.certificates() } });
+      return;
+    }
 
     if (!recipient.trim() || !sender.trim()) {
       setError('Заполните имя получателя и отправителя');
-      setIsReady(false);
+      setSuccess('');
       return;
     }
 
-    if (!email.includes('@')) {
-      setError('Введите корректный email для доставки');
-      setIsReady(false);
+    if (!email.includes('@') && !email.trim().startsWith('+')) {
+      setError('Введите email или телефон получателя');
+      setSuccess('');
       return;
     }
 
-    setError('');
-    setIsReady(true);
+    if (resolvedAmount < customMinAmount || resolvedAmount % customStep !== 0) {
+      setError(`Укажите сумму от ${customMinAmount} ₽ с шагом ${customStep} ₽`);
+      setSuccess('');
+      return;
+    }
+
+    try {
+      const certificate = await createGiftCertificate({
+        recipientName: recipient.trim(),
+        recipientContact: email.trim(),
+        amountRub: resolvedAmount,
+        format: format === 'paper' ? 'PAPER' : 'EMAIL',
+        message: (message || `Подарок от ${sender}`).trim(),
+      }).unwrap();
+      setError('');
+      setSuccess(`Сертификат оформлен. Код: ${certificate.code}`);
+    } catch (certificateError) {
+      setError(getApiErrorMessage(certificateError, 'Не удалось оформить сертификат'));
+      setSuccess('');
+    }
   };
 
   return (
@@ -53,21 +96,54 @@ export function IssueCertificateForm() {
             onClick={() => setType('service')}
           >
             <strong>Услуга</strong>
-            <span>Конкретная услуга или процедура</span>
+            <span>Подарок под конкретную процедуру или формат отдыха</span>
           </button>
         </div>
-        <div className={styles.valueRow}>
-          {certificatePresets.map((preset, index) => (
-            <button
-              key={preset.value}
-              className={`${styles.valueButton} ${index === presetIndex ? styles.valueActive : ''}`}
-              type="button"
-              onClick={() => setPresetIndex(index)}
-            >
-              {preset.label}
-            </button>
-          ))}
+
+        <div className={styles.modeRow}>
+          <button
+            className={amountMode === 'preset' ? styles.modeActive : styles.modeButton}
+            type="button"
+            onClick={() => setAmountMode('preset')}
+          >
+            Готовые суммы
+          </button>
+          <button
+            className={amountMode === 'custom' ? styles.modeActive : styles.modeButton}
+            type="button"
+            onClick={() => setAmountMode('custom')}
+          >
+            Своя сумма
+          </button>
         </div>
+
+        {amountMode === 'preset' ? (
+          <div className={styles.valueRow}>
+            {certificatePresets.map((preset, index) => (
+              <button
+                key={preset.value}
+                className={`${styles.valueButton} ${index === presetIndex ? styles.valueActive : ''}`}
+                type="button"
+                onClick={() => setPresetIndex(index)}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <label className={styles.customAmount}>
+            <span>Своя сумма</span>
+            <input
+              className={styles.input}
+              type="number"
+              min={customMinAmount}
+              step={customStep}
+              value={customAmount}
+              onChange={(event) => setCustomAmount(event.target.value)}
+            />
+            <small>Минимум {customMinAmount} ₽, шаг {customStep} ₽</small>
+          </label>
+        )}
       </div>
 
       <div className={styles.step}>
@@ -79,7 +155,7 @@ export function IssueCertificateForm() {
             onClick={() => setFormat('email')}
           >
             <strong>Электронный</strong>
-            <span>Придет на почту сразу после оплаты</span>
+            <span>Придёт на почту сразу после оплаты</span>
           </button>
           <button
             className={`${styles.optionCard} ${format === 'paper' ? styles.optionActive : ''}`}
@@ -98,52 +174,20 @@ export function IssueCertificateForm() {
           <div className={styles.formRow}>
             <label>
               <span>Кому</span>
-              <input
-                className={styles.input}
-                placeholder="Имя получателя"
-                value={recipient}
-                onChange={(event) => {
-                  setRecipient(event.target.value);
-                  setError('');
-                  setIsReady(false);
-                }}
-              />
+              <input className={styles.input} placeholder="Имя получателя" value={recipient} onChange={(event) => setRecipient(event.target.value)} />
             </label>
             <label>
               <span>От кого</span>
-              <input
-                className={styles.input}
-                placeholder="Ваше имя"
-                value={sender}
-                onChange={(event) => {
-                  setSender(event.target.value);
-                  setError('');
-                  setIsReady(false);
-                }}
-              />
+              <input className={styles.input} placeholder="Ваше имя" value={sender} onChange={(event) => setSender(event.target.value)} />
             </label>
           </div>
           <label>
-            <span>Email для доставки</span>
-            <input
-              className={styles.input}
-              placeholder="example@mail.ru"
-              value={email}
-              onChange={(event) => {
-                setEmail(event.target.value);
-                setError('');
-                setIsReady(false);
-              }}
-            />
+            <span>Email или телефон получателя</span>
+            <input className={styles.input} placeholder="example@mail.ru или +7..." value={email} onChange={(event) => setEmail(event.target.value)} />
           </label>
           <label>
-            <span>Текст поздравления (необязательно)</span>
-            <textarea
-              className={styles.textarea}
-              placeholder="Приятного отдыха! С любовью..."
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-            />
+            <span>Текст поздравления</span>
+            <textarea className={styles.textarea} placeholder="Приятного отдыха!" value={message} onChange={(event) => setMessage(event.target.value)} />
           </label>
         </div>
       </div>
@@ -151,17 +195,17 @@ export function IssueCertificateForm() {
       <div className={styles.total}>
         <div className={styles.totalTop}>
           <h3>Итого к оплате</h3>
-          <strong>{selectedPreset.label}</strong>
+          <strong>{resolvedAmount.toLocaleString('ru-RU')} ₽</strong>
         </div>
         <div className={styles.totalMeta}>
           <span>Безопасная оплата</span>
           <span>Действует 1 год</span>
-          <span>Мгновенная доставка</span>
+          <span>{format === 'paper' ? 'Бумажный формат' : 'Мгновенная доставка'}</span>
         </div>
         {error ? <p className={styles.error}>{error}</p> : null}
-        {isReady ? <p className={styles.success}>Сертификат готов к оплате на фронтенде.</p> : null}
-        <button className={styles.payButton} type="submit">
-          Оплатить
+        {success ? <p className={styles.success}>{success}</p> : null}
+        <button className={styles.payButton} type="submit" disabled={isLoading}>
+          {isLoading ? 'Оформляем...' : 'Оплатить'}
         </button>
       </div>
     </form>

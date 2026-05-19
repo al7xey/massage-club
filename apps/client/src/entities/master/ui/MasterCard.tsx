@@ -3,12 +3,11 @@ import styles from './MasterCard.module.css';
 
 interface MasterCardProps {
   master: MasterCardModel;
-  imageVariant: 'a' | 'b';
 }
 
-export function MasterCard({ master, imageVariant }: MasterCardProps) {
+export function MasterCard({ master }: MasterCardProps) {
   return (
-    <article className={styles.card} data-variant={imageVariant}>
+    <article className={styles.card}>
       <div className={styles.media}>
         <span className={styles.badge}>{master.experienceLabel}</span>
       </div>

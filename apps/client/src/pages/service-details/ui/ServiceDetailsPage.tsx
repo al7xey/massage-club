@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { formatPrice } from '@/shared/lib/currency/formatPrice';
-import { repeatToLength } from '@/shared/lib/collection/repeatToLength';
-import { appRoutes } from '@/shared/routes';
-import { PageShell } from '@/shared/ui/page-shell/PageShell';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { useAddCartItemMutation } from '@/entities/cart';
 import { mockReviews } from '@/entities/review';
 import { createServiceCardModel, useGetServiceQuery, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
+import { repeatToLength } from '@/shared/lib/collection/repeatToLength';
+import { formatPrice } from '@/shared/lib/currency/formatPrice';
+import { appRoutes } from '@/shared/routes';
+import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import { ReviewsShowcase } from '@/widgets/reviews-showcase';
 import { ServiceShowcase } from '@/widgets/service-showcase';
 import { StudioShowcase } from '@/widgets/studio-showcase';
@@ -14,13 +16,16 @@ import styles from './ServiceDetailsPage.module.css';
 
 export function ServiceDetailsPage() {
   const { id = '' } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [addCartItem] = useAddCartItemMutation();
   const { data: service } = useGetServiceQuery(id, { skip: !id });
   const { data: services = [] } = useGetServicesQuery();
   const { data: studios = [] } = useGetStudiosQuery();
 
   const selected = service ?? services[0];
-  const similar = repeatToLength(services, 4).map((item, index) => createServiceCardModel(item, index));
+  const similar = repeatToLength(services, 3).map((item, index) => createServiceCardModel(item, index));
   const selectedPrice = selected?.priceRub ?? 3500;
   const studioCards = studios.slice(0, 2).map(createStudioCardModel);
   const title = selected?.title ?? 'Лимфодренажный массаж тела';
@@ -31,6 +36,44 @@ export function ServiceDetailsPage() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [id]);
+
+  const navigateToAuth = (action: 'book' | 'cart') => {
+    navigate(appRoutes.login(), {
+      state: {
+        action,
+        from: appRoutes.serviceDetails(id),
+        serviceId: selected?.id ?? id,
+      },
+    });
+  };
+
+  const handleAddToCart = async () => {
+    if (!selected) {
+      return;
+    }
+
+    if (!user) {
+      navigateToAuth('cart');
+      return;
+    }
+
+    await addCartItem({ serviceId: selected.id }).unwrap();
+    navigate(appRoutes.cart());
+  };
+
+  const handleBook = async () => {
+    if (!selected) {
+      return;
+    }
+
+    if (!user) {
+      navigateToAuth('book');
+      return;
+    }
+
+    await addCartItem({ serviceId: selected.id }).unwrap();
+    navigate(`${appRoutes.booking()}?serviceId=${selected.id}`);
+  };
 
   return (
     <PageShell title={title} description={description}>
@@ -43,7 +86,11 @@ export function ServiceDetailsPage() {
             </button>
           </div>
           <div className={styles.thumbs}>
-            <span /><span /><span /><span />
+            {['Лимфодренаж', 'Расслабление', 'Восстановление', 'Уход'].map((label, index) => (
+              <div className={styles.thumbButton} key={label} data-active={index === 0 ? 'true' : undefined}>
+                <span>{label}</span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -58,8 +105,12 @@ export function ServiceDetailsPage() {
             <PriceRow tone="club" title="С подпиской" note="Для резидентов клуба" price={Math.round(selectedPrice * 0.8)} badge="-20%" />
             <PriceRow tone="super" title="С SUPER подпиской" note="Максимальная выгода" price={Math.round(selectedPrice * 0.7)} badge="-30%" />
           </div>
-          <Link className={styles.primaryButton} to={appRoutes.booking()}>Записаться на сеанс</Link>
-          <Link className={styles.outlineButton} to={appRoutes.subscriptions()}>Получить выгоду с подпиской</Link>
+          <button className={styles.primaryButton} type="button" onClick={() => void handleBook()}>
+            Записаться
+          </button>
+          <button className={styles.outlineButton} type="button" onClick={() => void handleAddToCart()}>
+            В корзину
+          </button>
           <p className={styles.note}>Подписка позволяет экономить до 15 000 ₽ в месяц при регулярных посещениях.</p>
         </aside>
       </section>
@@ -88,7 +139,7 @@ export function ServiceDetailsPage() {
       <section className={styles.giftBanner}>
         <div>
           <h2>Подарочные сертификаты</h2>
-          <p>Подарите заботу близким — от 2 000 ₽</p>
+          <p>Подарите заботу близким — от 1 000 ₽</p>
           <Link className={styles.primaryButton} to={appRoutes.certificates()}>Оформить сертификат</Link>
         </div>
       </section>

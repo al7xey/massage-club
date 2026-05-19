@@ -1,9 +1,10 @@
-﻿import 'reflect-metadata';
+import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { UserRole } from '@massage/shared';
 import { hash } from 'bcryptjs';
 import { DataSource, Repository } from 'typeorm';
 import { AppModule } from '../app.module';
+import { normalizePhone } from '../common/utils/normalize-contact.util';
 import { GiftCertificate } from '../modules/gift-certificates/entities/gift-certificate.entity';
 import { MasterShift } from '../modules/masters/entities/master-shift.entity';
 import { Master } from '../modules/masters/entities/master.entity';
@@ -41,13 +42,23 @@ async function seed() {
   const certificates = dataSource.getRepository(GiftCertificate);
 
   const passwordHash = await hash('password123', 10);
+  const userTestPasswordHash = await hash('user123', 10);
+  const adminTestPasswordHash = await hash('admin123', 10);
 
   await findOrCreate(users, { email: 'client@example.com' } as Partial<User>, () => ({
     email: 'client@example.com',
     passwordHash,
-    firstName: 'Анна',
-    lastName: 'Клиентова',
-    phone: '+79990000001',
+    fullName: 'Анна Клиентова',
+    phone: normalizePhone('+79990000001'),
+    role: UserRole.CLIENT,
+    isActive: true,
+  }));
+
+  await findOrCreate(users, { email: 'user@test.ru' } as Partial<User>, () => ({
+    email: 'user@test.ru',
+    passwordHash: userTestPasswordHash,
+    fullName: 'Тестовый Пользователь',
+    phone: normalizePhone('+79991112233'),
     role: UserRole.CLIENT,
     isActive: true,
   }));
@@ -55,9 +66,17 @@ async function seed() {
   await findOrCreate(users, { email: 'admin@example.com' } as Partial<User>, () => ({
     email: 'admin@example.com',
     passwordHash,
-    firstName: 'Ольга',
-    lastName: 'Администратор',
-    phone: '+79990000002',
+    fullName: 'Ольга Администратор',
+    phone: normalizePhone('+79990000002'),
+    role: UserRole.ADMIN,
+    isActive: true,
+  }));
+
+  await findOrCreate(users, { email: 'admin@test.ru' } as Partial<User>, () => ({
+    email: 'admin@test.ru',
+    passwordHash: adminTestPasswordHash,
+    fullName: 'Тестовый Администратор',
+    phone: normalizePhone('+79995557799'),
     role: UserRole.ADMIN,
     isActive: true,
   }));
@@ -65,9 +84,8 @@ async function seed() {
   await findOrCreate(users, { email: 'superadmin@example.com' } as Partial<User>, () => ({
     email: 'superadmin@example.com',
     passwordHash,
-    firstName: 'Ирина',
-    lastName: 'Супервайзер',
-    phone: '+79990000003',
+    fullName: 'Ирина Супервайзер',
+    phone: normalizePhone('+79990000003'),
     role: UserRole.SUPER_ADMIN,
     isActive: true,
   }));
@@ -197,6 +215,7 @@ async function seed() {
       certificates.create({
         code: 'GIFT-DEMO01',
         recipientName: 'Демо Получатель',
+        recipientContact: 'demo@example.com',
         amountRub: 5000,
         expiresAt,
       }),
@@ -204,7 +223,7 @@ async function seed() {
   }
 
   await app.close();
-  console.log('Seed data created successfully. Test password for all accounts: password123');
+  console.log('Seed data created successfully. Demo logins: user@test.ru/user123, admin@test.ru/admin123.');
 }
 
 seed().catch((error) => {

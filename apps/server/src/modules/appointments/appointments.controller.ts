@@ -1,10 +1,15 @@
-﻿import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { UserRole } from '../../common/enums/user-role.enum';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
 import { JwtUserPayload } from '../../common/types/authenticated-request.type';
 import { AppointmentsService } from './appointments.service';
+import { AppointmentSlotsQueryDto } from './dto/appointment-slots-query.dto';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { UpdateAppointmentStatusDto } from './dto/update-appointment-status.dto';
 
 @ApiTags('Appointments')
 @ApiBearerAuth()
@@ -23,8 +28,20 @@ export class AppointmentsController {
     return this.appointmentsService.findMine(user.sub);
   }
 
+  @Get('slots')
+  findSlots(@Query() query: AppointmentSlotsQueryDto) {
+    return this.appointmentsService.findSlots(query);
+  }
+
   @Patch(':id/cancel')
   cancel(@CurrentUser() user: JwtUserPayload, @Param('id') id: string) {
     return this.appointmentsService.cancel(user.sub, id);
+  }
+
+  @Patch(':id/status')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateAppointmentStatusDto) {
+    return this.appointmentsService.updateStatus(id, dto.status);
   }
 }

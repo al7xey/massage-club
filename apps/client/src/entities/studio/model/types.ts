@@ -4,6 +4,10 @@
   address: string;
   city: string;
   phone?: string;
+  coordinates?: {
+    lat: number;
+    lon: number;
+  };
 }
 
 export interface StudioCardModel {
@@ -13,4 +17,8 @@ export interface StudioCardModel {
   phone: string;
   openLabel: string;
   cityChip: string;
+  coordinates: {
+    lat: number;
+    lon: number;
+  };
 }

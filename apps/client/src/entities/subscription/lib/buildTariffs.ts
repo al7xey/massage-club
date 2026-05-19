@@ -7,7 +7,6 @@ function createPlanMeta(plan: SubscriptionPlanDto, index: number): PlanMeta {
 
   return {
     title,
-    subtitle: `до ${plan.discountPercent}% на услуги`,
     features: [
       `${plan.includedCredits} посещения`,
       `Скидка ${plan.discountPercent}% на услуги`,
@@ -21,9 +20,9 @@ const fallbackTariffs: TariffItem[] = [
     id: 'lady',
     title: 'Lady',
     priceRub: 2490,
+    isFeatured: false,
     planMeta: {
       title: 'Lady',
-      subtitle: 'до 20% на услуги',
       features: ['1 посещение', 'Скидка 20% на услуги', 'Скидка 10% на сертификаты'],
     },
   },
@@ -31,9 +30,9 @@ const fallbackTariffs: TariffItem[] = [
     id: 'lady-super',
     title: 'Lady Super',
     priceRub: 4490,
+    isFeatured: false,
     planMeta: {
       title: 'Lady Super',
-      subtitle: 'до 30% на услуги',
       features: ['2 посещения', 'Скидка 30% на услуги', 'Скидка 20% на сертификаты'],
     },
   },
@@ -41,9 +40,9 @@ const fallbackTariffs: TariffItem[] = [
     id: 'family-super',
     title: 'Family Super',
     priceRub: 8400,
+    isFeatured: false,
     planMeta: {
       title: 'Family Super',
-      subtitle: 'до 30% на услуги',
       features: ['4 посещения', 'Скидка 30% на услуги', 'Скидка 20% на сертификаты'],
     },
   },
@@ -52,7 +51,10 @@ const fallbackTariffs: TariffItem[] = [
 export function buildTariffs(plans: SubscriptionPlanDto[]): TariffItem[] {
   const base = (plans.length > 0 ? plans.slice(0, 3) : fallbackTariffs).map((plan, index) => {
     if ('planMeta' in plan) {
-      return plan;
+      return {
+        ...plan,
+        isFeatured: false,
+      };
     }
 
     const planMeta = createPlanMeta(plan, index);
@@ -60,6 +62,7 @@ export function buildTariffs(plans: SubscriptionPlanDto[]): TariffItem[] {
       id: plan.id,
       title: planMeta.title,
       priceRub: plan.monthlyPriceRub,
+      isFeatured: false,
       planMeta,
     };
   });
@@ -73,9 +76,9 @@ export function buildTariffs(plans: SubscriptionPlanDto[]): TariffItem[] {
       id: 'mister',
       title: 'Mister',
       priceRub: Math.round(misterBase.priceRub * 1.04),
+      isFeatured: false,
       planMeta: {
         title: 'Mister',
-        subtitle: 'до 20% на услуги',
         features: ['1 посещение', 'Скидка 20% на услуги', 'Скидка 10% на сертификаты'],
       },
     },
@@ -83,9 +86,9 @@ export function buildTariffs(plans: SubscriptionPlanDto[]): TariffItem[] {
       id: 'mister-super',
       title: 'Mister Super',
       priceRub: Math.round(misterSuperBase.priceRub * 1.03),
+      isFeatured: false,
       planMeta: {
         title: 'Mister Super',
-        subtitle: 'до 30% на услуги',
         features: ['2 посещения', 'Скидка 30% на услуги', 'Скидка 20% на сертификаты'],
       },
     },

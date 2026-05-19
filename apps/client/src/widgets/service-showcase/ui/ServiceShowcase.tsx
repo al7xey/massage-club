@@ -14,8 +14,8 @@ export function ServiceShowcase({ title, services, actionLabel }: ServiceShowcas
     <section className={styles.section}>
       <SectionHeader title={title} actionLabel={actionLabel} actionHref={actionLabel ? appRoutes.services() : undefined} />
       <div className={styles.grid}>
-        {services.map((service) => (
-          <ServiceCard key={service.id} service={service} />
+        {services.map((service, index) => (
+          <ServiceCard key={`${service.id}-${index}`} service={service} />
         ))}
       </div>
     </section>

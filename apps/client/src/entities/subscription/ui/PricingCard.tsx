@@ -9,13 +9,10 @@ interface PricingCardProps {
 }
 
 export function PricingCard({ item, actionSlot }: PricingCardProps) {
-  const isFeatured = item.title.toLowerCase().includes('super') && !item.title.toLowerCase().includes('family');
-
   return (
-    <article className={styles.card} data-featured={isFeatured ? 'true' : undefined}>
+    <article className={styles.card}>
       <div>
         <p className={styles.title}>{item.title}</p>
-        <p className={styles.subtitle}>{item.planMeta.subtitle}</p>
       </div>
       <div className={styles.priceRow}>
         <strong>{formatPrice(item.priceRub)}</strong>

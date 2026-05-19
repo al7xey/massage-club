@@ -15,40 +15,40 @@
   min-height: 460px;
   overflow: hidden;
   border-radius: var(--radius-card);
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(111, 141, 78, 0.1)),
-    linear-gradient(135deg, #c8a678 0%, #f4ead9 42%, #afd0c5 100%);
+  background: var(--color-soft-strong);
   border: 1px solid var(--color-line);
   box-shadow: var(--shadow-card);
 }
 
-.heroImage::before {
+.heroImage::before,
+.heroImage::after {
   position: absolute;
-  right: 82px;
-  bottom: 96px;
-  width: 190px;
-  height: 210px;
-  border-radius: 100px 100px 18px 18px;
-  background: linear-gradient(180deg, #ffffff 0%, #f5f4ef 100%);
   content: "";
-  box-shadow: -126px 138px 0 -84px rgba(248, 226, 202, 0.92);
+}
+
+.heroImage::before {
+  right: 9%;
+  bottom: 0;
+  width: 42%;
+  height: 70%;
+  border-radius: 192px 192px 0 0;
+  background: #ffffff;
 }
 
 .heroImage::after {
-  position: absolute;
-  right: 42px;
-  bottom: 54px;
-  left: 42px;
-  height: 102px;
-  border-radius: 70px;
-  background: rgba(255, 255, 255, 0.72);
-  content: "";
-  transform: rotate(-6deg);
+  right: 8%;
+  bottom: 15%;
+  width: 62%;
+  height: 22%;
+  border-radius: var(--radius-round);
+  background: rgba(255, 255, 255, 0.7);
+  transform: rotate(-5deg);
 }
 
 .heroImage span,
 .heroImage button {
   position: absolute;
+  z-index: 1;
   top: 14px;
   border-radius: var(--radius-control);
 }
@@ -56,7 +56,7 @@
 .heroImage span {
   left: 14px;
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-on-primary);
   padding: 7px 12px;
   font-weight: 800;
 }
@@ -76,32 +76,27 @@
   gap: 14px;
 }
 
-.thumbs span {
+.thumbButton {
   position: relative;
-  overflow: hidden;
+  display: grid;
+  place-items: center;
+  width: 100%;
   min-height: 110px;
+  border: 1px solid transparent;
   border-radius: var(--radius-card-small);
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(111, 141, 78, 0.12)),
-    linear-gradient(135deg, #d8c0a0 0%, #f3eadc 52%, #b9c69f 100%);
+  background: var(--color-soft);
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 800;
+  transition: border-color 0.18s ease, transform 0.18s ease;
 }
 
-.thumbs span::before {
-  position: absolute;
-  right: 18px;
-  bottom: 18px;
-  width: 58%;
-  height: 42%;
-  border-radius: 44px;
-  background: #ffffff;
-  content: "";
+.thumbButton:hover {
+  transform: translateY(-1px);
 }
 
-.thumbs span:nth-child(2),
-.thumbs span:nth-child(4) {
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(111, 141, 78, 0.08)),
-    linear-gradient(135deg, #bfaa8e 0%, #eadcc6 52%, #c9d6c3 100%);
+.thumbButton[data-active="true"] {
+  border-color: var(--color-primary);
 }
 
 .sideCard,
@@ -217,8 +212,8 @@
 
 .primaryButton {
   border: 0;
-  background: var(--color-primary);
-  color: #ffffff;
+  background: var(--gradient-primary);
+  color: var(--color-on-primary);
 }
 
 .outlineButton {
@@ -229,7 +224,13 @@
 
 .primaryButton:hover {
   background: var(--color-primary-hover);
+  color: var(--color-on-primary);
   box-shadow: 0 10px 20px rgba(111, 141, 78, 0.16);
+}
+
+.primaryButton:link,
+.primaryButton:visited {
+  color: var(--color-on-primary);
 }
 
 .outlineButton:hover {
@@ -315,15 +316,5 @@
 
   .prices > div {
     display: grid;
-  }
-
-  .heroImage::before {
-    right: 34px;
-    width: 170px;
-    height: 190px;
-  }
-
-  .heroImage::after {
-    left: 24px;
   }
 }
