@@ -38,4 +38,19 @@ export class SubscriptionsController {
   cancel(@CurrentUser() user: JwtUserPayload, @Param('id') id: string) {
     return this.subscriptionsService.cancel(user.sub, id);
   }
+
+  @Patch(':id/renew-now')
+  renewNow(@CurrentUser() user: JwtUserPayload, @Param('id') id: string) {
+    return this.subscriptionsService.renewNow(user.sub, id);
+  }
+
+  @Patch(':id/replace-card')
+  replaceCard(@CurrentUser() user: JwtUserPayload, @Param('id') id: string) {
+    return this.subscriptionsService.replaceCard(user.sub, id);
+  }
+
+  @Patch(':id/mock-payment-issue')
+  markPaymentIssue(@CurrentUser() user: JwtUserPayload, @Param('id') id: string) {
+    return this.subscriptionsService.markPaymentIssue(user.sub, id);
+  }
 }

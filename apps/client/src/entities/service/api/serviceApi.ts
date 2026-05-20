@@ -1,32 +1,39 @@
-﻿import { baseApi } from '@/shared/api/baseApi';
-import type { ServiceDto } from '../model/types';
-import { getMockServiceById, mockServices } from '../model/mock';
+import { baseApi } from '@/shared/api/baseApi';
+import type { ServiceCategoryDto, ServiceDto, ServicesPageDto, ServicesQuery } from '../model/types';
+
+const defaultServicesPage: ServicesPageDto = {
+  items: [],
+  page: 1,
+  limit: 12,
+  total: 0,
+  hasMore: false,
+};
 
 export const serviceApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getServices: builder.query<ServiceDto[], void>({
-      async queryFn(_arg, _api, _extraOptions, fetchWithBaseQuery) {
-        const result = await fetchWithBaseQuery('/services');
-        if (result.error) {
-          return { data: mockServices };
-        }
-
-        return { data: (result.data as ServiceDto[]) ?? mockServices };
-      },
+    getServices: builder.query<ServicesPageDto, ServicesQuery | void>({
+      query: (params) => ({ url: '/services', params: cleanParams(params ?? {}) }),
+      transformResponse: (response: ServicesPageDto | ServiceDto[]) =>
+        Array.isArray(response)
+          ? { ...defaultServicesPage, items: response, total: response.length, hasMore: false }
+          : response,
       providesTags: ['Services'],
     }),
     getService: builder.query<ServiceDto, string>({
-      async queryFn(id, _api, _extraOptions, fetchWithBaseQuery) {
-        const result = await fetchWithBaseQuery(`/services/${id}`);
-        if (result.error) {
-          return { data: getMockServiceById(id) ?? mockServices[0] };
-        }
-
-        return { data: (result.data as ServiceDto) ?? (getMockServiceById(id) ?? mockServices[0]) };
-      },
+      query: (id) => `/services/${id}`,
       providesTags: (_result, _error, id) => [{ type: 'Service', id }],
+    }),
+    getServiceCategories: builder.query<ServiceCategoryDto[], void>({
+      query: () => '/services/categories',
+      providesTags: ['Services'],
     }),
   }),
 });
 
-export const { useGetServiceQuery, useGetServicesQuery } = serviceApi;
+export const { useGetServiceCategoriesQuery, useGetServiceQuery, useGetServicesQuery } = serviceApi;
+
+function cleanParams(params: ServicesQuery) {
+  return Object.fromEntries(
+    Object.entries(params).filter(([, value]) => value !== undefined && value !== null && value !== ''),
+  );
+}

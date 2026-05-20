@@ -98,7 +98,7 @@ export function MainLayout() {
               </span>
               RelaxUp
             </p>
-            <p>Сеть wellness-клубов с заботой о вашем теле и ментальном здоровье. Работаем по системе подписки.</p>
+            <p>Wellness-клуб с подпиской на массаж, SPA и уходовые процедуры.</p>
           </div>
           <div>
             <h4>Клуб</h4>
@@ -108,12 +108,13 @@ export function MainLayout() {
           </div>
           <div>
             <h4>Услуги</h4>
-            <Link to={appRoutes.services()}>Массаж</Link>
-            <Link to={appRoutes.services()}>SPA-программы</Link>
-            <Link to={appRoutes.services()}>Уход за лицом</Link>
+            <Link to={appRoutes.services()}>Каталог</Link>
+            <Link to={`${appRoutes.services()}?category=spa-programs`}>SPA-программы</Link>
+            <Link to={`${appRoutes.services()}?category=face-care`}>Уход за лицом</Link>
           </div>
           <div>
-            <h4>Контакты</h4>
+            <h4>Документы</h4>
+            <Link to={appRoutes.legal()}>Юридический реестр</Link>
             <p>8 (800) 555-35-35</p>
             <p>hello@dlyasebya.ru</p>
           </div>

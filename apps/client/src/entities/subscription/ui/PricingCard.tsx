@@ -11,24 +11,20 @@ interface PricingCardProps {
 
 export function PricingCard({ item, actionSlot }: PricingCardProps) {
   return (
-    <article className={styles.card}>
+    <article className={styles.card} data-featured={item.isFeatured ? 'true' : undefined}>
       <div>
         <p className={styles.title}>{item.title}</p>
       </div>
       <div className={styles.priceRow}>
         <strong>{formatPrice(item.priceRub)}</strong>
-        <span>/ 30 дней</span>
+        <span>/ {item.periodDays} дней</span>
       </div>
       <ul className={styles.features}>
         {item.planMeta.features.map((feature) => (
           <li key={feature}>{feature}</li>
         ))}
       </ul>
-      {actionSlot ?? (
-        <Button fullWidth>
-          Выбрать тариф
-        </Button>
-      )}
+      {actionSlot ?? <Button fullWidth>Выбрать тариф</Button>}
     </article>
   );
 }

@@ -48,6 +48,21 @@
   font-weight: 800;
 }
 
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.warning {
+  display: block !important;
+  border: 1px solid var(--color-line-strong) !important;
+  border-radius: var(--radius-card-small);
+  background: var(--color-soft);
+  color: var(--color-text);
+  padding: 14px !important;
+}
+
 .error {
   margin: 0;
   border-radius: var(--radius-card-small);

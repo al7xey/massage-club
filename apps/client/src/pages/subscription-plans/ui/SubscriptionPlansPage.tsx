@@ -1,9 +1,8 @@
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { mockReviews } from '@/entities/review';
-import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
-import { PageShell } from '@/shared/ui/page-shell/PageShell';
+import { buildTariffs, useGetMembershipEntryFeeQuery, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
-import { repeatToLength } from '@/shared/lib/collection/repeatToLength';
+import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import { PlansCarousel } from '@/widgets/plans-carousel';
 import { ReviewsShowcase } from '@/widgets/reviews-showcase';
 import { ServiceShowcase } from '@/widgets/service-showcase';
@@ -12,35 +11,48 @@ import styles from './SubscriptionPlansPage.module.css';
 
 export function SubscriptionPlansPage() {
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
-  const { data: services = [] } = useGetServicesQuery();
+  const { data: entryFee } = useGetMembershipEntryFeeQuery();
+  const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
   const { data: studios = [] } = useGetStudiosQuery();
 
   const tariffs = buildTariffs(plans);
-  const popularServices = repeatToLength(services, 4).map((service, index) => createServiceCardModel(service, index));
+  const womenTariffs = tariffs.filter((item) => item.segment === 'women' || item.segment === 'family');
+  const menTariffs = tariffs.filter((item) => item.segment === 'men' || item.segment === 'family');
+  const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
+  const entryFeeText = entryFee?.entryFeeEnabled
+    ? `Вступительный взнос ${entryFee.entryFeeRub.toLocaleString('ru-RU')} ₽ действует при покупке первой подписки.`
+    : `Бессрочная акция: первый вступительный взнос ${entryFee?.entryFeeRub.toLocaleString('ru-RU') ?? '1 200'} ₽ сейчас 0 ₽.`;
 
   return (
     <PageShell
       title="Тарифы"
-      description="Выберите формат регулярного ухода и экономьте на процедурах при каждом посещении."
+      description="Выберите формат регулярного ухода: включенные услуги, скидки на каталог и заморозка подписки."
     >
-      <PlansCarousel title="Клубные подписки" items={tariffs} dotIdPrefix="plans-page" />
+      <PlansCarousel
+        title="Для женщин"
+        subtitle="Леди-планы для восстановления, ухода и мягкого ритма. Семейные тарифы тоже доступны здесь."
+        items={womenTariffs}
+        dotIdPrefix="plans-page-women"
+      />
+      <PlansCarousel
+        title="Для мужчин"
+        subtitle="Мистер-планы с акцентом на восстановление и силовой массаж. Семейные тарифы тоже доступны здесь."
+        items={menTariffs}
+        dotIdPrefix="plans-page-men"
+      />
 
       <section className={styles.promo}>
-        <span aria-hidden="true">□</span>
+        <span aria-hidden="true">%</span>
         <div>
-          <strong>Акция «Легкий старт»</strong>
-          <p>Вступительный взнос 1200 ₽ 0 ₽ при покупке первой подписки!</p>
+          <strong>Вступительный взнос</strong>
+          <p>{entryFeeText}</p>
         </div>
       </section>
 
-      <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={popularServices} />
+      {popularServices.length > 0 ? <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={popularServices} /> : null}
       <StudioShowcase title="Где пройти процедуру" studios={popularStudios} />
-      <ReviewsShowcase
-        title="Отзывы наших гостей"
-        subtitle="Честные мнения тех, кто уже попробовал"
-        reviews={mockReviews}
-      />
+      <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" reviews={mockReviews} />
     </PageShell>
   );
 }

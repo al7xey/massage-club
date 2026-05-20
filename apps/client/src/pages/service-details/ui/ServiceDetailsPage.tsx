@@ -5,7 +5,6 @@ import { useAddCartItemMutation } from '@/entities/cart';
 import { mockReviews } from '@/entities/review';
 import { createServiceCardModel, useGetServiceQuery, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
-import { repeatToLength } from '@/shared/lib/collection/repeatToLength';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import { appRoutes } from '@/shared/routes';
 import { Button, LinkButton } from '@/shared/ui';
@@ -23,17 +22,16 @@ export function ServiceDetailsPage() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [addCartItem] = useAddCartItemMutation();
   const { data: service } = useGetServiceQuery(id, { skip: !id });
-  const { data: services = [] } = useGetServicesQuery();
+  const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
   const { data: studios = [] } = useGetStudiosQuery();
 
-  const selected = service ?? services[0];
-  const similar = repeatToLength(services, 4).map((item, index) => createServiceCardModel(item, index));
-  const selectedPrice = selected?.priceRub ?? 3500;
+  const selected = service ?? servicesPage?.items[0];
+  const selectedPrice = selected?.priceRub ?? 0;
+  const similar = (servicesPage?.items ?? []).filter((item) => item.id !== selected?.id).map((item) => createServiceCardModel(item));
   const studioCards = studios.slice(0, 2).map(createStudioCardModel);
-  const title = selected?.title ?? 'Лимфодренажный массаж тела';
-  const description =
-    selected?.description ??
-    'Глубокая проработка тканей, направленная на стимуляцию движения лимфы, восстановление тонуса и снижение отечности.';
+  const title = selected?.title ?? 'Услуга';
+  const description = selected?.description ?? 'Описание услуги загружается из базы данных.';
+  const durationLabel = selected?.durationLabel?.trim() || `${selected?.durationMinutes ?? 0} мин`;
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -51,10 +49,7 @@ export function ServiceDetailsPage() {
   };
 
   const handleAddToCart = async () => {
-    if (!selected) {
-      return;
-    }
-
+    if (!selected) return;
     if (!user) {
       navigateToAuth('cart');
       return;
@@ -65,10 +60,7 @@ export function ServiceDetailsPage() {
   };
 
   const handleBook = async () => {
-    if (!selected) {
-      return;
-    }
-
+    if (!selected) return;
     if (!user) {
       navigateToAuth('book');
       return;
@@ -83,7 +75,7 @@ export function ServiceDetailsPage() {
       <section className={styles.top}>
         <div className={styles.gallery}>
           <div className={styles.heroImage}>
-            <span>Массаж</span>
+            <span>{selected?.category?.name ?? 'Услуга'}</span>
             <Button
               className={styles.favoriteButton}
               size="sm"
@@ -96,8 +88,8 @@ export function ServiceDetailsPage() {
             </Button>
           </div>
           <div className={styles.thumbs}>
-            {['Лимфодренаж', 'Расслабление', 'Восстановление', 'Уход'].map((label, index) => (
-              <div className={styles.thumbButton} key={label} data-active={index === 0 ? 'true' : undefined}>
+            {[selected?.category?.name ?? 'Категория', durationLabel, formatPrice(selectedPrice), 'RelaxUp'].map((label, index) => (
+              <div className={styles.thumbButton} key={`${label}-${index}`} data-active={index === 0 ? 'true' : undefined}>
                 <span>{label}</span>
               </div>
             ))}
@@ -107,13 +99,13 @@ export function ServiceDetailsPage() {
         <aside className={styles.sideCard}>
           <h2>Стоимость и запись</h2>
           <p className={styles.meta}>
-            <span>{selected?.durationMinutes ?? 60} минут</span>
-            <span>4.9 (48 отзывов)</span>
+            <span>{durationLabel}</span>
+            <span>{selected?.category?.name ?? 'Каталог RelaxUp'}</span>
           </p>
           <div className={styles.prices}>
             <PriceRow tone="base" title="Обычная запись" note="Без преимуществ клуба" price={selectedPrice} />
-            <PriceRow tone="club" title="С подпиской" note="Для резидентов клуба" price={Math.round(selectedPrice * 0.8)} badge="-20%" />
-            <PriceRow tone="super" title="С SUPER подпиской" note="Максимальная выгода" price={Math.round(selectedPrice * 0.7)} badge="-30%" />
+            <PriceRow tone="club" title="С тарифом 20%" note="ЛЕДИ, МИСТЕР или СЕМЕЙНЫЙ" price={Math.round(selectedPrice * 0.8)} badge="-20%" />
+            <PriceRow tone="super" title="С тарифом 30%" note="SUPER-тарифы" price={Math.round(selectedPrice * 0.7)} badge="-30%" />
           </div>
           <Button fullWidth onClick={() => void handleBook()}>
             Записаться
@@ -121,7 +113,7 @@ export function ServiceDetailsPage() {
           <Button fullWidth variant="secondary" onClick={() => void handleAddToCart()}>
             В корзину
           </Button>
-          <p className={styles.note}>Подписка позволяет экономить до 15 000 ₽ в месяц при регулярных посещениях.</p>
+          <p className={styles.note}>Клубная скидка применяется по активному тарифу. Включенные услуги списываются из подписки.</p>
         </aside>
       </section>
 
@@ -129,19 +121,27 @@ export function ServiceDetailsPage() {
         <div>
           <h2>Об услуге</h2>
           <p>{description}</p>
-          <ul className={styles.benefits}>
-            <li>Снимает мышечное напряжение</li>
-            <li>Улучшает лимфодренаж</li>
-            <li>Нормализует сон</li>
-            <li>Повышает упругость кожи</li>
-          </ul>
+          {selected?.composition ? (
+            <>
+              <h3>Состав / этапы</h3>
+              <ul className={styles.benefits}>
+                {selected.composition
+                  .split(';')
+                  .map((item) => item.trim())
+                  .filter(Boolean)
+                  .map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+              </ul>
+            </>
+          ) : null}
         </div>
         <aside className={styles.infoPanel}>
-          <h3>Полезно знать</h3>
+          <h3>Важно</h3>
           <ol>
-            <li>Рекомендуем не принимать пищу за 1.5 часа до начала сеанса.</li>
-            <li>Приходите за 10-15 минут, чтобы настроиться на процедуру.</li>
-            <li>После массажа пейте больше чистой воды для лучшего детокса.</li>
+            <li>Формулировки по противопоказаниям и эстетическим процедурам требуют юридической проверки.</li>
+            <li>Приходите за 10-15 минут до начала процедуры.</li>
+            <li>Итоговая длительность для SPA-программ показана как в исходном прайсе.</li>
           </ol>
         </aside>
       </section>
@@ -149,18 +149,14 @@ export function ServiceDetailsPage() {
       <section className={styles.giftBanner}>
         <div>
           <h2>Подарочные сертификаты</h2>
-          <p>Подарите заботу близким — от 1 000 ₽</p>
+          <p>Скидка на сертификаты зависит от тарифа: 10% или 20%.</p>
           <LinkButton to={appRoutes.certificates()}>Оформить сертификат</LinkButton>
         </div>
       </section>
 
-      <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={similar} />
+      {similar.length > 0 ? <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={similar} /> : null}
       <StudioShowcase title="Где пройти процедуру" studios={studioCards} />
-      <ReviewsShowcase
-        title="Отзывы наших гостей"
-        subtitle="Честные мнения тех, кто уже попробовал"
-        reviews={mockReviews}
-      />
+      <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" reviews={mockReviews} />
     </PageShell>
   );
 }

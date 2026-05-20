@@ -19,6 +19,26 @@ export class CreateServiceDto {
   @Min(15)
   durationMinutes: number;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  durationLabel?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  composition?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  externalSource?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  externalId?: string;
+
   @ApiProperty({ example: 4500 })
   @IsNumber()
   @Min(0)

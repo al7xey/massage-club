@@ -2,6 +2,7 @@ import type { PublicUserDto } from '@massage/shared';
 import type { AppointmentDto } from '@/entities/appointment';
 import type { GiftCertificateDto } from '@/entities/certificate';
 import type { ServiceDto } from '@/entities/service';
+import type { MembershipEntryFeeSettingDto, SubscriptionPlanDto } from '@/entities/subscription';
 import { baseApi } from '@/shared/api/baseApi';
 
 export interface AdminSummaryDto {
@@ -28,7 +29,9 @@ export interface AdminSubscriptionDto {
     name: string;
     code: string;
     monthlyPriceRub: number;
+    periodDays: number;
     discountPercent: number;
+    certificateDiscountPercent: number;
     includedCredits: number;
   };
 }
@@ -55,6 +58,18 @@ export const adminApi = baseApi.injectEndpoints({
       query: () => '/admin/subscriptions',
       providesTags: ['Admin'],
     }),
+    getAdminSubscriptionPlans: builder.query<SubscriptionPlanDto[], void>({
+      query: () => '/admin/subscription-plans',
+      providesTags: ['Admin', 'SubscriptionPlans'],
+    }),
+    getAdminMembershipEntryFee: builder.query<MembershipEntryFeeSettingDto, void>({
+      query: () => '/settings/membership-entry-fee',
+      providesTags: ['Settings'],
+    }),
+    updateAdminMembershipEntryFee: builder.mutation<MembershipEntryFeeSettingDto, Partial<MembershipEntryFeeSettingDto>>({
+      query: (body) => ({ url: '/admin/settings/membership-entry-fee', method: 'PATCH', body }),
+      invalidatesTags: ['Settings', 'Admin'],
+    }),
     getAdminGiftCertificates: builder.query<GiftCertificateDto[], void>({
       query: () => '/admin/gift-certificates',
       providesTags: ['Admin'],
@@ -66,7 +81,10 @@ export const {
   useGetAdminAppointmentsQuery,
   useGetAdminGiftCertificatesQuery,
   useGetAdminServicesQuery,
+  useGetAdminMembershipEntryFeeQuery,
+  useGetAdminSubscriptionPlansQuery,
   useGetAdminSubscriptionsQuery,
   useGetAdminSummaryQuery,
   useGetAdminUsersQuery,
+  useUpdateAdminMembershipEntryFeeMutation,
 } = adminApi;

@@ -1,4 +1,6 @@
-﻿import { Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { CreateGiftCertificateDto } from '../gift-certificates/dto/create-gift-certificate.dto';
@@ -21,10 +23,19 @@ import { UpdateSubscriptionPlanDto } from '../subscription-plans/dto/update-subs
 import { SubscriptionPlansService } from '../subscription-plans/subscription-plans.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { UsersService } from '../users/users.service';
+import { MembershipEntryFeeSettingDto, UpdateMembershipEntryFeeDto } from './dto/update-membership-entry-fee.dto';
+import { SystemSetting } from './entities/system-setting.entity';
+
+const membershipEntryFeeKey = 'membershipEntryFee';
+const defaultMembershipEntryFee: MembershipEntryFeeSettingDto = {
+  entryFeeRub: 1200,
+  entryFeeEnabled: false,
+};
 
 @Injectable()
 export class AdminService {
   constructor(
+    @InjectRepository(SystemSetting) private readonly settingsRepository: Repository<SystemSetting>,
     private readonly appointmentsService: AppointmentsService,
     private readonly usersService: UsersService,
     private readonly analyticsService: AnalyticsService,
@@ -47,6 +58,38 @@ export class AdminService {
 
   getAnalyticsSummary() {
     return this.analyticsService.getSummary();
+  }
+
+  async getMembershipEntryFee(): Promise<MembershipEntryFeeSettingDto> {
+    const setting = await this.settingsRepository.findOne({ where: { key: membershipEntryFeeKey } });
+    if (!setting || typeof setting.value !== 'object' || setting.value === null) {
+      return defaultMembershipEntryFee;
+    }
+
+    const value = setting.value as Partial<MembershipEntryFeeSettingDto>;
+    return {
+      entryFeeRub: typeof value.entryFeeRub === 'number' ? value.entryFeeRub : defaultMembershipEntryFee.entryFeeRub,
+      entryFeeEnabled:
+        typeof value.entryFeeEnabled === 'boolean' ? value.entryFeeEnabled : defaultMembershipEntryFee.entryFeeEnabled,
+    };
+  }
+
+  async updateMembershipEntryFee(dto: UpdateMembershipEntryFeeDto) {
+    const current = await this.getMembershipEntryFee();
+    const next: MembershipEntryFeeSettingDto = {
+      entryFeeRub: dto.entryFeeRub ?? current.entryFeeRub,
+      entryFeeEnabled: dto.entryFeeEnabled ?? current.entryFeeEnabled,
+    };
+    const existing = await this.settingsRepository.findOne({ where: { key: membershipEntryFeeKey } });
+
+    if (existing) {
+      existing.value = next;
+      await this.settingsRepository.save(existing);
+      return next;
+    }
+
+    await this.settingsRepository.save(this.settingsRepository.create({ key: membershipEntryFeeKey, value: next }));
+    return next;
   }
 
   getServices() {
@@ -153,4 +196,3 @@ export class AdminService {
     return this.giftCertificatesService.remove(id);
   }
 }
-

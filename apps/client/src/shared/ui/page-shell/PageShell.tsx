@@ -7,13 +7,12 @@ interface PageShellProps extends PropsWithChildren {
   actions?: ReactNode;
 }
 
-export function PageShell({ actions, title, description, children }: PageShellProps) {
+export function PageShell({ actions, title, children }: PageShellProps) {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
         <div>
           <h1 className={styles.title}>{title}</h1>
-          {description ? <p className={styles.description}>{description}</p> : null}
         </div>
         {actions ? <div className={styles.actions}>{actions}</div> : null}
       </header>

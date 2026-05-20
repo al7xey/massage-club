@@ -12,6 +12,7 @@
   register: () => '/register',
   certificates: () => '/certificates',
   contacts: () => '/contacts',
+  legal: () => '/legal',
   account: () => '/account',
   accountSubscription: () => '/account/subscription',
   accountAppointments: () => '/account/appointments',

@@ -17,11 +17,26 @@ export class SubscriptionPlan {
   @Column({ name: 'monthly_price_rub' })
   monthlyPriceRub: number;
 
+  @Column({ name: 'period_days', default: 30 })
+  periodDays: number;
+
   @Column({ name: 'discount_percent' })
   discountPercent: number;
 
+  @Column({ name: 'certificate_discount_percent', default: 0 })
+  certificateDiscountPercent: number;
+
   @Column({ name: 'included_credits' })
   includedCredits: number;
+
+  @Column({ name: 'included_description', type: 'text', nullable: true })
+  includedDescription?: string;
+
+  @Column({ name: 'freeze_count_per_year', default: 0 })
+  freezeCountPerYear: number;
+
+  @Column({ name: 'freeze_days', default: 0 })
+  freezeDays: number;
 
   @Column({ name: 'family_members_limit', default: 1 })
   familyMembersLimit: number;

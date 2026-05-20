@@ -18,6 +18,18 @@ export class Service {
   @Column({ name: 'duration_minutes' })
   durationMinutes: number;
 
+  @Column({ name: 'duration_label', nullable: true })
+  durationLabel?: string;
+
+  @Column({ type: 'text', nullable: true })
+  composition?: string;
+
+  @Column({ name: 'external_source', nullable: true })
+  externalSource?: string;
+
+  @Column({ name: 'external_id', nullable: true })
+  externalId?: string;
+
   @Column({ name: 'price_rub' })
   priceRub: number;
 

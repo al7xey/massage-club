@@ -13,6 +13,7 @@ import { UsersModule } from '../users/users.module';
 import { SystemSetting } from './entities/system-setting.entity';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
+import { SettingsController } from './settings.controller';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { AdminService } from './admin.service';
     GiftCertificatesModule,
     PaymentsModule,
   ],
-  controllers: [AdminController],
+  controllers: [AdminController, SettingsController],
   providers: [AdminService],
 })
 export class AdminModule {}

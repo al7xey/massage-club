@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { repeatToLength } from '@/shared/lib/collection/repeatToLength';
 import { EmptyState, TextField } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import { createMasterCardModel, MasterCard, useGetMastersQuery } from '@/entities/master';
@@ -8,13 +7,10 @@ import styles from './MastersPage.module.css';
 export function MastersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const { data = [], isLoading } = useGetMastersQuery();
-  const cards = useMemo(() => repeatToLength(data, 4).map((master, index) => createMasterCardModel(master, index)), [data]);
+  const cards = useMemo(() => data.map((master, index) => createMasterCardModel(master, index)), [data]);
   const visibleCards = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
-
-    if (normalizedQuery.length === 0) {
-      return cards;
-    }
+    if (!normalizedQuery) return cards;
 
     return cards.filter(
       (master) =>
@@ -27,12 +23,12 @@ export function MastersPage() {
   return (
     <PageShell
       title="Наши мастера"
-      description="Специалисты по массажу, SPA-ритуалам и восстановительным практикам для регулярной заботы о теле."
+      description="Стартовая команда мастеров массажа и SPA. Все мастера привязаны к полному каталогу услуг."
     >
       <section className={styles.toolbar}>
         <TextField
           label="Поиск"
-          placeholder="Найти мастера или специализацию"
+          placeholder="Найти мастера"
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
         />
@@ -41,12 +37,12 @@ export function MastersPage() {
 
       {isLoading ? <p className={styles.state}>Загрузка мастеров...</p> : null}
       {visibleCards.length === 0 && !isLoading ? (
-        <EmptyState title="Мастера не найдены" description="Попробуйте ввести другое имя или направление массажа." />
+        <EmptyState title="Мастера не найдены" description="Попробуйте ввести другое имя или направление." />
       ) : null}
 
       <section className={styles.grid}>
-        {visibleCards.map((master, index) => (
-          <MasterCard key={`${master.id}-${index}`} master={master} />
+        {visibleCards.map((master) => (
+          <MasterCard key={master.id} master={master} />
         ))}
       </section>
     </PageShell>

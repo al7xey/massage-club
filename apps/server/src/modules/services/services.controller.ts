@@ -1,5 +1,6 @@
-﻿import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { ServiceCatalogQueryDto } from './dto/service-catalog-query.dto';
 import { ServicesService } from './services.service';
 
 @ApiTags('Services')
@@ -8,8 +9,13 @@ export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
 
   @Get()
-  findAll() {
-    return this.servicesService.findAll();
+  findAll(@Query() query: ServiceCatalogQueryDto) {
+    return this.servicesService.findCatalog(query);
+  }
+
+  @Get('categories')
+  findCategories() {
+    return this.servicesService.findCategories();
   }
 
   @Get(':id')

@@ -74,6 +74,7 @@ export const baseApi = createApi({
     'Payments',
     'Service',
     'Services',
+    'Settings',
     'Studios',
     'SubscriptionPlans',
     'MySubscription',

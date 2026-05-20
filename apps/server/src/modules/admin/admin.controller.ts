@@ -17,6 +17,7 @@ import { UpdateStudioDto } from '../studios/dto/update-studio.dto';
 import { CreateSubscriptionPlanDto } from '../subscription-plans/dto/create-subscription-plan.dto';
 import { UpdateSubscriptionPlanDto } from '../subscription-plans/dto/update-subscription-plan.dto';
 import { AdminService } from './admin.service';
+import { UpdateMembershipEntryFeeDto } from './dto/update-membership-entry-fee.dto';
 
 @ApiTags('Admin')
 @ApiBearerAuth()
@@ -39,6 +40,11 @@ export class AdminController {
   @Get('analytics/summary')
   getAnalyticsSummary() {
     return this.adminService.getAnalyticsSummary();
+  }
+
+  @Patch('settings/membership-entry-fee')
+  updateMembershipEntryFee(@Body() dto: UpdateMembershipEntryFeeDto) {
+    return this.adminService.updateMembershipEntryFee(dto);
   }
 
   @Get('services')

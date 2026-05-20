@@ -5,8 +5,10 @@ import { User } from '../../users/entities/user.entity';
 export enum SubscriptionStatus {
   ACTIVE = 'ACTIVE',
   FROZEN = 'FROZEN',
-  CANCELLED = 'CANCELLED',
+  AUTO_RENEWAL_DISABLED = 'AUTO_RENEWAL_DISABLED',
+  PAYMENT_ISSUE = 'PAYMENT_ISSUE',
   EXPIRED = 'EXPIRED',
+  CANCELLED = 'CANCELLED',
 }
 
 @Entity('subscriptions')
@@ -33,6 +35,18 @@ export class Subscription {
 
   @Column({ name: 'frozen_until', type: 'timestamptz', nullable: true })
   frozenUntil?: Date;
+
+  @Column({ name: 'auto_renewal_enabled', default: true })
+  autoRenewalEnabled: boolean;
+
+  @Column({ name: 'grace_period_ends_at', type: 'timestamptz', nullable: true })
+  gracePeriodEndsAt?: Date;
+
+  @Column({ name: 'payment_issue_notified_at', type: 'timestamptz', nullable: true })
+  paymentIssueNotifiedAt?: Date;
+
+  @Column({ name: 'next_payment_retry_at', type: 'timestamptz', nullable: true })
+  nextPaymentRetryAt?: Date;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

@@ -9,7 +9,7 @@ export function AdminDashboardPage() {
   const { data: summary, isLoading } = useGetAdminSummaryQuery();
 
   return (
-    <PageShell title="Админ-панель" description="Операционное управление сетью, записями, клиентами и сертификатами.">
+    <PageShell title="Админ-панель" description="Операционное управление сетью, каталогом, тарифами и подписками.">
       <div className={styles.metrics}>
         <Metric title="Пользователи" value={isLoading ? '...' : String(summary?.users ?? 0)} />
         <Metric title="Активные подписки" value={isLoading ? '...' : String(summary?.activeSubscriptions ?? 0)} />
@@ -21,6 +21,7 @@ export function AdminDashboardPage() {
         <Link className={styles.card} to={appRoutes.adminSection('users')}>Пользователи</Link>
         <Link className={styles.card} to={appRoutes.adminSection('services')}>Услуги</Link>
         <Link className={styles.card} to={appRoutes.adminSection('subscriptions')}>Подписки</Link>
+        <Link className={styles.card} to={appRoutes.adminSection('settings')}>Тарифы и настройки</Link>
         <Link className={styles.card} to={appRoutes.adminSection('appointments')}>Записи</Link>
         <Link className={styles.card} to={appRoutes.adminSection('certificates')}>Сертификаты</Link>
       </div>

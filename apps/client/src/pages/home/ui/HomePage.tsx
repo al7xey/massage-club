@@ -2,7 +2,6 @@ import { createServiceCardModel, useGetServicesQuery } from '@/entities/service'
 import { mockReviews } from '@/entities/review';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
-import { repeatToLength } from '@/shared/lib/collection/repeatToLength';
 import { appRoutes } from '@/shared/routes';
 import { LinkButton } from '@/shared/ui';
 import { PlansCarousel } from '@/widgets/plans-carousel';
@@ -12,11 +11,11 @@ import { StudioShowcase } from '@/widgets/studio-showcase';
 import styles from './HomePage.module.css';
 
 export function HomePage() {
-  const { data: services = [] } = useGetServicesQuery();
+  const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
   const { data: studios = [] } = useGetStudiosQuery();
 
-  const popularServices = repeatToLength(services, 4).map((service, index) => createServiceCardModel(service, index));
+  const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
   const tariffs = buildTariffs(plans);
 
@@ -55,6 +54,11 @@ export function HomePage() {
         subtitle="Подписка — это не только выгода, но и дисциплина любви к себе."
         items={tariffs}
         dotIdPrefix="home-plans-page"
+        topAction={
+          <LinkButton to={appRoutes.subscriptions()} variant="secondary">
+            Смотреть все
+          </LinkButton>
+        }
       />
 
       <section className={styles.giftBanner}>

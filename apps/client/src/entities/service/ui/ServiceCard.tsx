@@ -25,11 +25,7 @@ export function ServiceCard({ isActionDisabled = false, onAddToCart, onBook, ser
           <span className={styles.category}>{service.categoryLabel}</span>
           <h3>{service.title}</h3>
           <div className={styles.priceRow}>
-            <div>
-              <span>{formatPrice(service.oldPriceRub)}</span>
-              <strong>{formatPrice(service.priceRub)}</strong>
-            </div>
-            <em>{service.clubLabel}</em>
+            <strong>{formatPrice(service.priceRub)}</strong>
           </div>
         </div>
       </Link>

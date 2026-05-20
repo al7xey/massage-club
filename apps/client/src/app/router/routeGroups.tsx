@@ -9,6 +9,7 @@ import { CertificatesPage } from '@/pages/certificates';
 import { ContactsPage } from '@/pages/contacts';
 import { HomePage } from '@/pages/home';
 import { LoginPage } from '@/pages/login';
+import { LegalDocumentsPage } from '@/pages/legal-documents';
 import { MastersPage } from '@/pages/masters';
 import { MyAppointmentsPage } from '@/pages/my-appointments';
 import { MyPaymentsPage } from '@/pages/my-payments';
@@ -34,6 +35,7 @@ export const publicRoutes: AppRouteConfig[] = [
   { path: 'register', element: <RegisterPage /> },
   { path: 'certificates', element: <CertificatesPage /> },
   { path: 'contacts', element: <ContactsPage /> },
+  { path: 'legal', element: <LegalDocumentsPage /> },
 ];
 
 export const accountRoutes: AppRouteConfig[] = [
