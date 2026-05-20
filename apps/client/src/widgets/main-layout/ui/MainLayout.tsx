@@ -1,5 +1,9 @@
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '@/features/auth';
+import { useGetCartQuery } from '@/entities/cart';
+import brandLogo from '@/shared/assets/brand-logo.jpg';
 import { appRoutes } from '@/shared/routes';
+import { LinkButton } from '@/shared/ui';
 import styles from './MainLayout.module.css';
 
 const links = [
@@ -11,29 +15,75 @@ const links = [
 ] as const;
 
 export function MainLayout() {
+  const location = useLocation();
+  const { isAuthLoading, user } = useAuth();
+  const { data: cartItems = [] } = useGetCartQuery(undefined, { skip: !user });
+  const logoRoute = user ? appRoutes.account() : appRoutes.home();
+  const accountInitial = (user?.fullName?.trim()?.[0] ?? 'Р').toUpperCase();
+  const authState = { backgroundLocation: location, from: location.pathname };
+
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <NavLink to={appRoutes.home()} className={styles.logo}>
-          <span aria-hidden="true">♡</span>
-          Для себя
-        </NavLink>
-
-        <nav className={styles.nav} aria-label="Основная навигация">
-          {links.map(([to, label]) => (
-            <NavLink key={to} to={to} className={({ isActive }) => (isActive ? styles.activeLink : undefined)}>
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className={styles.actions}>
-          <NavLink className={styles.login} to={appRoutes.auth()}>
-            Войти
+        <div className={styles.headerInner}>
+          <NavLink to={logoRoute} className={styles.logo}>
+            <span className={styles.brandMark} aria-hidden="true">
+              <img src={brandLogo} alt="" />
+            </span>
+            RelaxUp
           </NavLink>
-          <NavLink className={styles.primaryButton} to={appRoutes.booking()}>
-            Купить подписку
-          </NavLink>
+
+          <nav className={styles.nav} aria-label="Основная навигация">
+            {links.map(([to, label]) => (
+              <NavLink key={to} to={to} className={({ isActive }) => (isActive ? styles.activeLink : undefined)}>
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className={styles.actions}>
+            {!user && !isAuthLoading ? (
+              <>
+                <LinkButton state={authState} to={appRoutes.login()} variant="secondary" size="sm">
+                  Войти
+                </LinkButton>
+                <LinkButton to={appRoutes.subscriptions()} size="sm">
+                  Стать частью клуба
+                </LinkButton>
+              </>
+            ) : null}
+
+            {user ? (
+              <>
+                <LinkButton
+                  aria-label={`Корзина, товаров: ${cartItems.length}`}
+                  className={styles.iconButton}
+                  to={appRoutes.cart()}
+                  variant="secondary"
+                  size="sm"
+                >
+                  <span className={styles.cartIcon} aria-hidden="true" />
+                  <strong className={styles.cartBadge}>{cartItems.length}</strong>
+                </LinkButton>
+                {user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' ? (
+                  <LinkButton to={appRoutes.admin()} variant="secondary" size="sm">
+                    Админ-панель
+                  </LinkButton>
+                ) : null}
+                <LinkButton
+                  aria-label="Личный кабинет"
+                  className={styles.iconButton}
+                  to={appRoutes.account()}
+                  variant="secondary"
+                  size="sm"
+                >
+                  <span className={styles.avatar} aria-hidden="true">
+                    {accountInitial}
+                  </span>
+                </LinkButton>
+              </>
+            ) : null}
+          </div>
         </div>
       </header>
 
@@ -43,8 +93,10 @@ export function MainLayout() {
         <div className={styles.footerMain}>
           <div>
             <p className={styles.footerBrand}>
-              <span aria-hidden="true">♡</span>
-              Для себя
+              <span className={styles.brandMark} aria-hidden="true">
+                <img src={brandLogo} alt="" />
+              </span>
+              RelaxUp
             </p>
             <p>Сеть wellness-клубов с заботой о вашем теле и ментальном здоровье. Работаем по системе подписки.</p>
           </div>
@@ -64,17 +116,6 @@ export function MainLayout() {
             <h4>Контакты</h4>
             <p>8 (800) 555-35-35</p>
             <p>hello@dlyasebya.ru</p>
-            <Link to={appRoutes.contacts()} className={styles.socials} aria-label="Социальные сети">
-              <span>☆</span>
-              <span>□</span>
-            </Link>
-          </div>
-        </div>
-        <div className={styles.footerBottom}>
-          <span>© 2024 Dlya Sebya Wellness. Все права защищены.</span>
-          <div className={styles.footerPolicies}>
-            <Link to={appRoutes.contacts()}>Политика конфиденциальности</Link>
-            <Link to={appRoutes.certificates()}>Подарочные сертификаты</Link>
           </div>
         </div>
       </footer>

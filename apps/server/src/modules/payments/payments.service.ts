@@ -33,4 +33,15 @@ export class PaymentsService {
     }
     return payment;
   }
+
+  findMine(userId: string) {
+    return this.paymentsRepository.find({
+      where: { user: { id: userId } },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  findAll() {
+    return this.paymentsRepository.find({ order: { createdAt: 'DESC' } });
+  }
 }

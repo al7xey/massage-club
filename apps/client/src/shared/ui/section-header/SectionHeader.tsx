@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Button, LinkButton } from '@/shared/ui/button';
 import styles from './SectionHeader.module.css';
 
 interface SectionHeaderProps {
@@ -11,13 +11,13 @@ interface SectionHeaderProps {
 export function SectionHeader({ title, subtitle, actionLabel, actionHref }: SectionHeaderProps) {
   const action = actionLabel ? (
     actionHref ? (
-      <Link className={styles.button} to={actionHref}>
+      <LinkButton size="sm" to={actionHref} variant="secondary">
         {actionLabel}
-      </Link>
+      </LinkButton>
     ) : (
-      <button className={styles.button} type="button">
+      <Button size="sm" variant="secondary">
         {actionLabel}
-      </button>
+      </Button>
     )
   ) : null;
 

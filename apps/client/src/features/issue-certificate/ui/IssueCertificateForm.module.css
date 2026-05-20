@@ -8,9 +8,14 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 0 0 18px;
+  margin: 0;
   font-size: var(--font-h3);
   font-weight: 900;
+}
+
+.step {
+  display: grid;
+  gap: 18px;
 }
 
 .step h2 span {
@@ -25,6 +30,7 @@
 }
 
 .optionRow,
+.modeRow,
 .valueRow,
 .formRow,
 .totalMeta {
@@ -42,13 +48,19 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.modeRow {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .optionCard,
 .valueButton,
-.total {
+.total,
+.modeButton,
+.modeActive {
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
   background: #ffffff;
-  box-shadow: 0 8px 18px rgba(35, 38, 47, 0.05);
+  box-shadow: var(--shadow-card);
 }
 
 .optionCard {
@@ -80,10 +92,19 @@
   font-size: 14px;
 }
 
-.optionActive,
-.valueActive {
+.optionActive {
   border-color: var(--color-primary);
   background: var(--color-soft);
+}
+
+.valueActive {
+  border-color: var(--color-primary);
+  background: var(--gradient-primary);
+  color: var(--color-on-primary);
+}
+
+.valueActive:hover {
+  color: var(--color-on-primary);
 }
 
 .valueButton {
@@ -94,44 +115,29 @@
   transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
 }
 
-.input,
-.textarea {
-  width: 100%;
-  border: 1px solid var(--color-line);
-  background: #ffffff;
-  padding: 0 16px;
+.modeButton,
+.modeActive {
+  min-height: 48px;
+  cursor: pointer;
+  font-weight: 800;
 }
 
-.input {
-  min-height: var(--control-height);
-  border-radius: var(--radius-control);
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+.modeActive {
+  border-color: transparent;
+  background: var(--gradient-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-green);
 }
 
-.textarea {
-  min-height: 110px;
-  border-radius: var(--radius-card);
-  padding-top: 12px;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.form label > span {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--color-muted);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.input:focus,
-.textarea:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(111, 141, 78, 0.12);
-  outline: 0;
+.modeActive:hover {
+  color: var(--color-on-primary);
 }
 
 .total {
-  padding: 18px;
+  display: grid;
+  gap: 16px;
+  background: var(--gradient-surface);
+  padding: 24px;
 }
 
 .totalTop {
@@ -158,28 +164,10 @@
   font-size: 14px;
 }
 
-.payButton {
-  width: 100%;
-  min-height: 46px;
-  margin-top: 16px;
-  border: 0;
-  border-radius: var(--radius-control);
-  background: var(--color-primary);
-  color: #ffffff;
-  cursor: pointer;
-  font-weight: 900;
-  transition: background-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.payButton:hover {
-  background: var(--color-primary-hover);
-  box-shadow: 0 10px 20px rgba(111, 141, 78, 0.16);
-}
-
 .error,
 .success {
-  margin: 14px 0 0;
-  border-radius: var(--radius-card);
+  margin: 0;
+  border-radius: var(--radius-card-small);
   padding: 10px 12px;
   font-size: 14px;
   font-weight: 800;

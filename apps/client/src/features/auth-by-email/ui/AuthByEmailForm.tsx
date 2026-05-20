@@ -1,10 +1,12 @@
 import { FormEvent, useState } from 'react';
 import { tokenStorage } from '@/shared/lib/storage/tokenStorage';
+import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
+import { Button, TextField } from '@/shared/ui';
 import { useLoginMutation } from '../api/authByEmailApi';
 import styles from './AuthByEmailForm.module.css';
 
 export function AuthByEmailForm() {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [login, { isLoading }] = useLoginMutation();
@@ -12,39 +14,37 @@ export function AuthByEmailForm() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!email.trim() || !password.trim()) {
-      setError('Введите email и пароль');
-      return;
-    }
-
-    if (!email.includes('@')) {
-      setError('Введите корректный email');
+    if (!identifier.trim() || !password.trim()) {
+      setError('Введите почту или телефон и пароль');
       return;
     }
 
     try {
-      const response = await login({ email, password }).unwrap();
-      tokenStorage.setAccessToken(response.accessToken);
+      const response = await login({ identifier, password }).unwrap();
+      tokenStorage.setTokens({
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken,
+      });
       setError('');
-    } catch {
-      setError('Не удалось войти. Проверьте данные или попробуйте позже.');
+    } catch (submitError) {
+      setError(getApiErrorMessage(submitError, 'Не удалось войти. Проверьте данные и попробуйте позже.'));
     }
   };
 
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
-      <input
-        className={styles.input}
-        type="email"
-        placeholder="email@example.com"
-        value={email}
+      <TextField
+        label="Почта или телефон"
+        type="text"
+        placeholder="email@example.com или +7..."
+        value={identifier}
         onChange={(event) => {
-          setEmail(event.target.value);
+          setIdentifier(event.target.value);
           setError('');
         }}
       />
-      <input
-        className={styles.input}
+      <TextField
+        label="Пароль"
         type="password"
         placeholder="Пароль"
         value={password}
@@ -54,9 +54,9 @@ export function AuthByEmailForm() {
         }}
       />
       {error ? <p className={styles.error}>{error}</p> : null}
-      <button className={styles.button} type="submit" disabled={isLoading}>
-        {isLoading ? 'Входим...' : 'Войти'}
-      </button>
+      <Button fullWidth isLoading={isLoading} loadingText="Входим..." type="submit">
+        Войти
+      </Button>
     </form>
   );
 }

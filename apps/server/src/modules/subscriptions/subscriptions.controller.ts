@@ -24,6 +24,11 @@ export class SubscriptionsController {
     return this.subscriptionsService.findMine(user.sub);
   }
 
+  @Get('me/active')
+  findActive(@CurrentUser() user: JwtUserPayload) {
+    return this.subscriptionsService.findActive(user.sub);
+  }
+
   @Patch(':id/freeze')
   freeze(@CurrentUser() user: JwtUserPayload, @Param('id') id: string, @Body() dto: FreezeSubscriptionDto) {
     return this.subscriptionsService.freeze(user.sub, id, dto);

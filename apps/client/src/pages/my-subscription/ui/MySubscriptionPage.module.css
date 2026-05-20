@@ -1,7 +1,68 @@
 .card {
+  display: grid;
+  gap: 20px;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
-  background: #ffffff;
+  background: var(--gradient-surface);
   box-shadow: var(--shadow-card);
-  padding: 18px;
+  padding: 28px;
+}
+
+.statList {
+  display: grid;
+  gap: 14px;
+}
+
+.statList h2 {
+  margin: 0;
+}
+
+.statList p {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  border-top: 1px solid var(--color-line);
+  margin: 0;
+  padding-top: 14px;
+}
+
+.statList p:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.statList span,
+.empty {
+  color: var(--color-muted);
+}
+
+.actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-height);
+  border-radius: var(--radius-control);
+  background: var(--gradient-primary);
+  color: var(--color-on-primary);
+  padding: 0 18px;
+  font-weight: 800;
+}
+
+.error {
+  margin: 0;
+  border-radius: var(--radius-card-small);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  padding: 12px 14px;
+  font-weight: 800;
+}
+
+@media (max-width: 560px) {
+  .card {
+    padding: 22px;
+  }
+
+  .statList p {
+    flex-direction: column;
+  }
 }

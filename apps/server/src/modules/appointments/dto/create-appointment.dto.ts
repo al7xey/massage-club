@@ -1,5 +1,5 @@
 ﻿import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateAppointmentDto {
   @ApiProperty()
@@ -22,4 +22,9 @@ export class CreateAppointmentDto {
   @IsOptional()
   @IsString()
   note?: string;
+
+  @ApiPropertyOptional({ description: 'Use one included visit from active subscription instead of mock cash payment.' })
+  @IsOptional()
+  @IsBoolean()
+  useSubscriptionCredit?: boolean;
 }

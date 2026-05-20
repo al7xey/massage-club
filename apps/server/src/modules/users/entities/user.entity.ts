@@ -1,4 +1,4 @@
-﻿import { UserRole } from '@massage/shared';
+import { UserRole } from '@massage/shared';
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('users')
@@ -6,20 +6,17 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
-  email: string;
+  @Column({ type: 'text', unique: true, nullable: true })
+  email?: string | null;
 
   @Column({ name: 'password_hash' })
   passwordHash: string;
 
-  @Column({ name: 'first_name' })
-  firstName: string;
+  @Column({ name: 'full_name', type: 'text', default: '' })
+  fullName: string;
 
-  @Column({ name: 'last_name' })
-  lastName: string;
-
-  @Column({ nullable: true })
-  phone?: string;
+  @Column({ type: 'text', nullable: true, unique: true })
+  phone?: string | null;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.CLIENT })
   role: UserRole;

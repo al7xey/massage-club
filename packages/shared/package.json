@@ -8,6 +8,12 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./lib/subscription-benefits": {
+      "types": "./dist/lib/subscription-benefits.d.ts",
+      "import": "./src/lib/subscription-benefits.ts",
+      "require": "./dist/lib/subscription-benefits.js",
+      "default": "./dist/lib/subscription-benefits.js"
     }
   },
   "scripts": {

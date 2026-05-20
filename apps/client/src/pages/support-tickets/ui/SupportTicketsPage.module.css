@@ -1,7 +1,80 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: var(--grid-gap);
+}
+
 .card {
+  display: grid;
+  gap: 18px;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
-  background: #ffffff;
+  background: var(--gradient-surface);
   box-shadow: var(--shadow-card);
-  padding: 18px;
+  padding: 28px;
+}
+
+.card h2 {
+  margin: 0;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.ticket {
+  border-top: 1px solid var(--color-line);
+  padding-top: 12px;
+}
+
+.ticket:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.ticket p,
+.ticket small {
+  margin: 8px 0 0;
+}
+
+.ticketMeta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.empty {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.error,
+.success {
+  margin: 0;
+  border-radius: var(--radius-card-small);
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.success {
+  background: var(--color-soft);
+  color: var(--color-primary-hover);
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 22px;
+  }
 }

@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { formatPrice } from '@/shared/lib/currency/formatPrice';
-import { repeatToLength } from '@/shared/lib/collection/repeatToLength';
-import { appRoutes } from '@/shared/routes';
-import { PageShell } from '@/shared/ui/page-shell/PageShell';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@/features/auth';
+import { useAddCartItemMutation } from '@/entities/cart';
 import { mockReviews } from '@/entities/review';
 import { createServiceCardModel, useGetServiceQuery, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
+import { repeatToLength } from '@/shared/lib/collection/repeatToLength';
+import { formatPrice } from '@/shared/lib/currency/formatPrice';
+import { appRoutes } from '@/shared/routes';
+import { Button, LinkButton } from '@/shared/ui';
+import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import { ReviewsShowcase } from '@/widgets/reviews-showcase';
 import { ServiceShowcase } from '@/widgets/service-showcase';
 import { StudioShowcase } from '@/widgets/studio-showcase';
@@ -14,7 +17,11 @@ import styles from './ServiceDetailsPage.module.css';
 
 export function ServiceDetailsPage() {
   const { id = '' } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [addCartItem] = useAddCartItemMutation();
   const { data: service } = useGetServiceQuery(id, { skip: !id });
   const { data: services = [] } = useGetServicesQuery();
   const { data: studios = [] } = useGetStudiosQuery();
@@ -32,18 +39,68 @@ export function ServiceDetailsPage() {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [id]);
 
+  const navigateToAuth = (action: 'book' | 'cart') => {
+    navigate(appRoutes.login(), {
+      state: {
+        action,
+        backgroundLocation: location,
+        from: appRoutes.serviceDetails(id),
+        serviceId: selected?.id ?? id,
+      },
+    });
+  };
+
+  const handleAddToCart = async () => {
+    if (!selected) {
+      return;
+    }
+
+    if (!user) {
+      navigateToAuth('cart');
+      return;
+    }
+
+    await addCartItem({ serviceId: selected.id }).unwrap();
+    navigate(appRoutes.cart());
+  };
+
+  const handleBook = async () => {
+    if (!selected) {
+      return;
+    }
+
+    if (!user) {
+      navigateToAuth('book');
+      return;
+    }
+
+    await addCartItem({ serviceId: selected.id }).unwrap();
+    navigate(`${appRoutes.booking()}?serviceId=${selected.id}`);
+  };
+
   return (
     <PageShell title={title} description={description}>
       <section className={styles.top}>
         <div className={styles.gallery}>
           <div className={styles.heroImage}>
             <span>Массаж</span>
-            <button type="button" aria-pressed={isFavorite} aria-label="Добавить в избранное" onClick={() => setIsFavorite((value) => !value)}>
+            <Button
+              className={styles.favoriteButton}
+              size="sm"
+              variant="ghost"
+              aria-pressed={isFavorite}
+              aria-label={isFavorite ? 'Убрать из избранного' : 'Добавить в избранное'}
+              onClick={() => setIsFavorite((value) => !value)}
+            >
               {isFavorite ? '♥' : '♡'}
-            </button>
+            </Button>
           </div>
           <div className={styles.thumbs}>
-            <span /><span /><span /><span />
+            {['Лимфодренаж', 'Расслабление', 'Восстановление', 'Уход'].map((label, index) => (
+              <div className={styles.thumbButton} key={label} data-active={index === 0 ? 'true' : undefined}>
+                <span>{label}</span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -58,8 +115,12 @@ export function ServiceDetailsPage() {
             <PriceRow tone="club" title="С подпиской" note="Для резидентов клуба" price={Math.round(selectedPrice * 0.8)} badge="-20%" />
             <PriceRow tone="super" title="С SUPER подпиской" note="Максимальная выгода" price={Math.round(selectedPrice * 0.7)} badge="-30%" />
           </div>
-          <Link className={styles.primaryButton} to={appRoutes.booking()}>Записаться на сеанс</Link>
-          <Link className={styles.outlineButton} to={appRoutes.subscriptions()}>Получить выгоду с подпиской</Link>
+          <Button fullWidth onClick={() => void handleBook()}>
+            Записаться
+          </Button>
+          <Button fullWidth variant="secondary" onClick={() => void handleAddToCart()}>
+            В корзину
+          </Button>
           <p className={styles.note}>Подписка позволяет экономить до 15 000 ₽ в месяц при регулярных посещениях.</p>
         </aside>
       </section>
@@ -88,8 +149,8 @@ export function ServiceDetailsPage() {
       <section className={styles.giftBanner}>
         <div>
           <h2>Подарочные сертификаты</h2>
-          <p>Подарите заботу близким — от 2 000 ₽</p>
-          <Link className={styles.primaryButton} to={appRoutes.certificates()}>Оформить сертификат</Link>
+          <p>Подарите заботу близким — от 1 000 ₽</p>
+          <LinkButton to={appRoutes.certificates()}>Оформить сертификат</LinkButton>
         </div>
       </section>
 

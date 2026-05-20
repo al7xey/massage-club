@@ -1,10 +1,6 @@
-﻿import { PageShell } from '@/shared/ui/page-shell/PageShell';
-import { AuthByEmailForm } from '@/features/auth-by-email';
+import { Navigate } from 'react-router-dom';
+import { appRoutes } from '@/shared/routes';
 
 export function AuthPage() {
-  return (
-    <PageShell title="Вход и регистрация" description="Базовая страница авторизации клиента и администратора.">
-      <AuthByEmailForm />
-    </PageShell>
-  );
+  return <Navigate to={appRoutes.login()} replace />;
 }

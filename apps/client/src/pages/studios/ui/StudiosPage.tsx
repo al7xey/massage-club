@@ -1,19 +1,15 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { repeatToLength } from '@/shared/lib/collection/repeatToLength';
 import { appRoutes } from '@/shared/routes';
+import { Button, EmptyState, LinkButton, TextField } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import styles from './StudiosPage.module.css';
-
-const mapUrl =
-  'https://yandex.ru/map-widget/v1/?ll=48.040900%2C46.349200&mode=search&oid=0&ol=biz&pt=48.040900%2C46.349200%2Cpm2grm&text=%D0%90%D1%81%D1%82%D1%80%D0%B0%D1%85%D0%B0%D0%BD%D1%8C%20%D0%BC%D0%B0%D1%81%D1%81%D0%B0%D0%B6&z=13';
 
 export function StudiosPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudioId, setSelectedStudioId] = useState<string | null>(null);
   const { data = [] } = useGetStudiosQuery();
-  const list = useMemo(() => repeatToLength(data, 2).map(createStudioCardModel), [data]);
+  const list = useMemo(() => data.map(createStudioCardModel), [data]);
   const visibleStudios = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
@@ -29,6 +25,7 @@ export function StudiosPage() {
     );
   }, [list, searchQuery]);
   const selectedStudio = visibleStudios.find((studio) => studio.id === selectedStudioId) ?? visibleStudios[0];
+  const mapUrl = useMemo(() => buildMapUrl(visibleStudios, selectedStudio?.id), [selectedStudio?.id, visibleStudios]);
 
   return (
     <PageShell title="Наши студии" description="Выберите ближайший филиал для записи и регулярного посещения клуба.">
@@ -36,8 +33,8 @@ export function StudiosPage() {
         <aside className={styles.sidebar}>
           <h2>Филиалы</h2>
           <p>Поиск по названию, району или адресу</p>
-          <input
-            className={styles.input}
+          <TextField
+            label="Поиск"
             placeholder="Поиск по адресу или названию"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
@@ -54,9 +51,9 @@ export function StudiosPage() {
                   <p>{studio.address}</p>
                   <p>{studio.openLabel}</p>
                   <p>{studio.phone}</p>
-                  <button className={styles.primaryButton} type="button" onClick={() => setSelectedStudioId(studio.id)}>
+                  <Button fullWidth size="sm" onClick={() => setSelectedStudioId(studio.id)}>
                     {isSelected ? 'Выбрана' : 'Выбрать студию'}
-                  </button>
+                  </Button>
                 </article>
               );
             })}
@@ -79,18 +76,33 @@ export function StudiosPage() {
                 <p>{selectedStudio.address}</p>
                 <p>{selectedStudio.openLabel}</p>
               </div>
-              <Link className={styles.primaryButton} to={appRoutes.booking()}>
+              <LinkButton to={appRoutes.booking()}>
                 Записаться
-              </Link>
+              </LinkButton>
             </div>
           ) : (
-            <div className={styles.empty}>
-              <h2>Студии не найдены</h2>
-              <p>Попробуйте изменить запрос.</p>
-            </div>
+            <EmptyState title="Студии не найдены" description="Попробуйте изменить запрос." />
           )}
         </div>
       </section>
     </PageShell>
   );
+}
+
+function buildMapUrl(studios: ReturnType<typeof createStudioCardModel>[], selectedId?: string) {
+  const points = studios
+    .map((studio) => {
+      const marker = studio.id === selectedId ? 'pm2gnm' : 'pm2grm';
+      return `${studio.coordinates.lon},${studio.coordinates.lat},${marker}`;
+    })
+    .join('~');
+  const center = studios[0]?.coordinates ?? { lat: 46.3492, lon: 48.0409 };
+  const params = new URLSearchParams({
+    ll: `${center.lon},${center.lat}`,
+    mode: 'usermaps',
+    pt: points,
+    z: '13',
+  });
+
+  return `https://yandex.ru/map-widget/v1/?${params.toString()}`;
 }

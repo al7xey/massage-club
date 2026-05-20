@@ -1,7 +1,7 @@
 .page {
   width: var(--container-page);
   margin: 0 auto;
-  padding: 64px 0 96px;
+  padding: 64px 0 48px;
 }
 
 .hero {
@@ -47,43 +47,43 @@
   overflow: hidden;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(111, 141, 78, 0.12)),
-    linear-gradient(135deg, #bea485 0%, #f3e9d8 45%, #bfd7d0 100%);
+  background: var(--color-soft-strong);
   box-shadow: var(--shadow-card);
 }
 
-.heroMedia::before {
+.heroMedia::before,
+.heroMedia::after {
   position: absolute;
-  right: 48px;
-  bottom: 24px;
+  content: "";
+}
+
+.heroMedia::before {
+  right: 52px;
+  bottom: 0;
   width: 230px;
   height: 280px;
-  border-radius: 150px 150px 0 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f5f4ef 100%);
-  content: "";
-  box-shadow: -118px 132px 0 -76px rgba(244, 222, 199, 0.95);
+  border-radius: 180px 180px 0 0;
+  background: #ffffff;
 }
 
 .heroMedia::after {
-  position: absolute;
-  right: 34px;
-  bottom: 54px;
-  width: 340px;
-  height: 112px;
-  border-radius: 70px;
-  background: rgba(255, 255, 255, 0.76);
-  content: "";
+  right: 38px;
+  bottom: 58px;
+  width: 330px;
+  height: 100px;
+  border-radius: 88px;
+  background: rgba(255, 255, 255, 0.72);
   transform: rotate(-6deg);
 }
 
 .heroBadge {
   position: absolute;
+  z-index: 1;
   bottom: 34px;
   left: 28px;
   display: grid;
   gap: 4px;
-  border-radius: 8px;
+  border-radius: var(--radius-card-small);
   background: #ffffff;
   padding: 14px 18px;
   box-shadow: var(--shadow-card);
@@ -100,44 +100,6 @@
   font-size: 12px;
 }
 
-.primaryButton,
-.outlineButton,
-.whiteButton {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-control);
-  padding: 0 28px;
-  font-size: 13px;
-  font-weight: 800;
-  transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
-}
-
-.primaryButton {
-  border: 0;
-  background: var(--color-primary);
-  color: #ffffff;
-}
-
-.primaryButton:hover {
-  background: var(--color-primary-hover);
-  box-shadow: 0 12px 22px rgba(111, 141, 78, 0.2);
-  transform: translateY(-1px);
-}
-
-.outlineButton,
-.whiteButton {
-  border: 1px solid var(--color-primary);
-  background: #ffffff;
-  color: var(--color-primary);
-}
-
-.outlineButton:hover,
-.whiteButton:hover {
-  background: var(--color-soft);
-}
-
 .giftBanner {
   position: relative;
   display: grid;
@@ -145,7 +107,7 @@
   place-items: center start;
   margin-top: 72px;
   overflow: hidden;
-  border-radius: var(--radius-card);
+  border-radius: var(--radius-card-large);
   background: var(--color-soft);
   padding: 54px 70px;
 }
@@ -162,7 +124,7 @@
   bottom: 52px;
   width: 156px;
   height: 132px;
-  border-radius: 14px;
+  border-radius: var(--radius-card-small);
   transform: rotate(12deg);
 }
 
@@ -192,26 +154,45 @@
 }
 
 .cta {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 28px;
-  min-height: 280px;
   margin-top: var(--section-gap);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-  background: var(--color-soft);
-  color: var(--color-text);
-  text-align: center;
+  border-radius: var(--radius-card-large);
+  background: var(--gradient-primary);
+  color: var(--color-on-primary);
+  padding: 38px 48px;
+  text-align: left;
 }
 
 .cta h2 {
-  max-width: 520px;
-  font-size: var(--font-h2);
+  max-width: 620px;
+  color: var(--color-on-primary);
+  font-size: 26px;
+  line-height: 1.22;
 }
 
 .whiteButton {
-  border: 0;
+  border-color: transparent;
+  background: #ffffff;
+  color: var(--color-primary);
   box-shadow: var(--shadow-card);
+}
+
+.whiteButton:link,
+.whiteButton:visited {
+  color: var(--color-primary);
+}
+
+.cta .whiteButton {
+  flex: 0 0 auto;
+  min-width: 220px;
+}
+
+.whiteButton:hover {
+  background: var(--color-soft);
+  color: var(--color-primary-hover);
 }
 
 @media (max-width: 920px) {
@@ -226,16 +207,6 @@
 
   .heroBadge {
     left: 18px;
-  }
-
-  .heroMedia::before {
-    right: 28px;
-    width: 230px;
-    height: 280px;
-  }
-
-  .heroMedia::after {
-    width: 280px;
   }
 }
 
@@ -257,8 +228,6 @@
     gap: 10px;
   }
 
-  .primaryButton,
-  .outlineButton,
   .whiteButton {
     min-height: 42px;
     padding-inline: 22px;
@@ -271,5 +240,21 @@
   .giftBanner::before,
   .giftBanner::after {
     opacity: 0.35;
+  }
+
+  .cta {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 30px 24px;
+  }
+
+  .cta h2 {
+    max-width: none;
+    font-size: 23px;
+  }
+
+  .cta .whiteButton {
+    width: 100%;
+    min-width: 0;
   }
 }

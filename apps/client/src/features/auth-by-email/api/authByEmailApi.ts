@@ -1,15 +1,16 @@
-﻿import type { AuthResponseDto } from '@massage/shared';
+import type { AuthResponseDto } from '@massage/shared';
 import { baseApi } from '@/shared/api/baseApi';
 
 export interface LoginRequest {
-  email: string;
+  identifier: string;
   password: string;
 }
 
-export interface RegisterRequest extends LoginRequest {
-  firstName: string;
-  lastName: string;
+export interface RegisterRequest {
+  fullName: string;
+  email?: string;
   phone?: string;
+  password: string;
 }
 
 export const authByEmailApi = baseApi.injectEndpoints({

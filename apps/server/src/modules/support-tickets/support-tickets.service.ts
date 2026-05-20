@@ -20,4 +20,11 @@ export class SupportTicketsService {
   findAll() {
     return this.ticketsRepository.find({ order: { createdAt: 'DESC' } });
   }
+
+  findMine(userId: string) {
+    return this.ticketsRepository.find({
+      where: { user: { id: userId } },
+      order: { createdAt: 'DESC' },
+    });
+  }
 }

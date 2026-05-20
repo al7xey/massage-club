@@ -1,10 +1,15 @@
-﻿import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
 export enum GiftCertificateStatus {
   ACTIVE = 'ACTIVE',
   REDEEMED = 'REDEEMED',
   EXPIRED = 'EXPIRED',
+}
+
+export enum GiftCertificateFormat {
+  EMAIL = 'EMAIL',
+  PAPER = 'PAPER',
 }
 
 @Entity('gift_certificates')
@@ -22,8 +27,17 @@ export class GiftCertificate {
   @Column({ name: 'recipient_name' })
   recipientName: string;
 
+  @Column({ name: 'recipient_contact', nullable: true })
+  recipientContact?: string;
+
+  @Column({ type: 'enum', enum: GiftCertificateFormat, default: GiftCertificateFormat.EMAIL })
+  format: GiftCertificateFormat;
+
   @Column({ name: 'amount_rub' })
   amountRub: number;
+
+  @Column({ type: 'text', nullable: true })
+  message?: string;
 
   @Column({ type: 'enum', enum: GiftCertificateStatus, default: GiftCertificateStatus.ACTIVE })
   status: GiftCertificateStatus;

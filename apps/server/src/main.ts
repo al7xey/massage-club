@@ -9,10 +9,18 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   const apiPrefix = configService.get<string>('API_PREFIX', 'api');
+  const allowedOrigins = resolveCorsOrigins(configService.get<string>('CORS_ORIGIN'));
 
   app.setGlobalPrefix(apiPrefix);
   app.enableCors({
-    origin: configService.get<string>('CORS_ORIGIN', 'http://localhost:5173'),
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Origin "${origin}" is not allowed by CORS`), false);
+    },
     credentials: true,
   });
   app.useGlobalPipes(
@@ -38,3 +46,13 @@ async function bootstrap() {
 }
 
 void bootstrap();
+
+function resolveCorsOrigins(configValue?: string) {
+  const defaultOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://[::1]:5173'];
+  const configuredOrigins = (configValue ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  return Array.from(new Set([...defaultOrigins, ...configuredOrigins]));
+}

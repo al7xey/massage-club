@@ -126,6 +126,11 @@ export class AdminController {
     return this.adminService.getSubscriptionPlans();
   }
 
+  @Get('subscriptions')
+  getSubscriptions() {
+    return this.adminService.getSubscriptions();
+  }
+
   @Post('subscription-plans')
   createSubscriptionPlan(@Body() dto: CreateSubscriptionPlanDto) {
     return this.adminService.createSubscriptionPlan(dto);
@@ -144,6 +149,11 @@ export class AdminController {
   @Get('gift-certificates')
   getGiftCertificates() {
     return this.adminService.getGiftCertificates();
+  }
+
+  @Get('payments')
+  getPayments() {
+    return this.adminService.getPayments();
   }
 
   @Post('gift-certificates')
