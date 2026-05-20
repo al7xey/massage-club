@@ -2,6 +2,7 @@ import { createServiceCardModel, useGetServicesQuery } from '@/entities/service'
 import { mockReviews } from '@/entities/review';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
+import { repeatToLength } from '@/shared/lib/collection/repeatToLength';
 import { appRoutes } from '@/shared/routes';
 import { LinkButton } from '@/shared/ui';
 import { PlansCarousel } from '@/widgets/plans-carousel';
@@ -15,7 +16,7 @@ export function HomePage() {
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
   const { data: studios = [] } = useGetStudiosQuery();
 
-  const popularServices = services.slice(0, 3).map((service, index) => createServiceCardModel(service, index));
+  const popularServices = repeatToLength(services, 4).map((service, index) => createServiceCardModel(service, index));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
   const tariffs = buildTariffs(plans);
 

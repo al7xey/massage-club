@@ -1,6 +1,7 @@
 import { PropsWithChildren, useEffect, useId, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Location } from 'react-router-dom';
+import brandLogo from '@/shared/assets/brand-logo.jpg';
 import { appRoutes } from '@/shared/routes';
 import styles from './AuthForm.module.css';
 
@@ -72,7 +73,9 @@ export function AuthModal({ children, description, mode, title }: AuthModalProps
       >
         <div className={styles.modalHeader}>
           <div className={styles.modalBrand}>
-            <span aria-hidden="true">♥</span>
+            <span className={styles.brandMark} aria-hidden="true">
+              <img src={brandLogo} alt="" />
+            </span>
             RelaxUp
           </div>
           <button ref={closeButtonRef} aria-label="Закрыть" className={styles.closeButton} onClick={closeModal} type="button">

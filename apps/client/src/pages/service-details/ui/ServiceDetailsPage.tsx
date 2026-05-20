@@ -27,7 +27,7 @@ export function ServiceDetailsPage() {
   const { data: studios = [] } = useGetStudiosQuery();
 
   const selected = service ?? services[0];
-  const similar = repeatToLength(services, 3).map((item, index) => createServiceCardModel(item, index));
+  const similar = repeatToLength(services, 4).map((item, index) => createServiceCardModel(item, index));
   const selectedPrice = selected?.priceRub ?? 3500;
   const studioCards = studios.slice(0, 2).map(createStudioCardModel);
   const title = selected?.title ?? 'Лимфодренажный массаж тела';

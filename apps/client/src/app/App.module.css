@@ -14,8 +14,6 @@
   --color-primary: #6f8d4e;
   --color-primary-hover: #5f7b41;
   --color-on-primary: #ffffff;
-  --color-accent: #d99a22;
-  --color-danger: #b54b4b;
   --color-danger-bg: #fff3f3;
   --container-max: 1240px;
   --container-page: min(var(--container-max), calc(100% - 56px));

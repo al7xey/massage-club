@@ -154,6 +154,16 @@ async function seed() {
     isActive: true,
   }));
 
+  const aromaMassage = await findOrCreate(services, { slug: 'aroma-massage' } as Partial<Service>, () => ({
+    title: 'Ароматерапия',
+    slug: 'aroma-massage',
+    description: 'Массаж с применением эфирных масел для полного расслабления и восстановления.',
+    durationMinutes: 60,
+    priceRub: 5200,
+    category: careCategory,
+    isActive: true,
+  }));
+
   const masterElena = await findOrCreate(masters, { firstName: 'Елена', lastName: 'Смирнова' } as Partial<Master>, () => ({
     firstName: 'Елена',
     lastName: 'Смирнова',
