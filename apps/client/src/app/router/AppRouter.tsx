@@ -10,11 +10,22 @@ export function AppRouter() {
   const location = useLocation();
   const state = location.state as { backgroundLocation?: Location } | null;
   const backgroundLocation = state?.backgroundLocation;
+  const isAuthRoute = location.pathname === appRoutes.login() || location.pathname === appRoutes.register();
+  const routesLocation =
+    backgroundLocation ??
+    (isAuthRoute
+      ? {
+          ...location,
+          hash: '',
+          pathname: appRoutes.home(),
+          search: '',
+        }
+      : location);
 
   return (
     <>
       <ScrollToTop />
-      <Routes location={backgroundLocation ?? location}>
+      <Routes location={routesLocation}>
         <Route element={<MainLayout />}>
           {publicRoutes.map(renderRoute)}
 
@@ -30,7 +41,7 @@ export function AppRouter() {
         </Route>
       </Routes>
 
-      {backgroundLocation ? (
+      {backgroundLocation || isAuthRoute ? (
         <Routes>
           <Route path={appRoutes.login()} element={<LoginPage />} />
           <Route path={appRoutes.register()} element={<RegisterPage />} />

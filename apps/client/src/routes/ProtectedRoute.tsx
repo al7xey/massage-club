@@ -16,11 +16,11 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to={appRoutes.login()} state={{ backgroundLocation: location, from: location.pathname }} replace />;
+    return <Navigate to={appRoutes.login()} state={{ from: location.pathname }} replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to={appRoutes.login()} state={{ backgroundLocation: location, denied: true, from: location.pathname }} replace />;
+    return <Navigate to={appRoutes.login()} state={{ denied: true, from: location.pathname }} replace />;
   }
 
   return <Outlet />;
