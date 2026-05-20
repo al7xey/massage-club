@@ -89,29 +89,6 @@
   font-weight: 800;
 }
 
-.primaryButton,
-.removeButton {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-control);
-  font-weight: 800;
-}
-
-.primaryButton {
-  border: 0;
-  background: var(--gradient-primary);
-  color: var(--color-on-primary);
-  padding: 0 18px;
-}
-
-.removeButton {
-  border: 1px solid var(--color-line-strong);
-  background: #ffffff;
-  padding: 0 16px;
-}
-
 .state {
   margin: 0;
   color: var(--color-muted);

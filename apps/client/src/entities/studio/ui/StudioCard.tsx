@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
 import { appRoutes } from '@/shared/routes';
+import { LinkButton } from '@/shared/ui';
 import type { StudioCardModel } from '../model/types';
 import styles from './StudioCard.module.css';
 
@@ -15,9 +15,9 @@ export function StudioCard({ studio }: StudioCardProps) {
         <h3>{studio.title}</h3>
         <p>{studio.address}</p>
         <p>{studio.openLabel}</p>
-        <Link className={styles.button} to={appRoutes.booking()}>
+        <LinkButton fullWidth to={appRoutes.booking()}>
           Записаться в филиал
-        </Link>
+        </LinkButton>
       </div>
     </article>
   );

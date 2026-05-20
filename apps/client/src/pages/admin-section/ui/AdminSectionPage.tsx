@@ -9,7 +9,7 @@ import {
   useGetAdminServicesQuery,
   useGetAdminSubscriptionsQuery,
   useGetAdminUsersQuery,
-} from '@/pages/admin-dashboard/api/adminDashboardApi';
+} from '@/features/admin';
 import styles from './AdminSectionPage.module.css';
 
 const titles: Record<string, string> = {

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import { appRoutes } from '@/shared/routes';
+import { Button, LinkButton, TextAreaField, TextField } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import styles from './ContactsPage.module.css';
 
@@ -46,33 +46,25 @@ export function ContactsPage() {
               <strong>{value}</strong>
             </article>
           ))}
-          <Link className={styles.primaryLink} to={appRoutes.booking()}>
+          <LinkButton className={styles.primaryLink} to={appRoutes.booking()}>
             Записаться онлайн
-          </Link>
+          </LinkButton>
         </div>
 
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
           <h2>Перезвонить вам?</h2>
-          <label>
-            <span>Имя</span>
-            <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Ваше имя" />
-          </label>
-          <label>
-            <span>Телефон</span>
-            <input value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+7 900 000-00-00" />
-          </label>
-          <label>
-            <span>Комментарий</span>
-            <textarea
-              value={message}
-              onChange={(event) => setMessage(event.target.value)}
-              placeholder="Какая услуга или студия интересует"
-              rows={4}
-            />
-          </label>
+          <TextField label="Имя" value={name} onChange={(event) => setName(event.target.value)} placeholder="Ваше имя" />
+          <TextField label="Телефон" value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="+7 900 000-00-00" />
+          <TextAreaField
+            label="Комментарий"
+            value={message}
+            onChange={(event) => setMessage(event.target.value)}
+            placeholder="Какая услуга или студия интересует"
+            rows={4}
+          />
           {error ? <p className={styles.error}>{error}</p> : null}
           {success ? <p className={styles.success}>{success}</p> : null}
-          <button type="submit">Отправить</button>
+          <Button type="submit">Отправить</Button>
         </form>
       </section>
     </PageShell>

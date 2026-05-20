@@ -1,3 +1,5 @@
+import { Button, LinkButton } from '@/shared/ui';
+import { appRoutes } from '@/shared/routes';
 import type { MasterCardModel } from '../model/types';
 import styles from './MasterCard.module.css';
 
@@ -15,16 +17,10 @@ export function MasterCard({ master }: MasterCardProps) {
         <h3>{master.fullName}</h3>
         <p className={styles.role}>{master.roleLabel}</p>
         <p className={styles.rating}>★★★★★ <strong>{master.rating}</strong> ({master.reviewsCount} отзывов)</p>
-        <p className={styles.slotTitle}>Ближайшее время</p>
-        <div className={styles.slots}>
-          {master.nextSlots.slice(0, 3).map((slot) => (
-            <span key={slot}>{slot}</span>
-          ))}
-        </div>
         <p className={styles.summary}>{master.summary}</p>
         <div className={styles.actions}>
-          <button className={styles.secondaryButton} type="button">Подробнее</button>
-          <button className={styles.primaryButton} type="button">Записаться</button>
+          <Button size="sm" variant="secondary">Подробнее</Button>
+          <LinkButton size="sm" to={appRoutes.booking()}>Записаться</LinkButton>
         </div>
       </div>
     </article>

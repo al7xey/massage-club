@@ -1,10 +1,11 @@
 import { applySubscriptionBenefits } from '@massage/shared/lib/subscription-benefits';
 import { useEffect, useMemo } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAddCartItemMutation, useGetCartQuery, useRemoveCartItemMutation } from '@/entities/cart';
 import { useGetMySubscriptionQuery } from '@/entities/subscription';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import { appRoutes } from '@/shared/routes';
+import { Button, EmptyState, LinkButton } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import styles from './CartPage.module.css';
 
@@ -60,13 +61,11 @@ export function CartPage() {
         <div className={styles.list}>
           {isLoading || isAdding ? <p className={styles.state}>Загружаем корзину...</p> : null}
           {!isLoading && cartItems.length === 0 ? (
-            <div className={styles.empty}>
-              <h2>Корзина пока пуста</h2>
-              <p>Добавьте услуги из каталога или со страницы детали, а затем перейдите к оформлению записи.</p>
-              <Link className={styles.primaryButton} to={appRoutes.services()}>
-                Перейти к услугам
-              </Link>
-            </div>
+            <EmptyState
+              title="Корзина пока пуста"
+              description="Добавьте услуги из каталога или со страницы детали, а затем перейдите к оформлению записи."
+              actions={<LinkButton to={appRoutes.services()}>Перейти к услугам</LinkButton>}
+            />
           ) : null}
 
           {cartItems.map((item) => {
@@ -81,9 +80,9 @@ export function CartPage() {
                 </div>
                 <div className={styles.cardSide}>
                   <strong>{preview?.paidBySubscriptionCredit ? 'Включено в подписку' : formatPrice(preview?.finalPriceRub ?? item.service.priceRub)}</strong>
-                  <button type="button" className={styles.removeButton} disabled={isRemoving} onClick={() => void removeCartItem(item.id)}>
+                  <Button size="sm" variant="danger" disabled={isRemoving} onClick={() => void removeCartItem(item.id)}>
                     Удалить
-                  </button>
+                  </Button>
                 </div>
               </article>
             );
@@ -102,9 +101,9 @@ export function CartPage() {
             ) : (
               <p>На следующем шаге вы выберете студию, дату, время и мастеров для каждой услуги отдельно.</p>
             )}
-            <Link className={styles.primaryButton} to={appRoutes.booking()}>
+            <LinkButton to={appRoutes.booking()}>
               Перейти к оформлению
-            </Link>
+            </LinkButton>
           </aside>
         ) : null}
       </section>

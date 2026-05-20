@@ -31,8 +31,10 @@
   --shadow-card: 0 10px 24px rgba(32, 35, 42, 0.06);
   --shadow-hover: 0 16px 34px rgba(32, 35, 42, 0.11);
   --shadow-green: 0 16px 34px rgba(111, 141, 78, 0.15);
+  --focus-ring: 0 0 0 4px rgba(111, 141, 78, 0.16);
   --gradient-primary: linear-gradient(145deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   --gradient-surface: linear-gradient(180deg, #ffffff 0%, var(--color-surface-soft) 100%);
+  --transition-fast: 0.18s ease;
   --font-h1: 42px;
   --font-h2: 28px;
   --font-h3: 18px;
@@ -44,6 +46,7 @@
   inset: 0;
   overflow: auto;
   overflow-x: hidden;
+  scrollbar-gutter: stable;
   margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
@@ -91,6 +94,17 @@
 .app textarea:disabled {
   cursor: not-allowed;
   opacity: 0.62;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app *,
+  .app *::before,
+  .app *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
 
 @media (max-width: 760px) {

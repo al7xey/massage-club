@@ -10,5 +10,6 @@ coverage
 .cache
 .DS_Store
 *.log
+*.pid
 *.tsbuildinfo
 .vite-*

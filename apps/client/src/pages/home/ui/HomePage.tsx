@@ -1,9 +1,9 @@
-import { Link } from 'react-router-dom';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { mockReviews } from '@/entities/review';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { appRoutes } from '@/shared/routes';
+import { LinkButton } from '@/shared/ui';
 import { PlansCarousel } from '@/widgets/plans-carousel';
 import { ReviewsShowcase } from '@/widgets/reviews-showcase';
 import { ServiceShowcase } from '@/widgets/service-showcase';
@@ -33,12 +33,12 @@ export function HomePage() {
             Массаж, SPA и уход по единой подписке.
           </p>
           <div className={styles.heroActions}>
-            <Link className={styles.primaryButton} to={appRoutes.booking()}>
+            <LinkButton to={appRoutes.booking()}>
               Записаться
-            </Link>
-            <Link className={styles.outlineButton} to={appRoutes.subscriptions()}>
+            </LinkButton>
+            <LinkButton to={appRoutes.subscriptions()} variant="secondary">
               Выбрать подписку
-            </Link>
+            </LinkButton>
           </div>
         </div>
         <div className={styles.heroMedia}>
@@ -60,9 +60,9 @@ export function HomePage() {
         <div>
           <h2>Подарите время для себя своим близким</h2>
           <p>Электронные и бумажные сертификаты на любую сумму или конкретную услугу.</p>
-          <Link className={styles.primaryButton} to={appRoutes.certificates()}>
+          <LinkButton to={appRoutes.certificates()}>
             Оформить сертификат
-          </Link>
+          </LinkButton>
         </div>
       </section>
 
@@ -76,9 +76,9 @@ export function HomePage() {
 
       <section className={styles.cta}>
         <h2>Начните свой путь к гармонии сегодня</h2>
-        <Link className={styles.whiteButton} to={appRoutes.booking()}>
+        <LinkButton className={styles.whiteButton} to={appRoutes.booking()} variant="secondary">
           Записаться
-        </Link>
+        </LinkButton>
       </section>
     </main>
   );

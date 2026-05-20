@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { tokenStorage } from '@/shared/lib/storage/tokenStorage';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
+import { Button, TextField } from '@/shared/ui';
 import { useLoginMutation } from '../api/authByEmailApi';
 import styles from './AuthByEmailForm.module.css';
 
@@ -32,8 +33,8 @@ export function AuthByEmailForm() {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
-      <input
-        className={styles.input}
+      <TextField
+        label="Почта или телефон"
         type="text"
         placeholder="email@example.com или +7..."
         value={identifier}
@@ -42,8 +43,8 @@ export function AuthByEmailForm() {
           setError('');
         }}
       />
-      <input
-        className={styles.input}
+      <TextField
+        label="Пароль"
         type="password"
         placeholder="Пароль"
         value={password}
@@ -53,9 +54,9 @@ export function AuthByEmailForm() {
         }}
       />
       {error ? <p className={styles.error}>{error}</p> : null}
-      <button className={styles.button} type="submit" disabled={isLoading}>
-        {isLoading ? 'Входим...' : 'Войти'}
-      </button>
+      <Button fullWidth isLoading={isLoading} loadingText="Входим..." type="submit">
+        Войти
+      </Button>
     </form>
   );
 }

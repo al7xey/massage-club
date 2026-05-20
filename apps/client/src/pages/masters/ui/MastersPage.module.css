@@ -6,22 +6,6 @@
   color: var(--color-muted);
 }
 
-.input {
-  width: 100%;
-  min-height: var(--control-height);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-control);
-  background: #ffffff;
-  padding: 0 18px;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(111, 141, 78, 0.12);
-  outline: 0;
-}
-
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -31,25 +15,6 @@
 
 .state {
   margin: 18px 0 0;
-  color: var(--color-muted);
-}
-
-.empty {
-  margin-top: 20px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-  background: #ffffff;
-  padding: 28px;
-  text-align: center;
-}
-
-.empty h2,
-.empty p {
-  margin: 0;
-}
-
-.empty p {
-  margin-top: 8px;
   color: var(--color-muted);
 }
 

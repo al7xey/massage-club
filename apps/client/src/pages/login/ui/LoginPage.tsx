@@ -1,13 +1,14 @@
 import { FormEvent, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { appRoutes } from '@/shared/routes';
-import { PageShell } from '@/shared/ui/page-shell/PageShell';
-import styles from './LoginPage.module.css';
+import { AuthModal, Button, TextField } from '@/shared/ui';
+import styles from '@/shared/ui/auth-form/AuthForm.module.css';
 
 interface AuthLocationState {
   action?: 'book' | 'cart';
+  backgroundLocation?: unknown;
   denied?: boolean;
   from?: string;
   serviceId?: string;
@@ -20,7 +21,9 @@ export function LoginPage() {
   const state = location.state as AuthLocationState | null;
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(state?.denied ? 'Нет доступа к выбранному разделу. Войдите под аккаунтом с нужной ролью.' : '');
+  const [error, setError] = useState(
+    state?.denied ? 'Нет доступа к выбранному разделу. Войдите под аккаунтом с нужной ролью.' : '',
+  );
   const [isLoading, setIsLoading] = useState(false);
   const successPath = useMemo(() => resolvePostAuthPath(state), [state]);
 
@@ -49,55 +52,63 @@ export function LoginPage() {
   };
 
   return (
-    <PageShell title="Вход" description="Войдите в личный кабинет по почте или номеру телефона.">
+    <AuthModal
+      description="Войдите в личный кабинет по почте или номеру телефона."
+      mode="login"
+      title="Вход"
+    >
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
-        <label className={styles.field}>
-          <span>Почта или телефон</span>
-          <input
-            className={styles.input}
-            type="text"
-            placeholder="user@test.ru или +7 999 111-22-33"
-            value={identifier}
-            onChange={(event) => {
-              setIdentifier(event.target.value);
-              setError('');
-            }}
-          />
-        </label>
-        <label className={styles.field}>
-          <span>Пароль</span>
-          <input
-            className={styles.input}
-            type="password"
-            placeholder="user123"
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-              setError('');
-            }}
-          />
-        </label>
+        <TextField
+          autoComplete="username"
+          label="Почта или телефон"
+          placeholder="user@test.ru или +7 999 111-22-33"
+          type="text"
+          value={identifier}
+          onChange={(event) => {
+            setIdentifier(event.target.value);
+            setError('');
+          }}
+        />
+        <TextField
+          autoComplete="current-password"
+          label="Пароль"
+          placeholder="user123"
+          type="password"
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+            setError('');
+          }}
+        />
 
         {error ? <p className={styles.error}>{error}</p> : null}
 
-        <button className={styles.button} type="submit" disabled={isLoading}>
-          {isLoading ? 'Входим...' : 'Войти'}
-        </button>
+        <Button fullWidth isLoading={isLoading} loadingText="Входим..." type="submit">
+          Войти
+        </Button>
 
         <div className={styles.quickActions}>
-          <button type="button" onClick={() => void submitLogin('user@test.ru', 'user123')} disabled={isLoading}>
+          <Button
+            disabled={isLoading}
+            variant="secondary"
+            onClick={() => void submitLogin('user@test.ru', 'user123')}
+          >
             Войти как пользователь
-          </button>
-          <button type="button" onClick={() => void submitLogin('admin@test.ru', 'admin123')} disabled={isLoading}>
+          </Button>
+          <Button
+            disabled={isLoading}
+            variant="secondary"
+            onClick={() => void submitLogin('admin@test.ru', 'admin123')}
+          >
             Войти как администратор
-          </button>
+          </Button>
         </div>
 
         <p className={styles.note}>
-          Нет аккаунта? <Link to={appRoutes.register()} state={state}>Зарегистрироваться</Link>
+          Нет аккаунта? <Link state={state} to={appRoutes.register()}>Зарегистрироваться</Link>
         </p>
       </form>
-    </PageShell>
+    </AuthModal>
   );
 }
 

@@ -1,11 +1,12 @@
 import { FormEvent, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/features/auth';
 import { useCancelAppointmentMutation, useGetMyAppointmentsQuery } from '@/entities/appointment';
 import { useGetMySubscriptionQuery } from '@/entities/subscription';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { formatUserDisplayName } from '@/shared/lib/auth/formatUserDisplayName';
 import { appRoutes } from '@/shared/routes';
+import { Button, LinkButton, TextField } from '@/shared/ui';
 import styles from './AccountPage.module.css';
 
 export function AccountPage() {
@@ -127,13 +128,13 @@ export function AccountPage() {
           </div>
         </div>
 
-        <button
-          type="button"
+        <Button
           className={styles.settingsButton}
+          variant="secondary"
           onClick={() => setIsSettingsOpen((current) => !current)}
         >
           Настройки
-        </button>
+        </Button>
       </section>
 
       <section className={styles.subscriptionPanel}>
@@ -153,12 +154,12 @@ export function AccountPage() {
                   <InfoPill label="Скидка" value={`${subscription.plan.discountPercent}%`} />
                 </div>
                 <div className={styles.subscriptionActions}>
-                  <Link className={styles.primaryButton} to={appRoutes.booking()}>
+                  <LinkButton className={styles.clubButton} to={appRoutes.booking()} variant="secondary">
                     Записаться
-                  </Link>
-                  <Link className={styles.secondaryButton} to={appRoutes.subscriptions()}>
+                  </LinkButton>
+                  <LinkButton className={styles.clubButtonMuted} to={appRoutes.subscriptions()} variant="secondary">
                     Тарифы клуба
-                  </Link>
+                  </LinkButton>
                 </div>
               </div>
 
@@ -178,9 +179,9 @@ export function AccountPage() {
                 <h2>Подписка не подключена</h2>
                 <p>Выберите клубный тариф, чтобы получить специальные цены и включённые посещения.</p>
                 <div className={styles.subscriptionActions}>
-                  <Link className={styles.primaryButton} to={appRoutes.subscriptions()}>
+                  <LinkButton className={styles.clubButton} to={appRoutes.subscriptions()} variant="secondary">
                     Выбрать подписку
-                  </Link>
+                  </LinkButton>
                 </div>
               </div>
             </div>
@@ -247,40 +248,32 @@ export function AccountPage() {
                 <span className={styles.sectionLabel}>Настройки</span>
                 <h3>Личные данные</h3>
               </div>
-              <button
-                type="button"
+              <Button
                 className={styles.closeButton}
+                size="sm"
+                variant="ghost"
                 onClick={() => setIsSettingsOpen(false)}
               >
                 Закрыть
-              </button>
+              </Button>
             </div>
 
             <form className={styles.profileForm} onSubmit={handleSave}>
               <div className={styles.profileGrid}>
-                <label className={styles.field}>
-                  <span>Имя и фамилия</span>
-                  <input value={fullName} onChange={(event) => setFullName(event.target.value)} />
-                </label>
-                <label className={styles.field}>
-                  <span>Email</span>
-                  <input value={email} onChange={(event) => setEmail(event.target.value)} />
-                </label>
-                <label className={styles.field}>
-                  <span>Телефон</span>
-                  <input value={phone} onChange={(event) => setPhone(event.target.value)} />
-                </label>
+                <TextField label="Имя и фамилия" value={fullName} onChange={(event) => setFullName(event.target.value)} />
+                <TextField label="Email" value={email} onChange={(event) => setEmail(event.target.value)} />
+                <TextField label="Телефон" value={phone} onChange={(event) => setPhone(event.target.value)} />
               </div>
 
               {message ? <p className={styles.message}>{message}</p> : null}
 
               <div className={styles.formActions}>
-                <button className={styles.primaryButton} type="submit" disabled={isSaving}>
-                  {isSaving ? 'Сохраняем...' : 'Сохранить'}
-                </button>
-                <button className={styles.secondaryButton} type="button" onClick={handleLogout}>
+                <Button isLoading={isSaving} loadingText="Сохраняем..." type="submit">
+                  Сохранить
+                </Button>
+                <Button variant="secondary" onClick={handleLogout}>
                   Выйти
-                </button>
+                </Button>
               </div>
             </form>
           </section>
@@ -303,17 +296,16 @@ export function AccountPage() {
                 {formatUserDisplayName(nextAppointment.master)} · {nextAppointment.studio.name}
               </span>
               <div className={styles.inlineActions}>
-                <Link className={styles.secondaryButton} to={appRoutes.booking()}>
+                <LinkButton to={appRoutes.booking()} variant="secondary">
                   Новая запись
-                </Link>
-                <button
-                  type="button"
-                  className={styles.secondaryButton}
+                </LinkButton>
+                <Button
+                  variant="danger"
                   onClick={() => void handleCancelAppointment(nextAppointment.id)}
                   disabled={isCancellingAppointment}
                 >
                   Отменить
-                </button>
+                </Button>
               </div>
             </div>
           ) : (

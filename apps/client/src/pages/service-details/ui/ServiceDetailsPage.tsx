@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@/features/auth';
 import { useAddCartItemMutation } from '@/entities/cart';
 import { mockReviews } from '@/entities/review';
 import { createServiceCardModel, useGetServiceQuery, useGetServicesQuery } from '@/entities/service';
@@ -8,6 +8,7 @@ import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { repeatToLength } from '@/shared/lib/collection/repeatToLength';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import { appRoutes } from '@/shared/routes';
+import { Button, LinkButton } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import { ReviewsShowcase } from '@/widgets/reviews-showcase';
 import { ServiceShowcase } from '@/widgets/service-showcase';
@@ -16,6 +17,7 @@ import styles from './ServiceDetailsPage.module.css';
 
 export function ServiceDetailsPage() {
   const { id = '' } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -41,6 +43,7 @@ export function ServiceDetailsPage() {
     navigate(appRoutes.login(), {
       state: {
         action,
+        backgroundLocation: location,
         from: appRoutes.serviceDetails(id),
         serviceId: selected?.id ?? id,
       },
@@ -81,9 +84,16 @@ export function ServiceDetailsPage() {
         <div className={styles.gallery}>
           <div className={styles.heroImage}>
             <span>Массаж</span>
-            <button type="button" aria-pressed={isFavorite} aria-label="Добавить в избранное" onClick={() => setIsFavorite((value) => !value)}>
+            <Button
+              className={styles.favoriteButton}
+              size="sm"
+              variant="ghost"
+              aria-pressed={isFavorite}
+              aria-label={isFavorite ? 'Убрать из избранного' : 'Добавить в избранное'}
+              onClick={() => setIsFavorite((value) => !value)}
+            >
               {isFavorite ? '♥' : '♡'}
-            </button>
+            </Button>
           </div>
           <div className={styles.thumbs}>
             {['Лимфодренаж', 'Расслабление', 'Восстановление', 'Уход'].map((label, index) => (
@@ -105,12 +115,12 @@ export function ServiceDetailsPage() {
             <PriceRow tone="club" title="С подпиской" note="Для резидентов клуба" price={Math.round(selectedPrice * 0.8)} badge="-20%" />
             <PriceRow tone="super" title="С SUPER подпиской" note="Максимальная выгода" price={Math.round(selectedPrice * 0.7)} badge="-30%" />
           </div>
-          <button className={styles.primaryButton} type="button" onClick={() => void handleBook()}>
+          <Button fullWidth onClick={() => void handleBook()}>
             Записаться
-          </button>
-          <button className={styles.outlineButton} type="button" onClick={() => void handleAddToCart()}>
+          </Button>
+          <Button fullWidth variant="secondary" onClick={() => void handleAddToCart()}>
             В корзину
-          </button>
+          </Button>
           <p className={styles.note}>Подписка позволяет экономить до 15 000 ₽ в месяц при регулярных посещениях.</p>
         </aside>
       </section>
@@ -140,7 +150,7 @@ export function ServiceDetailsPage() {
         <div>
           <h2>Подарочные сертификаты</h2>
           <p>Подарите заботу близким — от 1 000 ₽</p>
-          <Link className={styles.primaryButton} to={appRoutes.certificates()}>Оформить сертификат</Link>
+          <LinkButton to={appRoutes.certificates()}>Оформить сертификат</LinkButton>
         </div>
       </section>
 

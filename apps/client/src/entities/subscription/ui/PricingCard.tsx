@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
+import { Button } from '@/shared/ui';
 import type { TariffItem } from '../model/types';
 import styles from './PricingCard.module.css';
 
@@ -24,9 +25,9 @@ export function PricingCard({ item, actionSlot }: PricingCardProps) {
         ))}
       </ul>
       {actionSlot ?? (
-        <button className={styles.button} type="button">
+        <Button fullWidth>
           Выбрать тариф
-        </button>
+        </Button>
       )}
     </article>
   );

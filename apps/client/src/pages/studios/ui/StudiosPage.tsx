@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { appRoutes } from '@/shared/routes';
+import { Button, EmptyState, LinkButton, TextField } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import styles from './StudiosPage.module.css';
@@ -33,8 +33,8 @@ export function StudiosPage() {
         <aside className={styles.sidebar}>
           <h2>Филиалы</h2>
           <p>Поиск по названию, району или адресу</p>
-          <input
-            className={styles.input}
+          <TextField
+            label="Поиск"
             placeholder="Поиск по адресу или названию"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
@@ -51,9 +51,9 @@ export function StudiosPage() {
                   <p>{studio.address}</p>
                   <p>{studio.openLabel}</p>
                   <p>{studio.phone}</p>
-                  <button className={styles.primaryButton} type="button" onClick={() => setSelectedStudioId(studio.id)}>
+                  <Button fullWidth size="sm" onClick={() => setSelectedStudioId(studio.id)}>
                     {isSelected ? 'Выбрана' : 'Выбрать студию'}
-                  </button>
+                  </Button>
                 </article>
               );
             })}
@@ -76,15 +76,12 @@ export function StudiosPage() {
                 <p>{selectedStudio.address}</p>
                 <p>{selectedStudio.openLabel}</p>
               </div>
-              <Link className={styles.primaryButton} to={appRoutes.booking()}>
+              <LinkButton to={appRoutes.booking()}>
                 Записаться
-              </Link>
+              </LinkButton>
             </div>
           ) : (
-            <div className={styles.empty}>
-              <h2>Студии не найдены</h2>
-              <p>Попробуйте изменить запрос.</p>
-            </div>
+            <EmptyState title="Студии не найдены" description="Попробуйте изменить запрос." />
           )}
         </div>
       </section>

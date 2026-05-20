@@ -1,5 +1,6 @@
 .segment {
   display: flex;
+  gap: 6px;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
   background: var(--gradient-surface);
@@ -21,6 +22,10 @@
 
 .segmentActive {
   background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.segmentActive:hover {
   color: var(--color-on-primary);
 }
 
@@ -75,30 +80,8 @@
   gap: 12px;
 }
 
-.lookupResult span {
+.lookupResult p > span:first-child {
   color: var(--color-muted);
-}
-
-.statusPanel input,
-.statusPanel button {
-  min-height: var(--control-height);
-  border-radius: var(--radius-control);
-}
-
-.statusPanel input {
-  border: 1px solid var(--color-line);
-  padding: 0 16px;
-}
-
-.statusPanel button {
-  border: 0;
-  background: var(--gradient-primary);
-  color: var(--color-on-primary);
-  font-weight: 900;
-}
-
-.statusPanel button:hover {
-  background: var(--color-primary-hover);
 }
 
 @media (max-width: 900px) {

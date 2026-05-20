@@ -1,7 +1,8 @@
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/features/auth';
 import { useGetCartQuery } from '@/entities/cart';
 import { appRoutes } from '@/shared/routes';
+import { Button, LinkButton } from '@/shared/ui';
 import styles from './MainLayout.module.css';
 
 const links = [
@@ -13,11 +14,13 @@ const links = [
 ] as const;
 
 export function MainLayout() {
+  const location = useLocation();
   const navigate = useNavigate();
   const { isAuthLoading, logout, user } = useAuth();
   const { data: cartItems = [] } = useGetCartQuery(undefined, { skip: !user });
   const logoRoute = user ? appRoutes.account() : appRoutes.home();
   const accountInitial = (user?.fullName?.trim()?.[0] ?? 'Р').toUpperCase();
+  const authState = { backgroundLocation: location, from: location.pathname };
 
   const handleLogout = async () => {
     await logout();
@@ -43,35 +46,35 @@ export function MainLayout() {
         <div className={styles.actions}>
           {!user && !isAuthLoading ? (
             <>
-              <NavLink className={styles.ghostButton} to={appRoutes.login()}>
+              <LinkButton state={authState} to={appRoutes.login()} variant="secondary" size="sm">
                 Войти
-              </NavLink>
-              <NavLink className={styles.primaryButton} to={appRoutes.subscriptions()}>
+              </LinkButton>
+              <LinkButton to={appRoutes.subscriptions()} size="sm">
                 Стать частью клуба
-              </NavLink>
+              </LinkButton>
             </>
           ) : null}
 
           {user ? (
             <>
-              <NavLink className={styles.cartButton} to={appRoutes.cart()}>
+              <LinkButton className={styles.cartButton} to={appRoutes.cart()} variant="secondary" size="sm">
                 <span>Корзина</span>
                 <strong>{cartItems.length}</strong>
-              </NavLink>
+              </LinkButton>
               {user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' ? (
-                <NavLink className={styles.ghostButton} to={appRoutes.admin()}>
+                <LinkButton to={appRoutes.admin()} variant="secondary" size="sm">
                   Админ-панель
-                </NavLink>
+                </LinkButton>
               ) : null}
-              <NavLink className={styles.accountLink} to={appRoutes.account()}>
+              <LinkButton className={styles.accountLink} to={appRoutes.account()} variant="secondary" size="sm">
                 <span className={styles.avatar} aria-hidden="true">
                   {accountInitial}
                 </span>
                 <span>Личный кабинет</span>
-              </NavLink>
-              <button className={styles.ghostButton} type="button" onClick={handleLogout}>
+              </LinkButton>
+              <Button variant="secondary" size="sm" onClick={handleLogout}>
                 Выйти
-              </button>
+              </Button>
             </>
           ) : null}
         </div>

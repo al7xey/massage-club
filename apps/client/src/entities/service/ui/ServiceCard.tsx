@@ -1,50 +1,19 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import { useAddCartItemMutation } from '@/entities/cart';
+import { Link } from 'react-router-dom';
 import { appRoutes } from '@/shared/routes';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
+import { Button } from '@/shared/ui';
 import type { ServiceCardModel } from '../model/types';
 import styles from './ServiceCard.module.css';
 
 interface ServiceCardProps {
+  isActionDisabled?: boolean;
+  onAddToCart?: (service: ServiceCardModel) => Promise<void> | void;
+  onBook?: (service: ServiceCardModel) => Promise<void> | void;
   service: ServiceCardModel;
 }
 
-export function ServiceCard({ service }: ServiceCardProps) {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [addCartItem] = useAddCartItemMutation();
+export function ServiceCard({ isActionDisabled = false, onAddToCart, onBook, service }: ServiceCardProps) {
   const detailsPath = appRoutes.serviceDetails(service.id);
-
-  const navigateToAuth = (action: 'book' | 'cart') => {
-    navigate(appRoutes.login(), {
-      state: {
-        action,
-        from: detailsPath,
-        serviceId: service.id,
-      },
-    });
-  };
-
-  const handleAddToCart = async () => {
-    if (!user) {
-      navigateToAuth('cart');
-      return;
-    }
-
-    await addCartItem({ serviceId: service.id }).unwrap();
-    navigate(appRoutes.cart());
-  };
-
-  const handleBook = async () => {
-    if (!user) {
-      navigateToAuth('book');
-      return;
-    }
-
-    await addCartItem({ serviceId: service.id }).unwrap();
-    navigate(`${appRoutes.booking()}?serviceId=${service.id}`);
-  };
 
   return (
     <article className={styles.card}>
@@ -66,12 +35,12 @@ export function ServiceCard({ service }: ServiceCardProps) {
       </Link>
       <div className={styles.actionWrap}>
         <div className={styles.actionButtons}>
-          <button className={styles.secondaryButton} type="button" onClick={() => void handleAddToCart()}>
+          <Button size="sm" variant="secondary" disabled={isActionDisabled || !onAddToCart} onClick={() => void onAddToCart?.(service)}>
             В корзину
-          </button>
-          <button className={styles.bookButton} type="button" onClick={() => void handleBook()}>
+          </Button>
+          <Button size="sm" disabled={isActionDisabled || !onBook} onClick={() => void onBook?.(service)}>
             Записаться
-          </button>
+          </Button>
         </div>
       </div>
     </article>

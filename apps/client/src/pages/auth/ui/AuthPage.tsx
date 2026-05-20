@@ -1,6 +1,8 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { appRoutes } from '@/shared/routes';
 
 export function AuthPage() {
-  return <Navigate to={appRoutes.login()} replace />;
+  const location = useLocation();
+
+  return <Navigate to={appRoutes.login()} state={{ backgroundLocation: location, from: location.pathname }} replace />;
 }

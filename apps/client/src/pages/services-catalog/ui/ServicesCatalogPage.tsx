@@ -1,32 +1,37 @@
 import { type CSSProperties, useMemo, useState } from 'react';
 import { repeatToLength } from '@/shared/lib/collection/repeatToLength';
+import { Button, EmptyState, SelectField, TextField } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
-import { createServiceCardModel, ServiceCard, useGetServicesQuery } from '@/entities/service';
+import { BookableServiceCard } from '@/features/service-card-actions';
+import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import styles from './ServicesCatalogPage.module.css';
 
-const membershipOptions = ['Lady', 'Master', 'Семейная'];
 const priceMin = 2000;
 const priceMax = 8000;
 const priceStep = 500;
-const durationOptions = [
-  ['short', 'До 60 минут'],
-  ['medium', '60-90 минут'],
-  ['long', 'Больше 90 минут'],
+const durationMin = 30;
+const durationMax = 150;
+const durationStep = 15;
+
+const sortOptions = [
+  ['popular', 'По популярности'],
+  ['priceAsc', 'Сначала дешевле'],
+  ['priceDesc', 'Сначала дороже'],
+  ['durationAsc', 'Сначала короче'],
+  ['durationDesc', 'Сначала длиннее'],
 ] as const;
 
-type DurationFilter = (typeof durationOptions)[number][0];
+type SortOption = (typeof sortOptions)[number][0];
 
 export function ServicesCatalogPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('popular');
+  const [sortBy, setSortBy] = useState<SortOption>('popular');
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedStudios, setSelectedStudios] = useState<string[]>([]);
-  const [selectedDurations, setSelectedDurations] = useState<DurationFilter[]>([]);
-  const [selectedMemberships, setSelectedMemberships] = useState<string[]>([]);
-  const [availableTodayOnly, setAvailableTodayOnly] = useState(false);
   const [minPrice, setMinPrice] = useState(priceMin);
   const [maxPrice, setMaxPrice] = useState(priceMax);
+  const [minDuration, setMinDuration] = useState(durationMin);
+  const [maxDuration, setMaxDuration] = useState(durationMax);
   const { data = [], isLoading } = useGetServicesQuery();
 
   const cards = useMemo(
@@ -34,81 +39,48 @@ export function ServicesCatalogPage() {
     [data],
   );
 
-  const catalogItems = useMemo(
-    () =>
-      cards.map((service, index) => ({
-        service,
-        membershipLabel: membershipOptions[index % membershipOptions.length],
-        durationBand: getDurationBand(service.durationMinutes),
-      })),
-    [cards],
-  );
   const categoryOptions = useMemo(() => uniqueSorted(cards.map((service) => service.categoryLabel)), [cards]);
-  const studioOptions = useMemo(() => uniqueSorted(cards.map((service) => service.studioLabel)), [cards]);
 
   const visibleCards = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    const filtered = catalogItems.filter(({ durationBand, membershipLabel, service }) => {
+    const filtered = cards.filter((service) => {
       const matchesCategory =
         selectedCategories.length === 0 || selectedCategories.includes(service.categoryLabel);
-      const matchesStudio = selectedStudios.length === 0 || selectedStudios.includes(service.studioLabel);
-      const matchesDuration = selectedDurations.length === 0 || selectedDurations.includes(durationBand);
-      const matchesMembership =
-        selectedMemberships.length === 0 || selectedMemberships.includes(membershipLabel);
       const matchesPrice = service.priceRub >= minPrice && service.priceRub <= maxPrice;
-      const matchesAvailable = !availableTodayOnly || service.isAvailableToday;
-      const matchesSearch = [service.title, service.categoryLabel, service.description].join(' ').toLowerCase().includes(query);
+      const matchesDuration = service.durationMinutes >= minDuration && service.durationMinutes <= maxDuration;
+      const matchesSearch = [service.title, service.categoryLabel, service.description]
+        .join(' ')
+        .toLowerCase()
+        .includes(query);
 
-      return (
-        matchesCategory &&
-        matchesStudio &&
-        matchesDuration &&
-        matchesMembership &&
-        matchesPrice &&
-        matchesAvailable &&
-        (query.length === 0 || matchesSearch)
-      );
+      return matchesCategory && matchesPrice && matchesDuration && (query.length === 0 || matchesSearch);
     });
 
     return [...filtered].sort((first, second) => {
-      if (sortBy === 'price') return first.service.priceRub - second.service.priceRub;
-      if (sortBy === 'duration') return first.service.durationMinutes - second.service.durationMinutes;
-      return second.service.reviewCount - first.service.reviewCount;
+      if (sortBy === 'priceAsc') return first.priceRub - second.priceRub;
+      if (sortBy === 'priceDesc') return second.priceRub - first.priceRub;
+      if (sortBy === 'durationAsc') return first.durationMinutes - second.durationMinutes;
+      if (sortBy === 'durationDesc') return second.durationMinutes - first.durationMinutes;
+      return second.reviewCount - first.reviewCount;
     });
-  }, [
-    availableTodayOnly,
-    catalogItems,
-    minPrice,
-    maxPrice,
-    searchQuery,
-    selectedCategories,
-    selectedDurations,
-    selectedMemberships,
-    selectedStudios,
-    sortBy,
-  ]);
+  }, [cards, maxDuration, maxPrice, minDuration, minPrice, searchQuery, selectedCategories, sortBy]);
 
   const hasActiveFilters =
     selectedCategories.length > 0 ||
-    selectedStudios.length > 0 ||
-    selectedDurations.length > 0 ||
-    selectedMemberships.length > 0 ||
-    availableTodayOnly ||
     minPrice > priceMin ||
-    maxPrice < priceMax;
-  const priceRangeStyle = {
-    '--range-start': `${((minPrice - priceMin) / (priceMax - priceMin)) * 100}%`,
-    '--range-end': `${100 - ((maxPrice - priceMin) / (priceMax - priceMin)) * 100}%`,
-  } as CSSProperties;
+    maxPrice < priceMax ||
+    minDuration > durationMin ||
+    maxDuration < durationMax;
+
+  const priceRangeStyle = getRangeStyle(minPrice, maxPrice, priceMin, priceMax);
+  const durationRangeStyle = getRangeStyle(minDuration, maxDuration, durationMin, durationMax);
 
   const resetFilters = () => {
     setSelectedCategories([]);
-    setSelectedStudios([]);
-    setSelectedDurations([]);
-    setSelectedMemberships([]);
-    setAvailableTodayOnly(false);
     setMinPrice(priceMin);
     setMaxPrice(priceMax);
+    setMinDuration(durationMin);
+    setMaxDuration(durationMax);
   };
 
   return (
@@ -119,39 +91,40 @@ export function ServicesCatalogPage() {
       <section className={styles.catalog}>
         <div className={styles.toolbar}>
           <div className={styles.searchWrap}>
-            <input
-              className={styles.search}
+            <TextField
+              label="Поиск"
               placeholder="Поиск по услуге"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
             />
           </div>
-          <button
+          <Button
             className={styles.filterButton}
-            type="button"
+            variant="secondary"
             aria-expanded={isFiltersOpen}
             onClick={() => setIsFiltersOpen((value) => !value)}
           >
             Фильтры{hasActiveFilters ? ` (${activeFiltersCount({
-              availableTodayOnly,
+              maxDuration,
               maxPrice,
+              minDuration,
               minPrice,
               selectedCategories,
-              selectedDurations,
-              selectedMemberships,
-              selectedStudios,
             })})` : ''}
-          </button>
+          </Button>
           <div className={styles.toolbarMeta}>
             <p>Найдено: <strong>{visibleCards.length}</strong></p>
-            <label>
-              <span>Сортировать:</span>
-              <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-                <option value="popular">По популярности</option>
-                <option value="price">Сначала дешевле</option>
-                <option value="duration">По длительности</option>
-              </select>
-            </label>
+            <SelectField
+              label="Сортировать"
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value as SortOption)}
+            >
+              {sortOptions.map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </SelectField>
           </div>
         </div>
 
@@ -160,18 +133,24 @@ export function ServicesCatalogPage() {
             <aside className={styles.filters}>
               <div className={styles.filtersHeader}>
                 <strong>Фильтры</strong>
-                <button type="button" onClick={resetFilters} disabled={!hasActiveFilters}>
+                <Button size="sm" variant="ghost" onClick={resetFilters} disabled={!hasActiveFilters}>
                   Сбросить
-                </button>
+                </Button>
               </div>
-              <FilterGroup title="Категории" values={categoryOptions} selected={selectedCategories} onToggle={toggleString(setSelectedCategories)} />
-              <FilterGroup title="Студии" values={studioOptions} selected={selectedStudios} onToggle={toggleString(setSelectedStudios)} />
-              <FilterGroup title="Подписка" values={membershipOptions} selected={selectedMemberships} onToggle={toggleString(setSelectedMemberships)} />
+
+              <FilterGroup
+                title="Услуги"
+                values={categoryOptions}
+                selected={selectedCategories}
+                onToggle={toggleString(setSelectedCategories)}
+              />
+
               <div className={styles.filterGroup}>
                 <h3>Стоимость</h3>
                 <div className={styles.rangeWrap} style={priceRangeStyle}>
                   <input
-                    className={styles.range}
+                    className={`${styles.range} ${styles.rangeMin}`}
+                    aria-label="Минимальная стоимость"
                     type="range"
                     min={priceMin}
                     max={priceMax}
@@ -180,7 +159,8 @@ export function ServicesCatalogPage() {
                     onChange={(event) => setMinPrice(Math.min(Number(event.target.value), maxPrice - priceStep))}
                   />
                   <input
-                    className={styles.range}
+                    className={`${styles.range} ${styles.rangeMax}`}
+                    aria-label="Максимальная стоимость"
                     type="range"
                     min={priceMin}
                     max={priceMax}
@@ -189,38 +169,56 @@ export function ServicesCatalogPage() {
                     onChange={(event) => setMaxPrice(Math.max(Number(event.target.value), minPrice + priceStep))}
                   />
                 </div>
-                <div className={styles.priceFields}>
+                <div className={styles.rangeFields}>
                   <span>от {minPrice.toLocaleString('ru-RU')} ₽</span>
                   <span>до {maxPrice.toLocaleString('ru-RU')} ₽</span>
                 </div>
               </div>
-              <FilterGroup
-                title="Длительность"
-                values={durationOptions.map(([, label]) => label)}
-                selected={durationOptions.filter(([key]) => selectedDurations.includes(key)).map(([, label]) => label)}
-                onToggle={(label) => {
-                  const key = durationOptions.find(([, value]) => value === label)?.[0];
-                  if (key) toggleString(setSelectedDurations)(key);
-                }}
-              />
-              <label className={styles.switchRow}>
-                <input
-                  type="checkbox"
-                  checked={availableTodayOnly}
-                  onChange={(event) => setAvailableTodayOnly(event.target.checked)}
-                />
-                <span>Доступно сегодня</span>
-              </label>
+
+              <div className={styles.filterGroup}>
+                <h3>Длительность</h3>
+                <div className={styles.rangeWrap} style={durationRangeStyle}>
+                  <input
+                    className={`${styles.range} ${styles.rangeMin}`}
+                    aria-label="Минимальная длительность"
+                    type="range"
+                    min={durationMin}
+                    max={durationMax}
+                    step={durationStep}
+                    value={minDuration}
+                    onChange={(event) => setMinDuration(Math.min(Number(event.target.value), maxDuration - durationStep))}
+                  />
+                  <input
+                    className={`${styles.range} ${styles.rangeMax}`}
+                    aria-label="Максимальная длительность"
+                    type="range"
+                    min={durationMin}
+                    max={durationMax}
+                    step={durationStep}
+                    value={maxDuration}
+                    onChange={(event) => setMaxDuration(Math.max(Number(event.target.value), minDuration + durationStep))}
+                  />
+                </div>
+                <div className={styles.rangeFields}>
+                  <span>от {minDuration} мин</span>
+                  <span>до {maxDuration} мин</span>
+                </div>
+              </div>
             </aside>
           ) : null}
 
           <div className={styles.results}>
             {isLoading ? <p className={styles.state}>Загрузка услуг...</p> : null}
-            {visibleCards.length === 0 && !isLoading ? <p className={styles.state}>Услуги не найдены.</p> : null}
+            {visibleCards.length === 0 && !isLoading ? (
+              <EmptyState
+                title="Услуги не найдены"
+                description="Попробуйте изменить поиск или сбросить активные фильтры."
+              />
+            ) : null}
 
             <div className={styles.grid}>
-              {visibleCards.map(({ service }, index) => (
-                <ServiceCard key={`${service.id}-${index}`} service={service} />
+              {visibleCards.map((service, index) => (
+                <BookableServiceCard key={`${service.id}-${index}`} service={service} />
               ))}
             </div>
           </div>
@@ -230,10 +228,11 @@ export function ServicesCatalogPage() {
   );
 }
 
-function getDurationBand(minutes: number): DurationFilter {
-  if (minutes < 60) return 'short';
-  if (minutes <= 90) return 'medium';
-  return 'long';
+function getRangeStyle(currentMin: number, currentMax: number, min: number, max: number) {
+  return {
+    '--range-start': `${((currentMin - min) / (max - min)) * 100}%`,
+    '--range-end': `${100 - ((currentMax - min) / (max - min)) * 100}%`,
+  } as CSSProperties;
 }
 
 function toggleString<T extends string>(setter: (value: (current: T[]) => T[]) => void) {
@@ -243,29 +242,22 @@ function toggleString<T extends string>(setter: (value: (current: T[]) => T[]) =
 }
 
 function activeFiltersCount({
-  availableTodayOnly,
+  maxDuration,
   maxPrice,
+  minDuration,
   minPrice,
   selectedCategories,
-  selectedDurations,
-  selectedMemberships,
-  selectedStudios,
 }: {
-  availableTodayOnly: boolean;
+  maxDuration: number;
   maxPrice: number;
+  minDuration: number;
   minPrice: number;
   selectedCategories: string[];
-  selectedDurations: string[];
-  selectedMemberships: string[];
-  selectedStudios: string[];
 }) {
   return (
     selectedCategories.length +
-    selectedDurations.length +
-    selectedMemberships.length +
-    selectedStudios.length +
-    (availableTodayOnly ? 1 : 0) +
-    (minPrice > priceMin || maxPrice < priceMax ? 1 : 0)
+    (minPrice > priceMin || maxPrice < priceMax ? 1 : 0) +
+    (minDuration > durationMin || maxDuration < durationMax ? 1 : 0)
   );
 }
 
@@ -287,7 +279,7 @@ function FilterGroup({
   return (
     <div className={styles.filterGroup}>
       <h3>{title}</h3>
-      {values.map((value, index) => (
+      {values.map((value) => (
         <label className={styles.checkRow} key={value}>
           <input type="checkbox" checked={selected.includes(value)} onChange={() => onToggle?.(value)} />
           <span>{value}</span>

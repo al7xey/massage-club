@@ -1,67 +1,51 @@
+import type { UserRole } from '@massage/shared';
 import { useLayoutEffect } from 'react';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { AccountPage } from '@/pages/account';
-import { AdminDashboardPage } from '@/pages/admin-dashboard';
-import { AdminSectionPage } from '@/pages/admin-section';
-import { AuthPage } from '@/pages/auth';
-import { BookingPage } from '@/pages/booking';
-import { CartPage } from '@/pages/cart';
-import { CertificatesPage } from '@/pages/certificates';
-import { ContactsPage } from '@/pages/contacts';
-import { HomePage } from '@/pages/home';
-import { LoginPage } from '@/pages/login';
-import { MastersPage } from '@/pages/masters';
-import { MyAppointmentsPage } from '@/pages/my-appointments';
-import { MyPaymentsPage } from '@/pages/my-payments';
-import { MySubscriptionPage } from '@/pages/my-subscription';
-import { RegisterPage } from '@/pages/register';
-import { ServiceDetailsPage } from '@/pages/service-details';
-import { ServicesCatalogPage } from '@/pages/services-catalog';
-import { StudiosPage } from '@/pages/studios';
-import { SubscriptionPlansPage } from '@/pages/subscription-plans';
-import { SupportTicketsPage } from '@/pages/support-tickets';
+import { Location, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import { appRoutes } from '@/shared/routes';
 import { MainLayout } from '@/widgets/main-layout';
+import { LoginPage, RegisterPage, accountRoutes, adminRoutes, publicRoutes, type AppRouteConfig } from './routeGroups';
 
 export function AppRouter() {
+  const location = useLocation();
+  const state = location.state as { backgroundLocation?: Location } | null;
+  const backgroundLocation = state?.backgroundLocation;
+
   return (
     <>
       <ScrollToTop />
-      <Routes>
+      <Routes location={backgroundLocation ?? location}>
         <Route element={<MainLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="services" element={<ServicesCatalogPage />} />
-          <Route path="services/:id" element={<ServiceDetailsPage />} />
-          <Route path="masters" element={<MastersPage />} />
-          <Route path="subscriptions" element={<SubscriptionPlansPage />} />
-          <Route path="studios" element={<StudiosPage />} />
-          <Route path="auth" element={<AuthPage />} />
-          <Route path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
-          <Route path="certificates" element={<CertificatesPage />} />
-          <Route path="contacts" element={<ContactsPage />} />
+          {publicRoutes.map(renderRoute)}
 
-          <Route element={<ProtectedRoute allowedRoles={['CLIENT', 'ADMIN', 'SUPER_ADMIN']} />}>
-            <Route path="cart" element={<CartPage />} />
-            <Route path="booking" element={<BookingPage />} />
-            <Route path="account" element={<AccountPage />} />
-            <Route path="account/subscription" element={<MySubscriptionPage />} />
-            <Route path="account/appointments" element={<MyAppointmentsPage />} />
-            <Route path="account/payments" element={<MyPaymentsPage />} />
-            <Route path="account/support" element={<SupportTicketsPage />} />
+          <Route element={<ProtectedRoute allowedRoles={['CLIENT', 'ADMIN', 'SUPER_ADMIN'] as UserRole[]} />}>
+            {accountRoutes.map(renderRoute)}
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN']} />}>
-            <Route path="admin" element={<AdminDashboardPage />} />
-            <Route path="admin/:section" element={<AdminSectionPage />} />
+          <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'SUPER_ADMIN'] as UserRole[]} />}>
+            {adminRoutes.map(renderRoute)}
           </Route>
 
           <Route path="*" element={<Navigate to={appRoutes.home()} replace />} />
         </Route>
       </Routes>
+
+      {backgroundLocation ? (
+        <Routes>
+          <Route path={appRoutes.login()} element={<LoginPage />} />
+          <Route path={appRoutes.register()} element={<RegisterPage />} />
+        </Routes>
+      ) : null}
     </>
   );
+}
+
+function renderRoute(route: AppRouteConfig) {
+  if ('index' in route) {
+    return <Route key="index" index element={route.element} />;
+  }
+
+  return <Route key={route.path} path={route.path} element={route.element} />;
 }
 
 function ScrollToTop() {

@@ -1,8 +1,7 @@
+import type { UserRole } from '@massage/shared';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/features/auth';
 import { appRoutes } from '@/shared/routes';
-
-type UserRole = 'CLIENT' | 'ADMIN' | 'SUPER_ADMIN';
 
 interface ProtectedRouteProps {
   allowedRoles?: UserRole[];
@@ -17,11 +16,11 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
   }
 
   if (!user) {
-    return <Navigate to={appRoutes.login()} state={{ from: location.pathname }} replace />;
+    return <Navigate to={appRoutes.login()} state={{ backgroundLocation: location, from: location.pathname }} replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to={appRoutes.login()} state={{ denied: true, from: location.pathname }} replace />;
+    return <Navigate to={appRoutes.login()} state={{ backgroundLocation: location, denied: true, from: location.pathname }} replace />;
   }
 
   return <Outlet />;

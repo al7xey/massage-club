@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { useCreateSupportTicketMutation, useGetMySupportTicketsQuery } from '@/entities/support-ticket';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
+import { Button, EmptyState, StatusBadge, TextAreaField, TextField, type StatusBadgeTone } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import styles from './SupportTicketsPage.module.css';
 
@@ -47,51 +48,45 @@ export function SupportTicketsPage() {
       <section className={styles.layout}>
         <form className={styles.card} onSubmit={handleSubmit} noValidate>
           <h2>Новое обращение</h2>
-          <label className={styles.field}>
-            <span>Тема</span>
-            <input
-              className={styles.input}
-              value={subject}
-              onChange={(event) => {
-                setSubject(event.target.value);
-                setFeedback('');
-                setFeedbackType(null);
-              }}
-              placeholder="Например: не вижу запись в кабинете"
-            />
-          </label>
-          <label className={styles.field}>
-            <span>Сообщение</span>
-            <textarea
-              className={styles.textarea}
-              value={message}
-              onChange={(event) => {
-                setMessage(event.target.value);
-                setFeedback('');
-                setFeedbackType(null);
-              }}
-              placeholder="Опишите, что произошло и какую помощь вы ожидаете"
-              rows={6}
-            />
-          </label>
+          <TextField
+            label="Тема"
+            value={subject}
+            onChange={(event) => {
+              setSubject(event.target.value);
+              setFeedback('');
+              setFeedbackType(null);
+            }}
+            placeholder="Например: не вижу запись в кабинете"
+          />
+          <TextAreaField
+            label="Сообщение"
+            value={message}
+            onChange={(event) => {
+              setMessage(event.target.value);
+              setFeedback('');
+              setFeedbackType(null);
+            }}
+            placeholder="Опишите, что произошло и какую помощь вы ожидаете"
+            rows={6}
+          />
           {feedback ? <p className={feedbackType === 'error' ? styles.error : styles.success}>{feedback}</p> : null}
-          <button className={styles.button} type="submit" disabled={isCreating}>
-            {isCreating ? 'Отправляем...' : 'Отправить'}
-          </button>
+          <Button isLoading={isCreating} loadingText="Отправляем..." type="submit">Отправить</Button>
         </form>
 
         <div className={styles.card}>
           <h2>Мои обращения</h2>
           {isLoading ? <p className={styles.empty}>Загружаем обращения...</p> : null}
           {error ? <p className={styles.error}>{getApiErrorMessage(error, 'Не удалось загрузить обращения')}</p> : null}
-          {!isLoading && !error && tickets.length === 0 ? <p className={styles.empty}>У вас пока нет обращений.</p> : null}
+          {!isLoading && !error && tickets.length === 0 ? (
+            <EmptyState title="Обращений пока нет" description="Когда вы отправите вопрос администратору, история появится здесь." />
+          ) : null}
 
           <div className={styles.list}>
             {tickets.map((ticket) => (
               <article className={styles.ticket} key={ticket.id}>
                 <div className={styles.ticketMeta}>
                   <strong>{ticket.subject}</strong>
-                  <span>{formatTicketStatus(ticket.status)}</span>
+                  <StatusBadge tone={getTicketStatusTone(ticket.status)}>{formatTicketStatus(ticket.status)}</StatusBadge>
                 </div>
                 <p>{ticket.message}</p>
                 <small>{new Intl.DateTimeFormat('ru-RU', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(ticket.createdAt))}</small>
@@ -113,4 +108,18 @@ function formatTicketStatus(status: string) {
   };
 
   return labels[normalizedStatus] ?? status;
+}
+
+function getTicketStatusTone(status: string): StatusBadgeTone {
+  const normalizedStatus = status.toUpperCase();
+
+  if (normalizedStatus === 'CLOSED') {
+    return 'neutral';
+  }
+
+  if (normalizedStatus === 'IN_PROGRESS') {
+    return 'warning';
+  }
+
+  return 'success';
 }

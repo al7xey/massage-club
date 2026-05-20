@@ -68,52 +68,8 @@
   line-height: 1.06;
 }
 
-.settingsButton,
-.primaryButton,
-.secondaryButton,
-.closeButton {
-  display: inline-flex;
-  min-height: 48px;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-control);
-  padding: 0 20px;
-  font-size: 14px;
-  font-weight: 800;
-  transition:
-    border-color 0.18s ease,
-    background-color 0.18s ease,
-    box-shadow 0.18s ease,
-    transform 0.18s ease,
-    color 0.18s ease;
-}
-
-.settingsButton,
-.secondaryButton,
-.closeButton {
-  border: 1px solid var(--color-line);
-  background: #ffffff;
-  color: var(--color-text);
-}
-
-.settingsButton:hover,
-.secondaryButton:hover,
-.closeButton:hover {
-  border-color: var(--color-primary);
-  background: var(--color-soft);
-  color: var(--color-primary-hover);
-  transform: translateY(-1px);
-}
-
-.primaryButton {
-  border: 0;
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-}
-
-.primaryButton:hover {
-  box-shadow: var(--shadow-green);
-  transform: translateY(-1px);
+.settingsButton {
+  justify-self: end;
 }
 
 .subscriptionPanel {
@@ -182,7 +138,6 @@
 .subscriptionCopy p,
 .summaryCard small,
 .tile p,
-.field span,
 .message,
 .highlightVisit span,
 .visitRow span,
@@ -239,23 +194,32 @@
   gap: 12px;
 }
 
-.subscriptionBlock .primaryButton {
-  background: rgba(255, 255, 255, 0.16);
+.subscriptionActions > * {
+  min-width: 150px;
+}
+
+.clubButton,
+.clubButtonMuted {
+  border-color: rgba(255, 255, 255, 0.24);
   color: var(--color-on-primary);
   backdrop-filter: blur(4px);
 }
 
-.subscriptionBlock .primaryButton:hover {
-  background: rgba(255, 255, 255, 0.22);
-}
-
-.subscriptionBlock .secondaryButton {
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.08);
+.clubButton {
+  background: rgba(255, 255, 255, 0.18);
   color: var(--color-on-primary);
 }
 
-.subscriptionBlock .secondaryButton:hover {
+.clubButton:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: var(--color-on-primary);
+}
+
+.clubButtonMuted {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.clubButtonMuted:hover {
   border-color: rgba(255, 255, 255, 0.32);
   background: rgba(255, 255, 255, 0.14);
   color: var(--color-on-primary);
@@ -445,27 +409,6 @@
   gap: 14px;
 }
 
-.field {
-  display: grid;
-  gap: 8px;
-  font-weight: 700;
-}
-
-.field input {
-  min-height: var(--control-height);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-control);
-  background: #ffffff;
-  padding: 0 16px;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.field input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(111, 141, 78, 0.12);
-  outline: 0;
-}
-
 .message {
   margin: 0;
   border-radius: var(--radius-card-small);
@@ -623,9 +566,9 @@
   }
 
   .settingsButton,
-  .primaryButton,
-  .secondaryButton,
-  .closeButton {
+  .subscriptionActions > *,
+  .formActions > *,
+  .inlineActions > * {
     width: 100%;
   }
 

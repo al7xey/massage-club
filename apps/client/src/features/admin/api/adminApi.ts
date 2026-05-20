@@ -33,7 +33,7 @@ export interface AdminSubscriptionDto {
   };
 }
 
-export const adminDashboardApi = baseApi.injectEndpoints({
+export const adminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAdminSummary: builder.query<AdminSummaryDto, void>({
       query: () => '/admin/analytics/summary',
@@ -69,4 +69,4 @@ export const {
   useGetAdminSubscriptionsQuery,
   useGetAdminSummaryQuery,
   useGetAdminUsersQuery,
-} = adminDashboardApi;
+} = adminApi;

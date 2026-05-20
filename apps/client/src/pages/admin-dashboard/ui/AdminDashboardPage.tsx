@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useGetAdminSummaryQuery } from '@/pages/admin-dashboard/api/adminDashboardApi';
+import { useGetAdminSummaryQuery } from '@/features/admin';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import { appRoutes } from '@/shared/routes';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';

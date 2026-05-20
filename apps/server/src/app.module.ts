@@ -16,12 +16,14 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
 import { SupportTicketsModule } from './modules/support-tickets/support-tickets.module';
 import { UsersModule } from './modules/users/users.module';
 import { DatabaseModule } from './database/database.module';
+import { validateEnv } from './config/env.validation';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '../../.env'],
+      validate: validateEnv,
     }),
     DatabaseModule,
     AuthModule,

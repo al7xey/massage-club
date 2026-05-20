@@ -1,13 +1,14 @@
 import { FormEvent, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { appRoutes } from '@/shared/routes';
-import { PageShell } from '@/shared/ui/page-shell/PageShell';
-import styles from '@/pages/login/ui/LoginPage.module.css';
+import { AuthModal, Button, TextField } from '@/shared/ui';
+import styles from '@/shared/ui/auth-form/AuthForm.module.css';
 
 interface AuthLocationState {
   action?: 'book' | 'cart';
+  backgroundLocation?: unknown;
   from?: string;
   serviceId?: string;
 }
@@ -19,11 +20,11 @@ export function RegisterPage() {
   const state = location.state as AuthLocationState | null;
   const successPath = useMemo(() => resolvePostAuthPath(state), [state]);
   const [values, setValues] = useState({
-    fullName: '',
-    phone: '',
-    email: '',
-    password: '',
     confirmPassword: '',
+    email: '',
+    fullName: '',
+    password: '',
+    phone: '',
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -65,10 +66,10 @@ export function RegisterPage() {
 
     try {
       await register({
-        fullName: values.fullName.trim(),
-        phone: values.phone.trim() || undefined,
         email: values.email.trim() || undefined,
+        fullName: values.fullName.trim(),
         password: values.password,
+        phone: values.phone.trim() || undefined,
       });
       navigate(successPath, { replace: true });
     } catch (registerError) {
@@ -79,44 +80,57 @@ export function RegisterPage() {
   };
 
   return (
-    <PageShell title="Регистрация" description="Создайте аккаунт для записи, покупок и оформления сертификатов.">
+    <AuthModal
+      description="Создайте аккаунт для записи, покупок и оформления сертификатов."
+      mode="register"
+      title="Регистрация"
+    >
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
-        <label className={styles.field}>
-          <span>Имя и фамилия</span>
-          <input className={styles.input} value={values.fullName} onChange={(event) => updateField('fullName', event.target.value)} />
-        </label>
-        <label className={styles.field}>
-          <span>Телефон</span>
-          <input className={styles.input} value={values.phone} onChange={(event) => updateField('phone', event.target.value)} />
-        </label>
-        <label className={styles.field}>
-          <span>Email</span>
-          <input className={styles.input} type="email" value={values.email} onChange={(event) => updateField('email', event.target.value)} />
-        </label>
-        <label className={styles.field}>
-          <span>Пароль</span>
-          <input className={styles.input} type="password" value={values.password} onChange={(event) => updateField('password', event.target.value)} />
-        </label>
-        <label className={styles.field}>
-          <span>Подтверждение пароля</span>
-          <input
-            className={styles.input}
-            type="password"
-            value={values.confirmPassword}
-            onChange={(event) => updateField('confirmPassword', event.target.value)}
-          />
-        </label>
+        <TextField
+          autoComplete="name"
+          label="Имя и фамилия"
+          value={values.fullName}
+          onChange={(event) => updateField('fullName', event.target.value)}
+        />
+        <TextField
+          autoComplete="tel"
+          label="Телефон"
+          value={values.phone}
+          onChange={(event) => updateField('phone', event.target.value)}
+        />
+        <TextField
+          autoComplete="email"
+          label="Email"
+          type="email"
+          value={values.email}
+          onChange={(event) => updateField('email', event.target.value)}
+        />
+        <TextField
+          autoComplete="new-password"
+          label="Пароль"
+          type="password"
+          value={values.password}
+          onChange={(event) => updateField('password', event.target.value)}
+        />
+        <TextField
+          autoComplete="new-password"
+          label="Подтверждение пароля"
+          type="password"
+          value={values.confirmPassword}
+          onChange={(event) => updateField('confirmPassword', event.target.value)}
+        />
 
         {error ? <p className={styles.error}>{error}</p> : null}
 
-        <button className={styles.button} type="submit" disabled={isLoading}>
-          {isLoading ? 'Создаём...' : 'Зарегистрироваться'}
-        </button>
+        <Button fullWidth isLoading={isLoading} loadingText="Создаем..." type="submit">
+          Зарегистрироваться
+        </Button>
+
         <p className={styles.note}>
-          Уже есть аккаунт? <Link to={appRoutes.login()} state={state}>Войти</Link>
+          Уже есть аккаунт? <Link state={state} to={appRoutes.login()}>Войти</Link>
         </p>
       </form>
-    </PageShell>
+    </AuthModal>
   );
 }
 

@@ -2,6 +2,7 @@ import { useCancelAppointmentMutation, useGetMyAppointmentsQuery } from '@/entit
 import { formatUserDisplayName } from '@/shared/lib/auth/formatUserDisplayName';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
+import { Button, EmptyState, StatusBadge, type StatusBadgeTone } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import styles from './MyAppointmentsPage.module.css';
 
@@ -22,7 +23,9 @@ export function MyAppointmentsPage() {
       <div className={styles.card}>
         {isLoading ? <p className={styles.empty}>Загружаем записи...</p> : null}
         {error ? <p className={styles.error}>{getApiErrorMessage(error, 'Не удалось загрузить записи')}</p> : null}
-        {!isLoading && !error && appointments.length === 0 ? <p className={styles.empty}>У вас пока нет записей.</p> : null}
+        {!isLoading && !error && appointments.length === 0 ? (
+          <EmptyState title="Записей пока нет" description="Выберите услугу и удобное время, чтобы первая запись появилась здесь." />
+        ) : null}
 
         <div className={styles.list}>
           {appointments.map((appointment) => (
@@ -33,12 +36,14 @@ export function MyAppointmentsPage() {
                 <span>{appointment.studio.name}</span>
               </div>
               <div className={styles.side}>
-                <em className={styles.status}>{formatAppointmentStatus(appointment.status)}</em>
+                <StatusBadge tone={getAppointmentStatusTone(appointment.status)}>
+                  {formatAppointmentStatus(appointment.status)}
+                </StatusBadge>
                 <strong>{appointment.paidBySubscriptionCredit ? 'По подписке' : formatPrice(appointment.priceRub)}</strong>
                 {appointment.status === 'SCHEDULED' ? (
-                  <button type="button" onClick={() => void handleCancel(appointment.id)} disabled={isCancelling}>
+                  <Button size="sm" variant="danger" onClick={() => void handleCancel(appointment.id)} disabled={isCancelling}>
                     Отменить
-                  </button>
+                  </Button>
                 ) : null}
               </div>
             </div>
@@ -66,4 +71,18 @@ function formatAppointmentStatus(status: string) {
   };
 
   return labels[normalizedStatus] ?? status;
+}
+
+function getAppointmentStatusTone(status: string): StatusBadgeTone {
+  const normalizedStatus = status.toUpperCase();
+
+  if (normalizedStatus === 'CANCELLED') {
+    return 'danger';
+  }
+
+  if (normalizedStatus === 'COMPLETED') {
+    return 'neutral';
+  }
+
+  return 'success';
 }

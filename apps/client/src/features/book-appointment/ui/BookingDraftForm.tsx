@@ -2,7 +2,7 @@ import { applySubscriptionBenefits } from '@massage/shared/lib/subscription-bene
 import type { SubscriptionBenefitItemResult } from '@massage/shared/lib/subscription-benefits';
 import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useGetAvailableMastersQuery, useGetServiceSlotsQuery } from '@/entities/appointment';
 import { useAddCartItemMutation, useCheckoutCartMutation, useGetCartQuery, useRemoveCartItemMutation } from '@/entities/cart';
 import type { CartCheckoutResponseDto, CartItemDto } from '@/entities/cart';
@@ -12,6 +12,7 @@ import { useGetMySubscriptionQuery } from '@/entities/subscription';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import { appRoutes } from '@/shared/routes';
+import { Button, EmptyState, LinkButton, TextField } from '@/shared/ui';
 import styles from './BookingDraftForm.module.css';
 
 const today = new Date().toISOString().slice(0, 10);
@@ -276,12 +277,11 @@ export function BookingDraftForm() {
           </div>
 
           {cartItems.length === 0 ? (
-            <div className={styles.empty}>
-              <p>В корзине пока нет услуг.</p>
-              <Link className={styles.primaryButton} to={appRoutes.services()}>
-                Добавить услуги
-              </Link>
-            </div>
+            <EmptyState
+              title="В корзине пока нет услуг"
+              description="Добавьте одну или несколько процедур, чтобы выбрать студию, время и мастера."
+              actions={<LinkButton to={appRoutes.services()}>Добавить услуги</LinkButton>}
+            />
           ) : (
             <div className={styles.cards}>
               {cartItems.map((item) => {
@@ -296,14 +296,14 @@ export function BookingDraftForm() {
                     </div>
                     <div className={styles.cardSide}>
                       <em>{formatItemPrice(pricing)}</em>
-                      <button
-                        type="button"
-                        className={styles.secondaryButton}
+                      <Button
+                        size="sm"
+                        variant="danger"
                         disabled={isRemovingFromCart}
                         onClick={() => void removeCartItem(item.id)}
                       >
                         Удалить
-                      </button>
+                      </Button>
                     </div>
                   </article>
                 );
@@ -339,10 +339,7 @@ export function BookingDraftForm() {
             })}
           </div>
 
-          <label className={styles.field}>
-            <span>Дата</span>
-            <input className={styles.input} type="date" min={today} value={date} onChange={(event) => setDate(event.target.value)} />
-          </label>
+          <TextField label="Дата" type="date" min={today} value={date} onChange={(event) => setDate(event.target.value)} />
         </section>
       ) : null}
 
@@ -515,12 +512,12 @@ export function BookingDraftForm() {
           </div>
 
           <div className={styles.footerActions}>
-            <Link className={styles.primaryButton} to={appRoutes.accountAppointments()}>
+            <LinkButton to={appRoutes.accountAppointments()}>
               Перейти к записям
-            </Link>
-            <button className={styles.secondaryButton} type="button" onClick={startNewBooking}>
+            </LinkButton>
+            <Button variant="secondary" onClick={startNewBooking}>
               Новый заказ
-            </button>
+            </Button>
           </div>
         </section>
       ) : null}
@@ -530,21 +527,21 @@ export function BookingDraftForm() {
       {step < 4 ? (
         <div className={styles.footerActions}>
           {step > 0 ? (
-            <button type="button" className={styles.secondaryButton} onClick={goPreviousStep}>
+            <Button variant="secondary" onClick={goPreviousStep}>
               Назад
-            </button>
+            </Button>
           ) : (
             <span />
           )}
 
           {step < 3 ? (
-            <button type="button" className={styles.primaryButton} onClick={goNextStep}>
+            <Button onClick={goNextStep}>
               Продолжить
-            </button>
+            </Button>
           ) : (
-            <button className={styles.primaryButton} type="button" disabled={isSubmitting} onClick={() => void handleSubmit()}>
-              {isSubmitting ? 'Оформляем...' : 'Подтвердить и оплатить'}
-            </button>
+            <Button isLoading={isSubmitting} loadingText="Оформляем..." onClick={() => void handleSubmit()}>
+              Подтвердить и оплатить
+            </Button>
           )}
         </div>
       ) : null}

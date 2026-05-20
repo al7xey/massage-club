@@ -1,10 +1,11 @@
 import { resolveSubscriptionPurchaseMode } from '@massage/shared/lib/subscription-benefits';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/features/auth';
 import { useGetMySubscriptionQuery, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { appRoutes } from '@/shared/routes';
+import { Button } from '@/shared/ui';
 import { useCreateSubscriptionMutation } from '../api/chooseSubscriptionApi';
 import styles from './ChooseSubscriptionButton.module.css';
 
@@ -13,6 +14,7 @@ interface ChooseSubscriptionButtonProps {
 }
 
 export function ChooseSubscriptionButton({ planId }: ChooseSubscriptionButtonProps) {
+  const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
@@ -22,7 +24,9 @@ export function ChooseSubscriptionButton({ planId }: ChooseSubscriptionButtonPro
 
   const handleClick = async () => {
     if (!user) {
-      navigate(appRoutes.login(), { state: { from: appRoutes.subscriptions() } });
+      navigate(appRoutes.login(), {
+        state: { backgroundLocation: location, from: appRoutes.subscriptions() },
+      });
       return;
     }
 
@@ -34,7 +38,7 @@ export function ChooseSubscriptionButton({ planId }: ChooseSubscriptionButtonPro
 
     const purchaseMode = resolveSubscriptionPurchaseMode(activeSubscription?.plan.id, planId);
     const confirmText = purchaseMode === 'EXTEND'
-      ? `Продлить тариф ${plan.name} ещё на 30 дней за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
+      ? `Продлить тариф ${plan.name} еще на 30 дней за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
       : purchaseMode === 'SWITCH'
         ? `Заменить текущую подписку тарифом ${plan.name} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
         : `Подтвердить покупку тарифа ${plan.name} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`;
@@ -54,9 +58,9 @@ export function ChooseSubscriptionButton({ planId }: ChooseSubscriptionButtonPro
 
   return (
     <div className={styles.root}>
-      <button className={styles.button} type="button" data-plan-id={planId} onClick={handleClick} disabled={isLoading}>
-        {isLoading ? 'Оформляем...' : 'Выбрать тариф'}
-      </button>
+      <Button data-plan-id={planId} fullWidth isLoading={isLoading} loadingText="Оформляем..." onClick={handleClick}>
+        Выбрать тариф
+      </Button>
       {message ? <span className={styles.message}>{message}</span> : null}
     </div>
   );
