@@ -195,34 +195,37 @@
 }
 
 .subscriptionActions > * {
-  min-width: 150px;
+  min-width: 128px;
 }
 
-.clubButton,
-.clubButtonMuted {
-  border-color: rgba(255, 255, 255, 0.24);
-  color: var(--color-on-primary);
+.actionButton {
+  min-height: 40px !important;
+  border-color: var(--color-line) !important;
+  border-radius: var(--radius-control) !important;
+  background: #ffffff !important;
+  color: var(--color-primary-hover) !important;
+  font-weight: 700 !important;
+}
+
+.actionButton:link,
+.actionButton:visited,
+.actionButton:hover,
+.actionButton:active {
+  color: var(--color-primary-hover) !important;
+}
+
+.subscriptionBlock .actionButton {
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: var(--color-on-primary) !important;
   backdrop-filter: blur(4px);
 }
 
-.clubButton {
-  background: rgba(255, 255, 255, 0.18);
-  color: var(--color-on-primary);
-}
-
-.clubButton:hover {
-  background: rgba(255, 255, 255, 0.22);
-  color: var(--color-on-primary);
-}
-
-.clubButtonMuted {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.clubButtonMuted:hover {
-  border-color: rgba(255, 255, 255, 0.32);
-  background: rgba(255, 255, 255, 0.14);
-  color: var(--color-on-primary);
+.subscriptionBlock .actionButton:link,
+.subscriptionBlock .actionButton:visited,
+.subscriptionBlock .actionButton:hover,
+.subscriptionBlock .actionButton:active {
+  color: var(--color-on-primary) !important;
 }
 
 .subscriptionRing {
@@ -316,7 +319,7 @@
 
 .tilewide {
   grid-column: span 6;
-  grid-row: span 2;
+  grid-row: span 1;
 }
 
 .tilestandard {

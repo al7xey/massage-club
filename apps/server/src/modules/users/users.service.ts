@@ -63,6 +63,7 @@ export class UsersService {
       email: user.email ?? null,
       phone: user.phone ?? null,
       role: user.role,
+      gender: user.gender,
     };
   }
 

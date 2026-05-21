@@ -17,6 +17,9 @@ export class Studio {
   @Column({ nullable: true })
   phone?: string;
 
+  @Column({ name: 'photo_url', nullable: true })
+  photoUrl?: string;
+
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 

@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { UserGender } from '@massage/shared';
+import { In, MoreThan, Repository } from 'typeorm';
+import { Subscription, SubscriptionStatus } from '../subscriptions/entities/subscription.entity';
+import { User } from '../users/entities/user.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { ServiceCatalogQueryDto } from './dto/service-catalog-query.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
@@ -12,27 +15,39 @@ export class ServicesService {
   constructor(
     @InjectRepository(Service) private readonly servicesRepository: Repository<Service>,
     @InjectRepository(ServiceCategory) private readonly categoriesRepository: Repository<ServiceCategory>,
+    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    @InjectRepository(Subscription) private readonly subscriptionsRepository: Repository<Subscription>,
   ) {}
 
   findAll() {
     return this.servicesRepository.find({ where: { isActive: true }, order: { title: 'ASC' } });
   }
 
-  findCategories() {
-    return this.categoriesRepository
+  async findCategories(userId?: string) {
+    const visibility = await this.resolveVisibility(userId);
+    const builder = this.categoriesRepository
       .createQueryBuilder('category')
-      .innerJoin('category.services', 'service', 'service.isActive = :isActive', { isActive: true })
-      .orderBy('category.name', 'ASC')
-      .getMany();
+      .innerJoin('category.services', 'service', 'service.isActive = :isActive', { isActive: true });
+
+    if (!visibility.showWomenMassage) {
+      builder.andWhere('category.slug != :womenMassageSlug', { womenMassageSlug: 'massage' });
+    }
+
+    return builder.orderBy('category.name', 'ASC').getMany();
   }
 
-  async findCatalog(query: ServiceCatalogQueryDto) {
+  async findCatalog(query: ServiceCatalogQueryDto, userId?: string) {
+    const visibility = await this.resolveVisibility(userId);
     const page = Math.max(1, query.page ?? 1);
     const limit = Math.min(48, Math.max(1, query.limit ?? 12));
     const builder = this.servicesRepository
       .createQueryBuilder('service')
       .leftJoinAndSelect('service.category', 'category')
       .where('service.isActive = :isActive', { isActive: true });
+
+    if (!visibility.showWomenMassage) {
+      builder.andWhere('(category.slug IS NULL OR category.slug != :womenMassageSlug)', { womenMassageSlug: 'massage' });
+    }
 
     const search = query.search?.trim().toLowerCase();
     if (search) {
@@ -96,11 +111,17 @@ export class ServicesService {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, userId?: string) {
+    const visibility = await this.resolveVisibility(userId);
     const service = await this.servicesRepository.findOne({ where: { id } });
     if (!service) {
       throw new NotFoundException('Service not found');
     }
+
+    if (!visibility.showWomenMassage && service.category?.slug === 'massage') {
+      throw new NotFoundException('Service not found');
+    }
+
     return service;
   }
 
@@ -135,5 +156,37 @@ export class ServicesService {
     const service = await this.findOne(id);
     service.isActive = false;
     return this.servicesRepository.save(service);
+  }
+
+  private async resolveVisibility(userId?: string) {
+    if (!userId) {
+      return { showWomenMassage: true };
+    }
+
+    const user = await this.usersRepository.findOne({ where: { id: userId, isActive: true } });
+    if (!user || user.gender !== UserGender.MALE) {
+      return { showWomenMassage: true };
+    }
+
+    const hasFamilySubscription = await this.hasActiveFamilySubscription(userId);
+    return { showWomenMassage: hasFamilySubscription };
+  }
+
+  private async hasActiveFamilySubscription(userId: string) {
+    const subscription = await this.subscriptionsRepository.findOne({
+      where: {
+        user: { id: userId },
+        status: In([
+          SubscriptionStatus.ACTIVE,
+          SubscriptionStatus.FROZEN,
+          SubscriptionStatus.AUTO_RENEWAL_DISABLED,
+          SubscriptionStatus.PAYMENT_ISSUE,
+        ]),
+        endsAt: MoreThan(new Date()),
+        plan: { code: In(['FAMILY', 'FAMILY_SUPER']) },
+      },
+    });
+
+    return Boolean(subscription);
   }
 }

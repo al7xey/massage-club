@@ -10,7 +10,9 @@ interface StudioCardProps {
 export function StudioCard({ studio }: StudioCardProps) {
   return (
     <article className={styles.card}>
-      <div className={styles.media} aria-hidden="true" />
+      <div className={styles.media}>
+        {studio.photoUrl ? <img src={studio.photoUrl} alt={studio.title} loading="lazy" /> : <div aria-hidden="true" className={styles.placeholder} />}
+      </div>
       <div className={styles.content}>
         <h3>{studio.title}</h3>
         <p>{studio.address}</p>

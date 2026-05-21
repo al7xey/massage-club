@@ -2,6 +2,7 @@ import { createServiceCardModel, useGetServicesQuery } from '@/entities/service'
 import { mockReviews } from '@/entities/review';
 import { buildTariffs, useGetMembershipEntryFeeQuery, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
+import { useAuth } from '@/features/auth';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import { PlansCarousel } from '@/widgets/plans-carousel';
 import { ReviewsShowcase } from '@/widgets/reviews-showcase';
@@ -10,6 +11,7 @@ import { StudioShowcase } from '@/widgets/studio-showcase';
 import styles from './SubscriptionPlansPage.module.css';
 
 export function SubscriptionPlansPage() {
+  const { user } = useAuth();
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
   const { data: entryFee } = useGetMembershipEntryFeeQuery();
   const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
@@ -24,23 +26,25 @@ export function SubscriptionPlansPage() {
     ? `Вступительный взнос ${entryFee.entryFeeRub.toLocaleString('ru-RU')} ₽ действует при покупке первой подписки.`
     : `Бессрочная акция: первый вступительный взнос ${entryFee?.entryFeeRub.toLocaleString('ru-RU') ?? '1 200'} ₽ сейчас 0 ₽.`;
 
+  const isMaleAccount = user?.gender === 'MALE';
+  const isFemaleAccount = user?.gender === 'FEMALE';
+
   return (
-    <PageShell
-      title="Тарифы"
-      description="Выберите формат регулярного ухода: включенные услуги, скидки на каталог и заморозка подписки."
-    >
-      <PlansCarousel
-        title="Для женщин"
-        subtitle="Леди-планы для восстановления, ухода и мягкого ритма. Семейные тарифы тоже доступны здесь."
-        items={womenTariffs}
-        dotIdPrefix="plans-page-women"
-      />
-      <PlansCarousel
-        title="Для мужчин"
-        subtitle="Мистер-планы с акцентом на восстановление и силовой массаж. Семейные тарифы тоже доступны здесь."
-        items={menTariffs}
-        dotIdPrefix="plans-page-men"
-      />
+    <PageShell title="Тарифы">
+      {isMaleAccount ? (
+        <PlansCarousel title="Доступные тарифы" items={menTariffs} dotIdPrefix="plans-page-men" />
+      ) : null}
+
+      {isFemaleAccount ? (
+        <PlansCarousel title="Доступные тарифы" items={womenTariffs} dotIdPrefix="plans-page-women" />
+      ) : null}
+
+      {!user ? (
+        <>
+          <PlansCarousel title="Для женщин" items={womenTariffs} dotIdPrefix="plans-page-women" />
+          <PlansCarousel title="Для мужчин" items={menTariffs} dotIdPrefix="plans-page-men" />
+        </>
+      ) : null}
 
       <section className={styles.promo}>
         <span aria-hidden="true">%</span>

@@ -38,6 +38,7 @@ export class AuthService {
       fullName,
       phone,
       role: UserRole.CLIENT,
+      gender: dto.gender,
     });
 
     const savedUser = await this.usersRepository.save(user);
@@ -54,8 +55,12 @@ export class AuthService {
           where: { phone: normalizePhone(identifier) ?? undefined, isActive: true },
         });
 
-    if (!user || !(await compare(dto.password, user.passwordHash))) {
-      throw new UnauthorizedException('Invalid phone/email or password');
+    if (!user) {
+      throw new UnauthorizedException('Account not found');
+    }
+
+    if (!(await compare(dto.password, user.passwordHash))) {
+      throw new UnauthorizedException('Invalid password');
     }
 
     return this.buildAuthResponse(user);
@@ -87,6 +92,7 @@ export class AuthService {
       email: user.email ?? null,
       phone: user.phone ?? null,
       role: user.role,
+      gender: user.gender,
     };
   }
 
@@ -104,6 +110,7 @@ export class AuthService {
       email: user.email ?? null,
       phone: user.phone ?? null,
       role: user.role,
+      gender: user.gender,
     };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {

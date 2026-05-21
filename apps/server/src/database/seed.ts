@@ -596,6 +596,7 @@ async function seed() {
     city: 'Москва',
     address: 'Тверская улица, 12',
     phone: '+74950000001',
+    photoUrl: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
     isActive: true,
   }));
 
@@ -604,6 +605,7 @@ async function seed() {
     city: 'Москва',
     address: 'Ленинский проспект, 45',
     phone: '+74950000002',
+    photoUrl: 'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
     isActive: true,
   }));
 

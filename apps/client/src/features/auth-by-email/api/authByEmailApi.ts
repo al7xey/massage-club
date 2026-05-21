@@ -1,4 +1,4 @@
-import type { AuthResponseDto } from '@massage/shared';
+import type { AuthResponseDto, UserGender } from '@massage/shared';
 import { baseApi } from '@/shared/api/baseApi';
 
 export interface LoginRequest {
@@ -10,6 +10,7 @@ export interface RegisterRequest {
   fullName: string;
   email?: string;
   phone?: string;
+  gender: UserGender;
   password: string;
 }
 

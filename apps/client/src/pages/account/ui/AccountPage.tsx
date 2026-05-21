@@ -129,7 +129,7 @@ export function AccountPage() {
         </div>
 
         <Button
-          className={styles.settingsButton}
+          className={`${styles.settingsButton} ${styles.actionButton}`}
           variant="secondary"
           onClick={() => setIsSettingsOpen((current) => !current)}
         >
@@ -154,10 +154,10 @@ export function AccountPage() {
                   <InfoPill label="Скидка" value={`${subscription.plan.discountPercent}%`} />
                 </div>
                 <div className={styles.subscriptionActions}>
-                  <LinkButton className={styles.clubButton} to={appRoutes.booking()} variant="secondary">
+                  <LinkButton className={styles.actionButton} size="sm" to={appRoutes.booking()} variant="secondary">
                     Записаться
                   </LinkButton>
-                  <LinkButton className={styles.clubButtonMuted} to={appRoutes.subscriptions()} variant="secondary">
+                  <LinkButton className={styles.actionButton} size="sm" to={appRoutes.subscriptions()} variant="secondary">
                     Тарифы клуба
                   </LinkButton>
                 </div>
@@ -179,7 +179,7 @@ export function AccountPage() {
                 <h2>Подписка не подключена</h2>
                 <p>Выберите клубный тариф, чтобы получить специальные цены и включённые посещения.</p>
                 <div className={styles.subscriptionActions}>
-                  <LinkButton className={styles.clubButton} to={appRoutes.subscriptions()} variant="secondary">
+                  <LinkButton className={styles.actionButton} size="sm" to={appRoutes.subscriptions()} variant="secondary">
                     Выбрать подписку
                   </LinkButton>
                 </div>
@@ -208,7 +208,7 @@ export function AccountPage() {
           description="Выберите процедуру, мастера и время в новом потоке записи."
           to={appRoutes.booking()}
           tone="accent"
-          size="wide"
+          size="standard"
         />
         <QuickTile
           title="Мои записи"
@@ -249,9 +249,9 @@ export function AccountPage() {
                 <h3>Личные данные</h3>
               </div>
               <Button
-                className={styles.closeButton}
+                className={`${styles.closeButton} ${styles.actionButton}`}
                 size="sm"
-                variant="ghost"
+                variant="secondary"
                 onClick={() => setIsSettingsOpen(false)}
               >
                 Закрыть
@@ -268,10 +268,10 @@ export function AccountPage() {
               {message ? <p className={styles.message}>{message}</p> : null}
 
               <div className={styles.formActions}>
-                <Button isLoading={isSaving} loadingText="Сохраняем..." type="submit">
+                <Button className={styles.actionButton} variant="secondary" isLoading={isSaving} loadingText="Сохраняем..." type="submit">
                   Сохранить
                 </Button>
-                <Button variant="secondary" onClick={handleLogout}>
+                <Button className={styles.actionButton} variant="secondary" onClick={handleLogout}>
                   Выйти
                 </Button>
               </div>
@@ -296,11 +296,12 @@ export function AccountPage() {
                 {formatUserDisplayName(nextAppointment.master)} · {nextAppointment.studio.name}
               </span>
               <div className={styles.inlineActions}>
-                <LinkButton to={appRoutes.booking()} variant="secondary">
+                <LinkButton className={styles.actionButton} to={appRoutes.booking()} variant="secondary">
                   Новая запись
                 </LinkButton>
                 <Button
-                  variant="danger"
+                  className={styles.actionButton}
+                  variant="secondary"
                   onClick={() => void handleCancelAppointment(nextAppointment.id)}
                   disabled={isCancellingAppointment}
                 >

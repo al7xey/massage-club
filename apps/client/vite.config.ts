@@ -3,6 +3,7 @@ import path from 'node:path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  cacheDir: path.resolve(__dirname, '../../.cache/vite-client'),
   plugins: [react()],
   resolve: {
     alias: {

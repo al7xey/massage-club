@@ -1,5 +1,5 @@
 import type { UserRole } from '@massage/shared';
-import { useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Location, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import { appRoutes } from '@/shared/routes';
@@ -11,15 +11,27 @@ export function AppRouter() {
   const state = location.state as { backgroundLocation?: Location } | null;
   const backgroundLocation = state?.backgroundLocation;
   const isAuthRoute = location.pathname === appRoutes.login() || location.pathname === appRoutes.register();
+  const lastContentLocationRef = useRef<Location>(location);
+  const hasContentLocationRef = useRef(!isAuthRoute);
+
+  useEffect(() => {
+    if (!isAuthRoute) {
+      lastContentLocationRef.current = location;
+      hasContentLocationRef.current = true;
+    }
+  }, [isAuthRoute, location]);
+
   const routesLocation =
     backgroundLocation ??
     (isAuthRoute
-      ? {
-          ...location,
-          hash: '',
-          pathname: appRoutes.home(),
-          search: '',
-        }
+      ? hasContentLocationRef.current
+        ? lastContentLocationRef.current
+        : {
+            ...location,
+            hash: '',
+            pathname: appRoutes.home(),
+            search: '',
+          }
       : location);
 
   return (
@@ -61,12 +73,16 @@ function renderRoute(route: AppRouteConfig) {
 
 function ScrollToTop() {
   const { key, pathname } = useLocation();
+  const isAuthRoute = pathname === appRoutes.login() || pathname === appRoutes.register();
 
   useLayoutEffect(() => {
+    if (isAuthRoute) {
+      return;
+    }
     const scrollRoot = document.querySelector<HTMLElement>('[data-app-scroll-root]');
     scrollRoot?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-  }, [key, pathname]);
+  }, [isAuthRoute, key, pathname]);
 
   return null;
 }

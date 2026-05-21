@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
-import type { AuthResponseDto, PublicUserDto } from '@massage/shared';
+import type { AuthResponseDto, PublicUserDto, UserGender } from '@massage/shared';
 import { API_BASE_URL } from '@/shared/config/env';
 import { formatUserDisplayName } from '@/shared/lib/auth/formatUserDisplayName';
 import { tokenStorage } from '@/shared/lib/storage/tokenStorage';
@@ -10,6 +10,7 @@ interface RegisterPayload {
   fullName: string;
   email?: string;
   phone?: string;
+  gender: UserGender;
   password: string;
 }
 

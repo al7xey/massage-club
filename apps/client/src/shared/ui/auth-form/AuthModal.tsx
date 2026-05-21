@@ -1,38 +1,27 @@
-import { PropsWithChildren, useEffect, useId, useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import type { Location } from 'react-router-dom';
+import { type MouseEvent, PropsWithChildren, useCallback, useEffect, useRef } from 'react';
+import { type Location, useLocation, useNavigate } from 'react-router-dom';
 import brandLogo from '@/shared/assets/brand-logo.jpg';
 import { appRoutes } from '@/shared/routes';
 import styles from './AuthForm.module.css';
 
 interface AuthModalProps extends PropsWithChildren {
-  description: string;
-  mode: 'login' | 'register';
   title: string;
 }
 
-interface AuthModalLocationState {
-  backgroundLocation?: Location;
-  from?: string;
-}
-
-export function AuthModal({ children, description, mode, title }: AuthModalProps) {
+export function AuthModal({ title, children }: AuthModalProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const state = location.state as AuthModalLocationState | null;
-  const titleId = useId();
-  const descriptionId = useId();
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  const closeModal = () => {
-    const backgroundLocation = state?.backgroundLocation;
+  const closeModal = useCallback(() => {
+    const state = location.state as { backgroundLocation?: Location; from?: string } | null;
 
-    if (backgroundLocation) {
+    if (state?.backgroundLocation) {
       navigate(
         {
-          hash: backgroundLocation.hash,
-          pathname: backgroundLocation.pathname,
-          search: backgroundLocation.search,
+          hash: state.backgroundLocation.hash,
+          pathname: state.backgroundLocation.pathname,
+          search: state.backgroundLocation.search,
         },
         { replace: true },
       );
@@ -40,78 +29,64 @@ export function AuthModal({ children, description, mode, title }: AuthModalProps
     }
 
     navigate(state?.from ?? appRoutes.home(), { replace: true });
-  };
+  }, [location.state, navigate]);
+
+  const handleCloseClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeModal();
+    },
+    [closeModal],
+  );
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    closeButtonRef.current?.focus();
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         closeModal();
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-
+    document.addEventListener('keydown', onKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
-      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keydown', onKeyDown);
     };
-  }, []);
+  }, [closeModal]);
 
   return (
-    <div className={styles.modalRoot}>
+    <div className={styles.modalRoot} ref={rootRef}>
       <button aria-label="Закрыть окно авторизации" className={styles.overlay} onClick={closeModal} type="button" />
-      <div
-        aria-describedby={descriptionId}
-        aria-labelledby={titleId}
-        aria-modal="true"
-        className={styles.modalCard}
-        role="dialog"
-      >
-        <div className={styles.modalHeader}>
+      <section aria-label={title} aria-modal="true" className={styles.modalCard} role="dialog">
+        <header className={styles.modalHeader}>
           <div className={styles.modalBrand}>
             <span className={styles.brandMark} aria-hidden="true">
               <img src={brandLogo} alt="" />
             </span>
             RelaxUp
           </div>
-          <button ref={closeButtonRef} aria-label="Закрыть" className={styles.closeButton} onClick={closeModal} type="button">
-            ×
+          <button
+            aria-label="Закрыть"
+            className={styles.closeButton}
+            onClick={handleCloseClick}
+            type="button"
+          >
+            <span aria-hidden="true" className={styles.closeGlyph}>
+              +
+            </span>
           </button>
-        </div>
+        </header>
 
         <div className={styles.modalBody}>
           <div className={styles.modalIntro}>
-            <p className={styles.eyebrow}>{mode === 'login' ? 'Личный кабинет' : 'Новый аккаунт'}</p>
-            <h1 id={titleId}>{title}</h1>
-            <p id={descriptionId}>{description}</p>
+            <h1>{title}</h1>
           </div>
-
-          <div className={styles.switchRow}>
-            <Link
-              className={mode === 'login' ? styles.switchActive : styles.switchLink}
-              replace
-              state={location.state}
-              to={appRoutes.login()}
-            >
-              Вход
-            </Link>
-            <Link
-              className={mode === 'register' ? styles.switchActive : styles.switchLink}
-              replace
-              state={location.state}
-              to={appRoutes.register()}
-            >
-              Регистрация
-            </Link>
-          </div>
-
           {children}
         </div>
-      </div>
+      </section>
     </div>
   );
 }

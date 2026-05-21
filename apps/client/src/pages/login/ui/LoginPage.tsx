@@ -34,7 +34,8 @@ export function LoginPage() {
       await login(nextIdentifier, nextPassword);
       navigate(successPath, { replace: true });
     } catch (loginError) {
-      setError(getApiErrorMessage(loginError, 'Не удалось войти'));
+      const apiMessage = getApiErrorMessage(loginError, 'Не удалось войти');
+      setError(mapLoginErrorMessage(apiMessage));
     } finally {
       setIsLoading(false);
     }
@@ -43,8 +44,9 @@ export function LoginPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!identifier.trim() || !password.trim()) {
-      setError('Введите почту или телефон и пароль');
+    const validationError = validateLoginInput(identifier, password);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -52,16 +54,12 @@ export function LoginPage() {
   };
 
   return (
-    <AuthModal
-      description="Войдите в личный кабинет по почте или номеру телефона."
-      mode="login"
-      title="Вход"
-    >
+    <AuthModal title="Вход">
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         <TextField
           autoComplete="username"
           label="Почта или телефон"
-          placeholder="user@test.ru или +7 999 111-22-33"
+          placeholder="Введите почту или телефон"
           type="text"
           value={identifier}
           onChange={(event) => {
@@ -72,7 +70,7 @@ export function LoginPage() {
         <TextField
           autoComplete="current-password"
           label="Пароль"
-          placeholder="user123"
+          placeholder="Введите пароль"
           type="password"
           value={password}
           onChange={(event) => {
@@ -83,26 +81,9 @@ export function LoginPage() {
 
         {error ? <p className={styles.error}>{error}</p> : null}
 
-        <Button fullWidth isLoading={isLoading} loadingText="Входим..." type="submit">
+        <Button className={styles.primarySubmit} fullWidth isLoading={isLoading} loadingText="Входим..." type="submit">
           Войти
         </Button>
-
-        <div className={styles.quickActions}>
-          <Button
-            disabled={isLoading}
-            variant="secondary"
-            onClick={() => void submitLogin('user@test.ru', 'user123')}
-          >
-            Войти как пользователь
-          </Button>
-          <Button
-            disabled={isLoading}
-            variant="secondary"
-            onClick={() => void submitLogin('admin@test.ru', 'admin123')}
-          >
-            Войти как администратор
-          </Button>
-        </div>
 
         <p className={styles.note}>
           Нет аккаунта? <Link state={state} to={appRoutes.register()}>Зарегистрироваться</Link>
@@ -110,6 +91,58 @@ export function LoginPage() {
       </form>
     </AuthModal>
   );
+}
+
+function validateLoginInput(identifier: string, password: string) {
+  const trimmedIdentifier = identifier.trim();
+
+  if (!trimmedIdentifier || !password.trim()) {
+    return 'Введите почту или телефон и пароль';
+  }
+
+  if (trimmedIdentifier.includes('@')) {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(trimmedIdentifier)) {
+      return 'Введите корректный email';
+    }
+  } else {
+    const digits = trimmedIdentifier.replace(/\D/g, '');
+    if (digits.length < 10) {
+      return 'Введите корректный номер телефона';
+    }
+  }
+
+  if (password.trim().length < 6) {
+    return 'Пароль должен быть не короче 6 символов';
+  }
+
+  return null;
+}
+
+function mapLoginErrorMessage(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes('account not found') || normalized.includes('user not found')) {
+    return 'Аккаунт не найден. Проверьте данные или зарегистрируйтесь.';
+  }
+
+  if (normalized.includes('invalid password')) {
+    return 'Неверный пароль.';
+  }
+
+  if (normalized.includes('unauthorized') || normalized.includes('forbidden')) {
+    return 'Неверная почта/телефон или пароль.';
+  }
+
+  if (normalized.includes('invalid phone/email or password')) {
+    return 'Неверные данные для входа.';
+  }
+
+  if (normalized.includes('network') || normalized.includes('failed to fetch')) {
+    return 'Ошибка сети. Проверьте интернет-соединение и попробуйте снова.';
+  }
+
+  return message;
 }
 
 function resolvePostAuthPath(state: AuthLocationState | null) {

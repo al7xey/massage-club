@@ -1,4 +1,4 @@
-import { UserRole } from '@massage/shared';
+import { UserGender, UserRole } from '@massage/shared';
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('users')
@@ -20,6 +20,9 @@ export class User {
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.CLIENT })
   role: UserRole;
+
+  @Column({ type: 'enum', enum: UserGender, default: UserGender.FEMALE })
+  gender: UserGender;
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;

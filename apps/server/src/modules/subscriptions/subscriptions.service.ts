@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { resolveSubscriptionPurchaseMode } from '@massage/shared';
+import { UserGender, resolveSubscriptionPurchaseMode } from '@massage/shared';
 import { In, MoreThan, Repository } from 'typeorm';
 import { Payment, PaymentStatus } from '../payments/entities/payment.entity';
 import { SubscriptionPlan } from '../subscription-plans/entities/subscription-plan.entity';
@@ -23,6 +23,11 @@ export class SubscriptionsService {
   async create(userId: string, dto: CreateSubscriptionDto) {
     const user = await this.usersRepository.findOneByOrFail({ id: userId });
     const plan = await this.plansRepository.findOneByOrFail({ id: dto.planId, isActive: true });
+
+    if (!this.isPlanAvailableForGender(plan.code, user.gender)) {
+      throw new ForbiddenException('Selected plan is not available for your account');
+    }
+
     const activeSubscription = await this.findCurrentActiveSubscription(user.id);
     const purchaseMode = resolveSubscriptionPurchaseMode(activeSubscription?.plan.id, plan.id);
     const startsAt = new Date();
@@ -235,5 +240,17 @@ export class SubscriptionsService {
       throw new ForbiddenException('Subscription belongs to another user');
     }
     return subscription;
+  }
+
+  private isPlanAvailableForGender(planCode: string, gender: UserGender) {
+    if (planCode.startsWith('FAMILY')) {
+      return true;
+    }
+
+    if (gender === UserGender.MALE) {
+      return planCode.startsWith('MISTER');
+    }
+
+    return planCode.startsWith('LADY');
   }
 }

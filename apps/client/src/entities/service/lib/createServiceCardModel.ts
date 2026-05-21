@@ -7,6 +7,14 @@ function getCategoryLabel(service: ServiceDto): string {
     return 'КОРРЕКЦИЯ ФИГУРЫ';
   }
 
+  if (slug === 'massage') {
+    return 'МАССАЖ ДЛЯ ЖЕНЩИН';
+  }
+
+  if (slug === 'massage-men') {
+    return 'МАССАЖ ДЛЯ МУЖЧИН';
+  }
+
   return service.category?.name ?? 'Услуга';
 }
 

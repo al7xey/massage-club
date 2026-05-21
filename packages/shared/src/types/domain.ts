@@ -1,4 +1,5 @@
-﻿import { UserRole } from '../enums/user-role.enum';
+import { UserGender } from '../enums/user-gender.enum';
+import { UserRole } from '../enums/user-role.enum';
 
 export interface PublicUserDto {
   id: string;
@@ -6,6 +7,7 @@ export interface PublicUserDto {
   email?: string | null;
   phone?: string | null;
   role: UserRole;
+  gender: UserGender;
 }
 
 export interface AuthTokensDto {

@@ -1,4 +1,5 @@
 import { FormEvent, useMemo, useState } from 'react';
+import type { UserGender } from '@massage/shared';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
@@ -23,6 +24,7 @@ export function RegisterPage() {
     confirmPassword: '',
     email: '',
     fullName: '',
+    gender: 'FEMALE' as UserGender,
     password: '',
     phone: '',
   });
@@ -38,27 +40,32 @@ export function RegisterPage() {
     event.preventDefault();
 
     if (!values.fullName.trim() || !values.password.trim()) {
-      setError('Заполните имя и фамилию, а также пароль');
+      setError('Заполните имя и пароль.');
       return;
     }
 
     if (!values.email.trim() && !values.phone.trim()) {
-      setError('Укажите телефон или email');
+      setError('Укажите телефон или email.');
       return;
     }
 
     if (values.email.trim() && !values.email.includes('@')) {
-      setError('Введите корректный email');
+      setError('Введите корректный email.');
       return;
     }
 
     if (values.password.length < 6) {
-      setError('Пароль должен быть не короче 6 символов');
+      setError('Пароль должен быть не короче 6 символов.');
       return;
     }
 
     if (values.password !== values.confirmPassword) {
-      setError('Пароли не совпадают');
+      setError('Пароли не совпадают.');
+      return;
+    }
+
+    if (values.gender !== 'FEMALE' && values.gender !== 'MALE') {
+      setError('Выберите пол.');
       return;
     }
 
@@ -68,23 +75,20 @@ export function RegisterPage() {
       await register({
         email: values.email.trim() || undefined,
         fullName: values.fullName.trim(),
+        gender: values.gender,
         password: values.password,
         phone: values.phone.trim() || undefined,
       });
       navigate(successPath, { replace: true });
     } catch (registerError) {
-      setError(getApiErrorMessage(registerError, 'Не удалось зарегистрироваться'));
+      setError(getApiErrorMessage(registerError, 'Не удалось зарегистрироваться.'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <AuthModal
-      description="Создайте аккаунт для записи, покупок и оформления сертификатов."
-      mode="register"
-      title="Регистрация"
-    >
+    <AuthModal title="Регистрация">
       <form className={styles.form} onSubmit={handleSubmit} noValidate>
         <TextField
           autoComplete="name"
@@ -92,6 +96,27 @@ export function RegisterPage() {
           value={values.fullName}
           onChange={(event) => updateField('fullName', event.target.value)}
         />
+        <div className={styles.genderField} role="group" aria-label="Выбор пола">
+          <span className={styles.genderLabel}>Пол</span>
+          <div className={styles.genderRow}>
+            <button
+              type="button"
+              className={`${styles.genderOption} ${values.gender === 'FEMALE' ? styles.genderOptionActive : ''}`}
+              aria-pressed={values.gender === 'FEMALE'}
+              onClick={() => updateField('gender', 'FEMALE')}
+            >
+              Женский
+            </button>
+            <button
+              type="button"
+              className={`${styles.genderOption} ${values.gender === 'MALE' ? styles.genderOptionActive : ''}`}
+              aria-pressed={values.gender === 'MALE'}
+              onClick={() => updateField('gender', 'MALE')}
+            >
+              Мужской
+            </button>
+          </div>
+        </div>
         <TextField
           autoComplete="tel"
           label="Телефон"
@@ -122,7 +147,7 @@ export function RegisterPage() {
 
         {error ? <p className={styles.error}>{error}</p> : null}
 
-        <Button fullWidth isLoading={isLoading} loadingText="Создаем..." type="submit">
+        <Button className={styles.primarySubmit} fullWidth isLoading={isLoading} loadingText="Создаем..." type="submit">
           Зарегистрироваться
         </Button>
 
