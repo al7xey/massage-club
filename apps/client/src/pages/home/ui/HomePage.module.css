@@ -115,26 +115,33 @@
 .giftBanner::before,
 .giftBanner::after {
   position: absolute;
-  border: 14px solid rgba(111, 141, 78, 0.12);
   content: "";
 }
 
 .giftBanner::before {
-  right: 86px;
-  bottom: 52px;
-  width: 156px;
-  height: 132px;
-  border-radius: var(--radius-card-small);
-  transform: rotate(12deg);
+  right: 74px;
+  bottom: 44px;
+  width: 166px;
+  height: 136px;
+  border: 2px solid rgba(111, 141, 78, 0.22);
+  border-radius: 22px;
+  background:
+    linear-gradient(90deg, transparent 0 43%, rgba(111, 141, 78, 0.18) 43% 57%, transparent 57%),
+    linear-gradient(180deg, rgba(111, 141, 78, 0.18) 0 18%, transparent 18%),
+    rgba(255, 255, 255, 0.52);
+  box-shadow: 0 16px 34px rgba(32, 35, 42, 0.07);
+  transform: rotate(7deg);
 }
 
 .giftBanner::after {
-  right: 142px;
-  bottom: 34px;
-  width: 38px;
-  height: 178px;
-  border-width: 0 14px;
-  transform: rotate(12deg);
+  right: 125px;
+  bottom: 176px;
+  width: 74px;
+  height: 44px;
+  border: 12px solid rgba(111, 141, 78, 0.18);
+  border-bottom: 0;
+  border-radius: 48px 48px 0 0;
+  transform: rotate(7deg);
 }
 
 .giftBanner h2,

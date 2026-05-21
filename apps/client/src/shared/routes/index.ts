@@ -12,6 +12,7 @@
   register: () => '/register',
   certificates: () => '/certificates',
   contacts: () => '/contacts',
+  reviews: () => '/reviews',
   legal: () => '/legal',
   account: () => '/account',
   accountSubscription: () => '/account/subscription',

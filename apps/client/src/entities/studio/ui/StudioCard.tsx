@@ -17,8 +17,8 @@ export function StudioCard({ studio }: StudioCardProps) {
         <h3>{studio.title}</h3>
         <p>{studio.address}</p>
         <p>{studio.openLabel}</p>
-        <LinkButton fullWidth to={appRoutes.booking()}>
-          Записаться в филиал
+        <LinkButton fullWidth to={`${appRoutes.studios()}#map`}>
+          Посмотреть на карте
         </LinkButton>
       </div>
     </article>

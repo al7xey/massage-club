@@ -67,7 +67,7 @@
 }
 
 .meta p {
-  color: var(--color-muted);
+  color: var(--color-accent);
   font-size: 14px;
   line-height: 1.35;
 }

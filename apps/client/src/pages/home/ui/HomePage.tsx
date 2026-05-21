@@ -17,7 +17,8 @@ export function HomePage() {
 
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
-  const tariffs = buildTariffs(plans).slice(0, 4);
+  const homeTariffCodes = new Set(['LADY', 'LADY_SUPER', 'FAMILY', 'FAMILY_SUPER']);
+  const tariffs = buildTariffs(plans).filter((plan) => homeTariffCodes.has(plan.code)).slice(0, 4);
 
   return (
     <main className={styles.page}>
@@ -33,11 +34,11 @@ export function HomePage() {
             Массаж, SPA и уход по единой подписке.
           </p>
           <div className={styles.heroActions}>
-            <LinkButton to={appRoutes.booking()}>
-              Записаться
+            <LinkButton to={appRoutes.subscriptions()}>
+              Выбрать тариф
             </LinkButton>
-            <LinkButton to={appRoutes.subscriptions()} variant="secondary">
-              Выбрать подписку
+            <LinkButton to={appRoutes.services()} variant="secondary">
+              Записаться на услугу
             </LinkButton>
           </div>
         </div>
@@ -51,7 +52,6 @@ export function HomePage() {
 
       <PlansCarousel
         title="Стань членом клуба"
-        subtitle="Подписка — это не только выгода, но и дисциплина любви к себе."
         items={tariffs}
         dotIdPrefix="home-plans-page"
         topAction={
@@ -76,13 +76,14 @@ export function HomePage() {
       <ReviewsShowcase
         title="Отзывы наших гостей"
         subtitle="Честные мнения тех, кто уже попробовал"
+        actionLabel="Смотреть все"
         reviews={mockReviews}
       />
 
       <section className={styles.cta}>
         <h2>Начните свой путь к гармонии сегодня</h2>
-        <LinkButton className={styles.whiteButton} to={appRoutes.booking()} variant="secondary">
-          Записаться
+        <LinkButton className={styles.whiteButton} to={appRoutes.subscriptions()} variant="secondary">
+          Выбрать тариф
         </LinkButton>
       </section>
     </main>

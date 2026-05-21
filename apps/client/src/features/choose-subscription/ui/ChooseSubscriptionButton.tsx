@@ -26,7 +26,12 @@ export function ChooseSubscriptionButton({ planId }: ChooseSubscriptionButtonPro
   const handleClick = async () => {
     if (!user) {
       navigate(appRoutes.login(), {
-        state: { backgroundLocation: location, from: appRoutes.subscriptions() },
+        state: {
+          action: 'subscription',
+          backgroundLocation: location,
+          from: `${appRoutes.subscriptions()}?purchasePlanId=${encodeURIComponent(planId)}`,
+          planId,
+        },
       });
       return;
     }
@@ -40,10 +45,10 @@ export function ChooseSubscriptionButton({ planId }: ChooseSubscriptionButtonPro
     const purchaseMode = resolveSubscriptionPurchaseMode(activeSubscription?.plan.id, planId);
     const confirmText =
       purchaseMode === 'EXTEND'
-        ? `Продлить тариф ${plan.name} еще на ${plan.periodDays} дней за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
+        ? `Покупка тарифа\n\nПродлить тариф ${plan.name} еще на ${plan.periodDays} дней за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
         : purchaseMode === 'SWITCH'
-          ? `Заменить текущую подписку тарифом ${plan.name} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
-          : `Подтвердить покупку тарифа ${plan.name} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`;
+          ? `Покупка тарифа\n\nЗаменить текущую подписку тарифом ${plan.name} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
+          : `Покупка тарифа\n\nПодтвердить покупку тарифа ${plan.name} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`;
 
     if (!window.confirm(confirmText)) {
       return;

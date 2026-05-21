@@ -72,6 +72,7 @@ export const baseApi = createApi({
     'GiftCertificates',
     'Masters',
     'Payments',
+    'Reviews',
     'Service',
     'Services',
     'Settings',

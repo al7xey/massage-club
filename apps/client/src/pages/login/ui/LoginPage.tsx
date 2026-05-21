@@ -7,10 +7,11 @@ import { AuthModal, Button, TextField } from '@/shared/ui';
 import styles from '@/shared/ui/auth-form/AuthForm.module.css';
 
 interface AuthLocationState {
-  action?: 'book' | 'cart';
+  action?: 'book' | 'cart' | 'subscription';
   backgroundLocation?: unknown;
   denied?: boolean;
   from?: string;
+  planId?: string;
   serviceId?: string;
 }
 

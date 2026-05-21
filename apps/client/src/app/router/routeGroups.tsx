@@ -15,6 +15,7 @@ import { MyAppointmentsPage } from '@/pages/my-appointments';
 import { MyPaymentsPage } from '@/pages/my-payments';
 import { MySubscriptionPage } from '@/pages/my-subscription';
 import { RegisterPage } from '@/pages/register';
+import { ReviewsPage } from '@/pages/reviews';
 import { ServiceDetailsPage } from '@/pages/service-details';
 import { ServicesCatalogPage } from '@/pages/services-catalog';
 import { StudiosPage } from '@/pages/studios';
@@ -35,6 +36,7 @@ export const publicRoutes: AppRouteConfig[] = [
   { path: 'register', element: <RegisterPage /> },
   { path: 'certificates', element: <CertificatesPage /> },
   { path: 'contacts', element: <ContactsPage /> },
+  { path: 'reviews', element: <ReviewsPage /> },
   { path: 'legal', element: <LegalDocumentsPage /> },
 ];
 

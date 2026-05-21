@@ -18,7 +18,7 @@
 
 .media {
   position: relative;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 8;
   overflow: hidden;
   background: var(--color-soft-strong);
 }
@@ -37,8 +37,8 @@
 
 .content {
   display: grid;
-  gap: 8px;
-  padding: 16px;
+  gap: 7px;
+  padding: 14px;
 }
 
 .content h3,
@@ -48,16 +48,17 @@
 
 .content h3 {
   color: var(--color-text);
-  font-size: var(--font-h3);
+  font-size: 17px;
   font-weight: 800;
   line-height: 1.25;
 }
 
 .content p {
   color: var(--color-muted);
+  font-size: 13px;
   line-height: 1.4;
 }
 
 .content > :last-child {
-  margin-top: 10px;
+  margin-top: 6px;
 }

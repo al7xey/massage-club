@@ -3,10 +3,17 @@ import type { PlanMeta, SubscriptionPlanDto, TariffItem } from '../model/types';
 const tariffOrder: Record<SubscriptionPlanDto['code'], number> = {
   LADY: 0,
   LADY_SUPER: 1,
-  MISTER: 2,
-  MISTER_SUPER: 3,
-  FAMILY: 4,
-  FAMILY_SUPER: 5,
+  FAMILY: 2,
+  FAMILY_SUPER: 3,
+  MISTER: 4,
+  MISTER_SUPER: 5,
+};
+
+const tariffTitleByCode: Partial<Record<SubscriptionPlanDto['code'], string>> = {
+  LADY: 'LET',
+  LADY_SUPER: 'LADY SUPER',
+  FAMILY: 'FAMILY',
+  FAMILY_SUPER: 'FAMILY SUPER',
 };
 
 function getSegment(code: string): TariffItem['segment'] {
@@ -22,12 +29,14 @@ function getSegment(code: string): TariffItem['segment'] {
 }
 
 function createPlanMeta(plan: SubscriptionPlanDto): PlanMeta {
+  const includedDescription = normalizeIncludedDescription(plan.includedDescription?.trim());
+
   return {
-    title: plan.name,
+    title: tariffTitleByCode[plan.code] ?? plan.name,
     subtitle: `${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽ / ${plan.periodDays} дней`,
     features: [
-      plan.includedDescription?.trim() || `${plan.includedCredits} включенных услуги`,
-      `Скидка ${plan.discountPercent}% на услуги вне пакета`,
+      includedDescription || `${plan.includedCredits} включенных услуги`,
+      `скидка ${plan.discountPercent}% на все услуги`,
       `Скидка ${plan.certificateDiscountPercent}% на сертификаты`,
       plan.freezeCountPerYear > 0
         ? `Заморозка ${plan.freezeCountPerYear} раз(а) в год до ${plan.freezeDays} дней`
@@ -43,11 +52,15 @@ export function buildTariffs(plans: SubscriptionPlanDto[]): TariffItem[] {
     .map((plan) => ({
       id: plan.id,
       code: plan.code,
-      title: plan.name,
+      title: tariffTitleByCode[plan.code] ?? plan.name,
       priceRub: plan.monthlyPriceRub,
       periodDays: plan.periodDays,
       isFeatured: plan.discountPercent >= 30,
       segment: getSegment(plan.code),
       planMeta: createPlanMeta(plan),
     }));
+}
+
+function normalizeIncludedDescription(description?: string) {
+  return description?.replace(/фирменная процедура ухода за лицом/gi, 'процедура ухода за лицом');
 }
