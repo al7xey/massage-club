@@ -66,10 +66,14 @@ export function ServicesCatalogPage() {
   }, [filterKey]);
 
   useEffect(() => {
-    if (!data) return;
+    if (!data) {
+      return;
+    }
 
     setLoadedServices((current) => {
-      if (data.page === 1) return data.items;
+      if (data.page === 1) {
+        return data.items;
+      }
 
       const existingIds = new Set(current.map((service) => service.id));
       return [...current, ...data.items.filter((service) => !existingIds.has(service.id))];
@@ -78,7 +82,9 @@ export function ServicesCatalogPage() {
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel || !data?.hasMore) return;
+    if (!sentinel || !data?.hasMore) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -100,7 +106,8 @@ export function ServicesCatalogPage() {
     maxPrice < priceMax ||
     minDuration > durationMin ||
     maxDuration < durationMax ||
-    searchQuery.trim();
+    sortBy !== 'popular' ||
+    searchQuery.trim().length > 0;
   const priceRangeStyle = getRangeStyle(minPrice, maxPrice, priceMin, priceMax);
   const durationRangeStyle = getRangeStyle(minDuration, maxDuration, durationMin, durationMax);
 
@@ -143,10 +150,7 @@ export function ServicesCatalogPage() {
   };
 
   return (
-    <PageShell
-      title="Наши услуги"
-      description="Каталог массажей, SPA-программ, уходов и лазерной эпиляции из базы RelaxUp."
-    >
+    <PageShell title="Наши услуги">
       <section className={styles.catalog}>
         <div className={styles.toolbar}>
           <div className={styles.searchWrap}>
@@ -163,20 +167,8 @@ export function ServicesCatalogPage() {
             aria-expanded={isFiltersOpen}
             onClick={() => setIsFiltersOpen((value) => !value)}
           >
-            Фильтры{hasActiveFilters ? ' включены' : ''}
+            Фильтры
           </Button>
-          <div className={styles.toolbarMeta}>
-            <p>
-              Найдено: <strong>{data?.total ?? cards.length}</strong>
-            </p>
-            <SelectField label="Сортировать" className={styles.sortSelect} value={sortBy} onChange={(event) => setSortBy(event.target.value as SortOption)}>
-              {sortOptions.map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </SelectField>
-          </div>
         </div>
 
         <div className={styles.body}>
@@ -189,7 +181,7 @@ export function ServicesCatalogPage() {
                 </Button>
               </div>
 
-              <div className={styles.filterGroup}>
+              <div className={`${styles.filterGroup} ${styles.categoryGroup}`}>
                 <h3>Категории</h3>
                 <div className={styles.categoryGrid}>
                   {categories.map((category) => (
@@ -205,7 +197,23 @@ export function ServicesCatalogPage() {
                 </div>
               </div>
 
-              <div className={styles.filterGroup}>
+              <div className={`${styles.filterGroup} ${styles.sortGroup}`}>
+                <h3>Сортировка</h3>
+                <SelectField
+                  label="Сортировка"
+                  className={styles.sortSelect}
+                  value={sortBy}
+                  onChange={(event) => setSortBy(event.target.value as SortOption)}
+                >
+                  {sortOptions.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </SelectField>
+              </div>
+
+              <div className={`${styles.filterGroup} ${styles.priceGroup}`}>
                 <h3>Стоимость</h3>
                 <div className={styles.rangeWrap} style={priceRangeStyle}>
                   <input
@@ -235,7 +243,7 @@ export function ServicesCatalogPage() {
                 </div>
               </div>
 
-              <div className={styles.filterGroup}>
+              <div className={`${styles.filterGroup} ${styles.durationGroup}`}>
                 <h3>Длительность</h3>
                 <div className={styles.rangeWrap} style={durationRangeStyle}>
                   <input

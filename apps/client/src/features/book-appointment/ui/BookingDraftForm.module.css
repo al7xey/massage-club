@@ -234,6 +234,7 @@
   background: #ffffff;
   padding: 18px;
   text-align: left;
+  font-weight: 800;
 }
 
 .masterButton span {
@@ -256,6 +257,7 @@
   border: 1px solid var(--color-line);
   border-radius: var(--radius-control);
   background: #ffffff;
+  font-weight: 800;
 }
 
 .slotSelected {

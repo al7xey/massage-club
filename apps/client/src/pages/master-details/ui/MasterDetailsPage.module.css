@@ -1,0 +1,244 @@
+.top,
+.description {
+  display: grid;
+  grid-template-columns: 1fr minmax(380px, 460px);
+  gap: 40px;
+}
+
+.profilePanel {
+  display: grid;
+  gap: 20px;
+}
+
+.heroImage {
+  position: relative;
+  min-height: 500px;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-soft-strong);
+  box-shadow: var(--shadow-card);
+}
+
+.heroImage::before,
+.heroImage::after {
+  position: absolute;
+  content: "";
+}
+
+.heroImage::before {
+  right: 10%;
+  bottom: 0;
+  width: 46%;
+  height: 72%;
+  border-radius: 220px 220px 0 0;
+  background: #ffffff;
+}
+
+.heroImage::after {
+  top: 18%;
+  left: 50%;
+  width: 104px;
+  height: 104px;
+  border: 14px solid rgba(111, 141, 78, 0.16);
+  border-radius: var(--radius-round);
+  transform: translateX(-50%);
+}
+
+.heroImage span {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1;
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--color-text);
+  padding: 8px 13px;
+  font-size: 12px;
+  font-weight: 800;
+  backdrop-filter: blur(8px);
+}
+
+.thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.thumbItem {
+  display: grid;
+  min-height: 98px;
+  place-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card-small);
+  background: #ffffff;
+  color: var(--color-primary);
+  padding: 12px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+}
+
+.thumbItem[data-active="true"] {
+  border-color: var(--color-primary);
+  background: var(--color-soft);
+}
+
+.thumbItem span {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.sideCard,
+.infoPanel {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+  padding: 24px;
+}
+
+.roleLabel {
+  display: inline-block;
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.sideCard h2,
+.sideCard p,
+.infoPanel h3,
+.description h2,
+.description h3,
+.description p {
+  margin: 0;
+}
+
+.sideCard h2,
+.description h2 {
+  margin-top: 10px;
+  font-size: var(--font-h2);
+  line-height: 1.12;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px !important;
+  color: var(--color-muted);
+}
+
+.facts {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.facts div {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card-small);
+  background: var(--gradient-surface);
+  padding: 16px;
+}
+
+.facts span,
+.note,
+.description p,
+.infoPanel ol,
+.benefits li span {
+  color: var(--color-muted);
+}
+
+.facts span {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.facts strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--color-text);
+  font-size: 16px;
+}
+
+.ctaButton {
+  margin-top: 12px;
+}
+
+.note {
+  margin-top: 12px !important;
+  line-height: 1.65;
+  text-align: center;
+}
+
+.description {
+  margin-top: 44px;
+}
+
+.description p {
+  margin-top: 10px;
+  line-height: 1.62;
+}
+
+.description h3 {
+  margin-top: 24px;
+  font-size: 22px;
+}
+
+.benefits {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.benefits li {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card-small);
+  background: #ffffff;
+  padding: 16px;
+}
+
+.benefits li strong {
+  color: var(--color-text);
+}
+
+.infoPanel ol {
+  margin: 14px 0 0;
+  padding-left: 22px;
+  line-height: 1.7;
+}
+
+.state {
+  margin: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-soft);
+  color: var(--color-muted);
+  padding: 18px;
+  text-align: center;
+}
+
+@media (max-width: 920px) {
+  .top,
+  .description {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .heroImage {
+    min-height: 340px;
+  }
+
+  .thumbs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

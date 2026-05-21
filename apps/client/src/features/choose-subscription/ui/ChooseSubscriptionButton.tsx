@@ -2,7 +2,7 @@ import { resolveSubscriptionPurchaseMode } from '@massage/shared/lib/subscriptio
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
-import { useGetMySubscriptionQuery, useGetSubscriptionPlansQuery } from '@/entities/subscription';
+import { getSubscriptionPlanTitle, useGetMySubscriptionQuery, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { reachGoal } from '@/shared/lib/analytics/yandexMetrika';
 import { appRoutes } from '@/shared/routes';
@@ -42,13 +42,14 @@ export function ChooseSubscriptionButton({ planId }: ChooseSubscriptionButtonPro
       return;
     }
 
+    const planTitle = getSubscriptionPlanTitle(plan.code, plan.name);
     const purchaseMode = resolveSubscriptionPurchaseMode(activeSubscription?.plan.id, planId);
     const confirmText =
       purchaseMode === 'EXTEND'
-        ? `Покупка тарифа\n\nПродлить тариф ${plan.name} еще на ${plan.periodDays} дней за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
+        ? `Покупка тарифа\n\nПродлить тариф ${planTitle} еще на ${plan.periodDays} дней за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
         : purchaseMode === 'SWITCH'
-          ? `Покупка тарифа\n\nЗаменить текущую подписку тарифом ${plan.name} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
-          : `Покупка тарифа\n\nПодтвердить покупку тарифа ${plan.name} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`;
+          ? `Покупка тарифа\n\nЗаменить текущую подписку тарифом ${planTitle} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
+          : `Покупка тарифа\n\nПодтвердить покупку тарифа ${planTitle} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`;
 
     if (!window.confirm(confirmText)) {
       return;
@@ -60,7 +61,7 @@ export function ChooseSubscriptionButton({ planId }: ChooseSubscriptionButtonPro
       const subscription = await createSubscription({ planId }).unwrap();
       const remainingCredits = subscription.credits.reduce((sum, credit) => sum + credit.remainingCredits, 0);
       reachGoal('payment_success', { planId, subscriptionId: subscription.id });
-      setMessage(`Тариф ${subscription.plan.name} активен. Доступных визитов: ${remainingCredits}.`);
+      setMessage(`Тариф ${getSubscriptionPlanTitle(subscription.plan.code, subscription.plan.name)} активен. Доступных визитов: ${remainingCredits}.`);
     } catch (error) {
       reachGoal('payment_error', { planId });
       setMessage(getApiErrorMessage(error, 'Не удалось купить тариф'));

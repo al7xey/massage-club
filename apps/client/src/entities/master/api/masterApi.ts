@@ -15,7 +15,19 @@ export const masterApi = baseApi.injectEndpoints({
       },
       providesTags: ['Masters'],
     }),
+    getMaster: builder.query<MasterDto | null, string>({
+      async queryFn(id, _api, _extraOptions, fetchWithBaseQuery) {
+        const result = await fetchWithBaseQuery(`/masters/${id}`);
+        if (result.error) {
+          const fallback = mockMasters.find((master) => master.id === id) ?? null;
+          return { data: fallback };
+        }
+
+        return { data: (result.data as MasterDto | null) ?? null };
+      },
+      providesTags: ['Masters'],
+    }),
   }),
 });
 
-export const { useGetMastersQuery } = masterApi;
+export const { useGetMasterQuery, useGetMastersQuery } = masterApi;

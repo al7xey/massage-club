@@ -3,6 +3,7 @@
   services: () => '/services',
   serviceDetails: (id: string) => `/services/${id}`,
   masters: () => '/masters',
+  masterDetails: (id: string) => `/masters/${id}`,
   subscriptions: () => '/subscriptions',
   studios: () => '/studios',
   cart: () => '/cart',

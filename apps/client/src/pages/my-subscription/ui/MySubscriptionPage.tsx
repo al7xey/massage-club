@@ -1,4 +1,5 @@
 import {
+  getSubscriptionPlanTitle,
   useCancelAutoRenewalMutation,
   useFreezeMySubscriptionMutation,
   useGetMySubscriptionQuery,
@@ -44,7 +45,7 @@ export function MySubscriptionPage() {
 
         {!isLoading && !error && subscription ? (
           <div className={styles.statList}>
-            <h2>{subscription.plan.name}</h2>
+            <h2>{getSubscriptionPlanTitle(subscription.plan.code, subscription.plan.name)}</h2>
 
             {subscription.status === 'PAYMENT_ISSUE' ? (
               <p className={styles.warning}>

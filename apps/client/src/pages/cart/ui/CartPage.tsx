@@ -2,7 +2,7 @@ import { applySubscriptionBenefits } from '@massage/shared/lib/subscription-bene
 import { useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAddCartItemMutation, useGetCartQuery, useRemoveCartItemMutation } from '@/entities/cart';
-import { useGetMySubscriptionQuery } from '@/entities/subscription';
+import { getSubscriptionPlanTitle, useGetMySubscriptionQuery } from '@/entities/subscription';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import { appRoutes } from '@/shared/routes';
 import { Button, EmptyState, LinkButton } from '@/shared/ui';
@@ -82,7 +82,7 @@ export function CartPage() {
                   {preview ? (
                     <div className={styles.discountLine}>
                       {preview.paidBySubscriptionCredit ? (
-                        <span>Классический массаж включён в подписку</span>
+                        <span>Классический массаж включен в подписку</span>
                       ) : preview.discountPercent > 0 ? (
                         <span>
                           Скидка {preview.discountPercent}%: {formatPrice(preview.basePriceRub)} → {formatPrice(preview.finalPriceRub)}
@@ -111,7 +111,8 @@ export function CartPage() {
             <span>{formatPrice(pricingPreview.totalAmountRub)}</span>
             {activeSubscription ? (
               <p>
-                Подписка <strong>{activeSubscription.plan.name}</strong>: автоматически спишем {pricingPreview.subscriptionCreditsUsed} визита и сэкономим {formatPrice(savedAmountRub)}.
+                Подписка <strong>{getSubscriptionPlanTitle(activeSubscription.plan.code, activeSubscription.plan.name)}</strong>: автоматически спишем{' '}
+                {pricingPreview.subscriptionCreditsUsed} визита и сэкономим {formatPrice(savedAmountRub)}.
               </p>
             ) : (
               <p>На следующем шаге вы выберете студию, дату, время и мастеров для каждой услуги отдельно.</p>

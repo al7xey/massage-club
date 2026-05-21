@@ -19,7 +19,9 @@ export function SubscriptionPlansPage() {
 
   const tariffs = buildTariffs(plans);
   const womenTariffs = tariffs.filter((item) => item.segment === 'women' || item.segment === 'family');
-  const menTariffs = tariffs.filter((item) => item.segment === 'men' || item.segment === 'family');
+  const menTariffs = [...tariffs]
+    .filter((item) => item.segment === 'men' || item.segment === 'family')
+    .sort((left, right) => getMenTariffOrder(left.code) - getMenTariffOrder(right.code));
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
   const entryFeeText = entryFee?.entryFeeEnabled
@@ -59,4 +61,15 @@ export function SubscriptionPlansPage() {
       <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" actionLabel="Смотреть все" reviews={mockReviews} />
     </PageShell>
   );
+}
+
+function getMenTariffOrder(code: string) {
+  const order: Record<string, number> = {
+    MISTER: 0,
+    MISTER_SUPER: 1,
+    FAMILY: 2,
+    FAMILY_SUPER: 3,
+  };
+
+  return order[code] ?? Number.MAX_SAFE_INTEGER;
 }

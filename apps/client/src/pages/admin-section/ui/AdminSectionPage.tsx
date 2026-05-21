@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useUpdateAppointmentStatusMutation } from '@/entities/appointment';
+import { getSubscriptionPlanTitle } from '@/entities/subscription';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { formatUserDisplayName } from '@/shared/lib/auth/formatUserDisplayName';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
@@ -79,7 +80,7 @@ export function AdminSectionPage() {
             headers={['Клиент', 'Тариф', 'Статус', 'Начало', 'До']}
             rows={subscriptions.map((subscription) => [
               formatUserDisplayName(subscription.user),
-              subscription.plan.name,
+              getSubscriptionPlanTitle(subscription.plan.code, subscription.plan.name),
               subscription.status,
               formatDate(subscription.startsAt),
               formatDate(subscription.endsAt),
@@ -105,7 +106,7 @@ export function AdminSectionPage() {
             <Table
               headers={['Тариф', 'Цена', 'Включено', 'Услуги', 'Сертификаты', 'Заморозка']}
               rows={plans.map((plan) => [
-                plan.name,
+                getSubscriptionPlanTitle(plan.code, plan.name),
                 `${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽ / ${plan.periodDays} дней`,
                 plan.includedDescription ?? '—',
                 `${plan.discountPercent}%`,

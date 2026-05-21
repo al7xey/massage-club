@@ -2,7 +2,7 @@ import { useMemo, useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { useCancelAppointmentMutation, useGetMyAppointmentsQuery } from '@/entities/appointment';
-import { useGetMySubscriptionQuery } from '@/entities/subscription';
+import { getSubscriptionPlanTitle, useGetMySubscriptionQuery } from '@/entities/subscription';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { formatUserDisplayName } from '@/shared/lib/auth/formatUserDisplayName';
 import { appRoutes } from '@/shared/routes';
@@ -96,7 +96,7 @@ export function AccountPage() {
           {subscription ? (
             <div className={styles.subscriptionContent}>
               <div className={styles.subscriptionCopy}>
-                <h2>{subscription.plan.name}</h2>
+                <h2>{getSubscriptionPlanTitle(subscription.plan.code, subscription.plan.name)}</h2>
                 <p>Активна до {formatDate(subscription.endsAt)}. Следите за остатком посещений и бронируйте удобные слоты заранее.</p>
                 <div className={styles.subscriptionMeta}>
                   <InfoPill label="Посещений" value={String(remainingCredits)} />

@@ -70,7 +70,7 @@
   left: 50%;
   transform: translateX(-50%);
   justify-content: center;
-  gap: 24px;
+  gap: 18px;
   min-width: 0;
   color: var(--color-text);
   font-size: 13px;
@@ -79,7 +79,7 @@
 }
 
 .nav a {
-  padding: 10px 2px;
+  padding: 10px 1px;
   white-space: nowrap;
   transition: color 0.18s ease;
 }
@@ -236,7 +236,7 @@
     max-width: 100%;
     justify-content: flex-start;
     flex-wrap: wrap;
-    gap: 18px;
+    gap: 14px;
   }
 
   .actions {

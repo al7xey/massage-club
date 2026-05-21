@@ -1,4 +1,5 @@
 import type { PlanMeta, SubscriptionPlanDto, TariffItem } from '../model/types';
+import { getSubscriptionPlanTitle } from './getSubscriptionPlanTitle';
 
 const tariffOrder: Record<SubscriptionPlanDto['code'], number> = {
   LADY: 0,
@@ -7,13 +8,6 @@ const tariffOrder: Record<SubscriptionPlanDto['code'], number> = {
   FAMILY_SUPER: 3,
   MISTER: 4,
   MISTER_SUPER: 5,
-};
-
-const tariffTitleByCode: Partial<Record<SubscriptionPlanDto['code'], string>> = {
-  LADY: 'LET',
-  LADY_SUPER: 'LADY SUPER',
-  FAMILY: 'FAMILY',
-  FAMILY_SUPER: 'FAMILY SUPER',
 };
 
 function getSegment(code: string): TariffItem['segment'] {
@@ -32,7 +26,7 @@ function createPlanMeta(plan: SubscriptionPlanDto): PlanMeta {
   const includedDescription = normalizeIncludedDescription(plan.includedDescription?.trim());
 
   return {
-    title: tariffTitleByCode[plan.code] ?? plan.name,
+    title: getSubscriptionPlanTitle(plan.code, plan.name),
     subtitle: `${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽ / ${plan.periodDays} дней`,
     features: [
       includedDescription || `${plan.includedCredits} включенных услуги`,
@@ -52,7 +46,7 @@ export function buildTariffs(plans: SubscriptionPlanDto[]): TariffItem[] {
     .map((plan) => ({
       id: plan.id,
       code: plan.code,
-      title: tariffTitleByCode[plan.code] ?? plan.name,
+      title: getSubscriptionPlanTitle(plan.code, plan.name),
       priceRub: plan.monthlyPriceRub,
       periodDays: plan.periodDays,
       isFeatured: plan.discountPercent >= 30,

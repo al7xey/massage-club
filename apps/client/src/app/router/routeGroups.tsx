@@ -12,6 +12,7 @@ import { HomePage } from '@/pages/home';
 import { LoginPage } from '@/pages/login';
 import { LegalDocumentsPage } from '@/pages/legal-documents';
 import { MastersPage } from '@/pages/masters';
+import { MasterDetailsPage } from '@/pages/master-details';
 import { MyAppointmentsPage } from '@/pages/my-appointments';
 import { MyPaymentsPage } from '@/pages/my-payments';
 import { MySubscriptionPage } from '@/pages/my-subscription';
@@ -30,6 +31,7 @@ export const publicRoutes: AppRouteConfig[] = [
   { path: 'services', element: <ServicesCatalogPage /> },
   { path: 'services/:id', element: <ServiceDetailsPage /> },
   { path: 'masters', element: <MastersPage /> },
+  { path: 'masters/:id', element: <MasterDetailsPage /> },
   { path: 'subscriptions', element: <SubscriptionPlansPage /> },
   { path: 'studios', element: <StudiosPage /> },
   { path: 'auth', element: <AuthPage /> },
