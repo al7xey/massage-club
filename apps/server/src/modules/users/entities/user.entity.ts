@@ -18,6 +18,9 @@ export class User {
   @Column({ type: 'text', nullable: true, unique: true })
   phone?: string | null;
 
+  @Column({ name: 'avatar_url', type: 'text', nullable: true })
+  avatarUrl?: string | null;
+
   @Column({ type: 'enum', enum: UserRole, default: UserRole.CLIENT })
   role: UserRole;
 

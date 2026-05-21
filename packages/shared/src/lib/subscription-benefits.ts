@@ -6,6 +6,7 @@ export interface SubscriptionBenefitContext {
 export interface SubscriptionBenefitItemInput {
   id: string;
   priceRub: number;
+  isIncludedInSubscription?: boolean;
 }
 
 export interface SubscriptionBenefitItemResult {
@@ -32,6 +33,7 @@ export function applySubscriptionBenefits(
   const remainingCredits = Math.max(0, Math.floor(context?.remainingCredits ?? 0));
   const prioritizedCredits = new Set(
     [...items]
+      .filter((item) => item.isIncludedInSubscription)
       .sort((left, right) => right.priceRub - left.priceRub || left.id.localeCompare(right.id))
       .slice(0, remainingCredits)
       .map((item) => item.id),

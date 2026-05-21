@@ -3,6 +3,42 @@
   gap: 26px;
 }
 
+.controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 18px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--gradient-surface);
+  box-shadow: var(--shadow-card);
+  padding: 22px;
+}
+
+.studioRow,
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.studioButton,
+.chip {
+  min-height: 40px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: #ffffff;
+  color: var(--color-text);
+  padding: 0 14px;
+  font-weight: 800;
+}
+
+.studioButtonActive,
+.chipActive {
+  border-color: var(--color-primary);
+  background: var(--color-soft);
+  color: var(--color-primary-hover);
+}
+
 .stepper {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -87,6 +123,32 @@
   display: grid;
   gap: 18px;
   padding: 22px;
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.cardTitle {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.cardTopRight {
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+}
+
+.inlineGroup {
+  display: grid;
+  gap: 10px;
 }
 
 .cardHeader {
@@ -257,13 +319,15 @@
 @media (max-width: 900px) {
   .stepper,
   .summary,
-  .studioGrid {
+  .studioGrid,
+  .controls {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 640px) {
   .cardHeader,
+  .cardTop,
   .footerActions {
     flex-direction: column;
   }
@@ -273,6 +337,10 @@
   }
 
   .cardSide {
+    justify-items: start;
+  }
+
+  .cardTopRight {
     justify-items: start;
   }
 }

@@ -1,33 +1,20 @@
-import { FormEvent, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useMemo, useState, type CSSProperties } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { useCancelAppointmentMutation, useGetMyAppointmentsQuery } from '@/entities/appointment';
 import { useGetMySubscriptionQuery } from '@/entities/subscription';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { formatUserDisplayName } from '@/shared/lib/auth/formatUserDisplayName';
 import { appRoutes } from '@/shared/routes';
-import { Button, LinkButton, TextField } from '@/shared/ui';
+import { Button, LinkButton } from '@/shared/ui';
 import styles from './AccountPage.module.css';
 
 export function AccountPage() {
-  const navigate = useNavigate();
-  const profileRef = useRef<HTMLElement | null>(null);
-  const { logout, updateProfile, user } = useAuth();
+  const { user } = useAuth();
   const { data: subscription } = useGetMySubscriptionQuery();
   const { data: appointments = [] } = useGetMyAppointmentsQuery();
   const [cancelAppointment, { isLoading: isCancellingAppointment }] = useCancelAppointmentMutation();
-  const [fullName, setFullName] = useState(user?.fullName ?? '');
-  const [email, setEmail] = useState(user?.email ?? '');
-  const [phone, setPhone] = useState(user?.phone ?? '');
   const [message, setMessage] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
-  useEffect(() => {
-    setFullName(user?.fullName ?? '');
-    setEmail(user?.email ?? '');
-    setPhone(user?.phone ?? '');
-  }, [user]);
 
   const remainingCredits = useMemo(
     () => subscription?.credits.reduce((sum, credit) => sum + credit.remainingCredits, 0) ?? 0,
@@ -61,49 +48,9 @@ export function AccountPage() {
   const daysLeft = subscription ? Math.max(0, Math.ceil((new Date(subscription.endsAt).getTime() - Date.now()) / 86400000)) : 0;
   const ringProgress = subscription ? Math.max(8, Math.min(100, Math.round((daysLeft / 30) * 100))) : 0;
 
-  useEffect(() => {
-    if (isSettingsOpen) {
-      profileRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [isSettingsOpen]);
-
   if (!user) {
     return null;
   }
-
-  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!fullName.trim()) {
-      setMessage('Укажите имя и фамилию');
-      return;
-    }
-
-    if (!email.trim() && !phone.trim()) {
-      setMessage('Нужен хотя бы один контакт: email или телефон');
-      return;
-    }
-
-    setIsSaving(true);
-
-    try {
-      await updateProfile({
-        fullName: fullName.trim(),
-        email: email.trim() || undefined,
-        phone: phone.trim() || undefined,
-      });
-      setMessage('Профиль обновлён');
-    } catch (error) {
-      setMessage(getApiErrorMessage(error, 'Не удалось сохранить профиль'));
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    navigate(appRoutes.home());
-  };
 
   const handleCancelAppointment = async (appointmentId: string) => {
     if (!window.confirm('Отменить будущую запись?')) {
@@ -121,20 +68,22 @@ export function AccountPage() {
     <main className={styles.page}>
       <section className={styles.topbar}>
         <div className={styles.profileBadge}>
-          <div className={styles.avatar}>{accountInitial}</div>
+          <div className={styles.avatar}>
+            {user.avatarUrl ? <img src={user.avatarUrl} alt={userDisplayName} /> : accountInitial}
+          </div>
           <div className={styles.profileIdentity}>
             <span className={styles.overline}>Профиль клиента</span>
             <h1>{userDisplayName}</h1>
           </div>
         </div>
 
-        <Button
+        <LinkButton
           className={`${styles.settingsButton} ${styles.actionButton}`}
           variant="secondary"
-          onClick={() => setIsSettingsOpen((current) => !current)}
+          to={appRoutes.accountSettings()}
         >
           Настройки
-        </Button>
+        </LinkButton>
       </section>
 
       <section className={styles.subscriptionPanel}>
@@ -204,17 +153,10 @@ export function AccountPage() {
 
       <section className={styles.tiles}>
         <QuickTile
-          title="Записаться на услугу"
-          description="Выберите процедуру, мастера и время в новом потоке записи."
-          to={appRoutes.booking()}
-          tone="accent"
-          size="standard"
-        />
-        <QuickTile
           title="Мои записи"
           description={nextAppointment ? nextAppointment.service.title : 'Все предстоящие и прошедшие визиты'}
           to={appRoutes.accountAppointments()}
-          tone="soft"
+          tone="accent"
           size="standard"
         />
         <QuickTile
@@ -232,53 +174,17 @@ export function AccountPage() {
           size="standard"
         />
         <QuickTile
-          title="Подобрать тариф"
-          description="Сравните доступные планы и скидки клуба."
-          to={appRoutes.subscriptions()}
+          title="Записаться на услугу"
+          description="Выберите процедуру, мастера и удобное время."
+          to={appRoutes.booking()}
           tone="light"
           size="standard"
         />
       </section>
 
-      <section className={`${styles.lowerGrid} ${!isSettingsOpen ? styles.lowerGridSingle : ''}`}>
-        {isSettingsOpen ? (
-          <section ref={profileRef} className={styles.card}>
-            <div className={styles.cardHeader}>
-              <div>
-                <span className={styles.sectionLabel}>Настройки</span>
-                <h3>Личные данные</h3>
-              </div>
-              <Button
-                className={`${styles.closeButton} ${styles.actionButton}`}
-                size="sm"
-                variant="secondary"
-                onClick={() => setIsSettingsOpen(false)}
-              >
-                Закрыть
-              </Button>
-            </div>
+      {message ? <p className={styles.message}>{message}</p> : null}
 
-            <form className={styles.profileForm} onSubmit={handleSave}>
-              <div className={styles.profileGrid}>
-                <TextField label="Имя и фамилия" value={fullName} onChange={(event) => setFullName(event.target.value)} />
-                <TextField label="Email" value={email} onChange={(event) => setEmail(event.target.value)} />
-                <TextField label="Телефон" value={phone} onChange={(event) => setPhone(event.target.value)} />
-              </div>
-
-              {message ? <p className={styles.message}>{message}</p> : null}
-
-              <div className={styles.formActions}>
-                <Button className={styles.actionButton} variant="secondary" isLoading={isSaving} loadingText="Сохраняем..." type="submit">
-                  Сохранить
-                </Button>
-                <Button className={styles.actionButton} variant="secondary" onClick={handleLogout}>
-                  Выйти
-                </Button>
-              </div>
-            </form>
-          </section>
-        ) : null}
-
+      <section className={`${styles.lowerGrid} ${styles.lowerGridSingle}`}>
         <section className={styles.card}>
           <div className={styles.cardHeader}>
             <div>

@@ -30,6 +30,7 @@ export class UsersService {
     const nextEmail = dto.email !== undefined ? normalizeEmail(dto.email) : user.email ?? null;
     const nextPhone = dto.phone !== undefined ? normalizePhone(dto.phone) : user.phone ?? null;
     const nextFullName = dto.fullName !== undefined ? dto.fullName.trim() : user.fullName;
+    const nextAvatarUrl = dto.avatarUrl !== undefined ? dto.avatarUrl.trim() || null : user.avatarUrl ?? null;
 
     if (!nextFullName) {
       throw new BadRequestException('Full name is required');
@@ -44,6 +45,7 @@ export class UsersService {
     user.fullName = nextFullName;
     user.email = nextEmail;
     user.phone = nextPhone;
+    user.avatarUrl = nextAvatarUrl;
 
     return this.toPublicUser(await this.usersRepository.save(user));
   }
@@ -62,6 +64,7 @@ export class UsersService {
       fullName: user.fullName,
       email: user.email ?? null,
       phone: user.phone ?? null,
+      avatarUrl: user.avatarUrl ?? null,
       role: user.role,
       gender: user.gender,
     };

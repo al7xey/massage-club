@@ -74,7 +74,11 @@ export function BookingDraftForm() {
   const pricingPreview = useMemo(
     () =>
       applySubscriptionBenefits(
-        cartItems.map((item) => ({ id: item.id, priceRub: item.service.priceRub })),
+        cartItems.map((item) => ({
+          id: item.id,
+          isIncludedInSubscription: isClassicMassage(item.service),
+          priceRub: item.service.priceRub,
+        })),
         { discountPercent, remainingCredits },
       ),
     [cartItems, discountPercent, remainingCredits],
@@ -166,6 +170,15 @@ export function BookingDraftForm() {
 
   return (
     <section className={styles.root}>
+      <div className={styles.stepper} aria-label="Этапы записи">
+        {['Студия', 'Дата', 'Время', 'Мастер', 'Подтверждение'].map((label, index) => (
+          <div className={`${styles.stepItem} ${index === 0 ? styles.stepCurrent : ''}`} key={label}>
+            <span>{index + 1}</span>
+            <strong>{label}</strong>
+          </div>
+        ))}
+      </div>
+
       <section className={styles.controls}>
         <div className={styles.field}>
           <span>Студия</span>
@@ -320,17 +333,18 @@ function BookingItemCard({
       </div>
 
       {config.startsAt ? (
-        <div className={styles.inlineGroup}>
+          <div className={styles.inlineGroup}>
           <span className={styles.fieldLabel}>Мастер</span>
-          <div className={styles.chips}>
+          <div className={styles.masterGrid}>
             {masters.map((master) => (
               <button
                 key={master.id}
                 type="button"
-                className={`${styles.chip} ${config.masterId === master.id ? styles.chipActive : ''}`}
+                className={`${styles.masterButton} ${config.masterId === master.id ? styles.masterButtonSelected : ''}`}
                 onClick={() => onChange({ masterId: master.id })}
               >
-                {master.firstName} {master.lastName}
+                <strong>{master.firstName} {master.lastName}</strong>
+                <span>{master.bio ?? 'Мастер массажа и SPA'}</span>
               </button>
             ))}
           </div>
@@ -348,4 +362,10 @@ function formatItemPrice(item?: SubscriptionBenefitItemResult) {
   }
 
   return item.paidBySubscriptionCredit ? 'Включено' : formatPrice(item.finalPriceRub);
+}
+
+function isClassicMassage(service: { category?: { slug?: string } | null; title: string }) {
+  const title = service.title.toLowerCase();
+  const categorySlug = service.category?.slug ?? '';
+  return categorySlug.includes('massage') && title.includes('классический');
 }

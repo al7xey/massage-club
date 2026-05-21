@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { AccountPage } from '@/pages/account';
+import { AccountSettingsPage } from '@/pages/account-settings';
 import { AdminDashboardPage } from '@/pages/admin-dashboard';
 import { AdminSectionPage } from '@/pages/admin-section';
 import { AuthPage } from '@/pages/auth';
@@ -44,6 +45,7 @@ export const accountRoutes: AppRouteConfig[] = [
   { path: 'cart', element: <CartPage /> },
   { path: 'booking', element: <BookingPage /> },
   { path: 'account', element: <AccountPage /> },
+  { path: 'account/settings', element: <AccountSettingsPage /> },
   { path: 'account/subscription', element: <MySubscriptionPage /> },
   { path: 'account/appointments', element: <MyAppointmentsPage /> },
   { path: 'account/payments', element: <MyPaymentsPage /> },

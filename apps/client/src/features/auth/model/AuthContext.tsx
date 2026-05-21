@@ -18,6 +18,7 @@ interface UpdateProfilePayload {
   fullName: string;
   email?: string;
   phone?: string;
+  avatarUrl?: string | null;
 }
 
 interface AuthContextValue {

@@ -217,7 +217,7 @@
 }
 
 .primarySubmit {
-  font-weight: 700 !important;
+  font-weight: 800 !important;
   min-height: var(--control-height);
   font-size: var(--font-body);
 }

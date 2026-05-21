@@ -10,7 +10,8 @@ test('applySubscriptionBenefits spends credits on the most expensive services fi
     [
       { id: 'back', priceRub: 3200 },
       { id: 'face', priceRub: 1800 },
-      { id: 'spa', priceRub: 4700 },
+      { id: 'spa', priceRub: 4700, isIncludedInSubscription: true },
+      { id: 'classic', priceRub: 2500, isIncludedInSubscription: true },
     ],
     {
       discountPercent: 10,
@@ -21,9 +22,10 @@ test('applySubscriptionBenefits spends credits on the most expensive services fi
   const pricedById = new Map(result.items.map((item) => [item.id, item]));
 
   assert.equal(result.subscriptionCreditsUsed, 2);
-  assert.equal(result.totalAmountRub, 1620);
+  assert.equal(result.totalAmountRub, 4500);
   assert.equal(pricedById.get('spa')?.finalPriceRub, 0);
-  assert.equal(pricedById.get('back')?.finalPriceRub, 0);
+  assert.equal(pricedById.get('classic')?.finalPriceRub, 0);
+  assert.equal(pricedById.get('back')?.finalPriceRub, 2880);
   assert.equal(pricedById.get('face')?.finalPriceRub, 1620);
   assert.equal(pricedById.get('face')?.discountPercent, 10);
 });

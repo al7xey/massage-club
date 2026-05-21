@@ -117,6 +117,7 @@ export class CartService {
       const pricingPlan = applySubscriptionBenefits(
         cartItems.map((item) => ({
           id: item.id,
+          isIncludedInSubscription: isClassicMassage(item.service),
           priceRub: item.service.priceRub,
         })),
         {
@@ -265,4 +266,10 @@ export class CartService {
       throw new BadRequestException('Master already has an appointment in this time slot');
     }
   }
+}
+
+function isClassicMassage(service: Service) {
+  const title = service.title.toLowerCase();
+  const categorySlug = service.category?.slug ?? '';
+  return categorySlug.includes('massage') && title.includes('классический');
 }

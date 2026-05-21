@@ -15,6 +15,7 @@
   reviews: () => '/reviews',
   legal: () => '/legal',
   account: () => '/account',
+  accountSettings: () => '/account/settings',
   accountSubscription: () => '/account/subscription',
   accountAppointments: () => '/account/appointments',
   accountPayments: () => '/account/payments',

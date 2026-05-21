@@ -60,7 +60,7 @@ export class AppointmentsService {
     const activeSubscription = await this.findActiveSubscription(user.id);
     const credit = activeSubscription ? await this.findUsableCredit(activeSubscription.id) : null;
     const pricing = applySubscriptionBenefits(
-      [{ id: service.id, priceRub: service.priceRub }],
+      [{ id: service.id, isIncludedInSubscription: isClassicMassage(service), priceRub: service.priceRub }],
       {
         discountPercent: activeSubscription?.plan.discountPercent ?? 0,
         remainingCredits: credit ? 1 : 0,
@@ -328,6 +328,12 @@ export class AppointmentsService {
 
     return masters.filter((master) => master.services.some((service) => service.id === serviceId));
   }
+}
+
+function isClassicMassage(service: Service) {
+  const title = service.title.toLowerCase();
+  const categorySlug = service.category?.slug ?? '';
+  return categorySlug.includes('massage') && title.includes('классический');
 }
 
 function buildSlots(startsAt: Date, endsAt: Date, durationMinutes: number) {

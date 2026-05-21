@@ -6,6 +6,7 @@ export interface PublicUserDto {
   fullName: string;
   email?: string | null;
   phone?: string | null;
+  avatarUrl?: string | null;
   role: UserRole;
   gender: UserGender;
 }

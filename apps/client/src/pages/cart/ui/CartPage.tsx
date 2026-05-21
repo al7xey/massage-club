@@ -39,6 +39,7 @@ export function CartPage() {
       applySubscriptionBenefits(
         cartItems.map((item) => ({
           id: item.id,
+          isIncludedInSubscription: isClassicMassage(item.service),
           priceRub: item.service.priceRub,
         })),
         {
@@ -73,10 +74,24 @@ export function CartPage() {
 
             return (
               <article className={styles.card} key={item.id}>
-                <div>
+                <img className={styles.image} src={getServiceImageUrl(item.service.category?.slug)} alt="" loading="lazy" />
+                <div className={styles.cardBody}>
                   <span className={styles.meta}>{item.service.durationMinutes} минут</span>
                   <h3>{item.service.title}</h3>
                   <p>{item.service.description}</p>
+                  {preview ? (
+                    <div className={styles.discountLine}>
+                      {preview.paidBySubscriptionCredit ? (
+                        <span>Классический массаж включён в подписку</span>
+                      ) : preview.discountPercent > 0 ? (
+                        <span>
+                          Скидка {preview.discountPercent}%: {formatPrice(preview.basePriceRub)} → {formatPrice(preview.finalPriceRub)}
+                        </span>
+                      ) : (
+                        <span>Стоимость без скидки: {formatPrice(preview.basePriceRub)}</span>
+                      )}
+                    </div>
+                  ) : null}
                 </div>
                 <div className={styles.cardSide}>
                   <strong>{preview?.paidBySubscriptionCredit ? 'Включено в подписку' : formatPrice(preview?.finalPriceRub ?? item.service.priceRub)}</strong>
@@ -109,4 +124,26 @@ export function CartPage() {
       </section>
     </PageShell>
   );
+}
+
+function isClassicMassage(service: { category?: { slug?: string } | null; title: string }) {
+  const title = service.title.toLowerCase();
+  const categorySlug = service.category?.slug ?? '';
+  return categorySlug.includes('massage') && title.includes('классический');
+}
+
+function getServiceImageUrl(categorySlug?: string) {
+  if (categorySlug === 'face-care') {
+    return 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=420&q=80';
+  }
+
+  if (categorySlug === 'laser-hair-removal') {
+    return 'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=420&q=80';
+  }
+
+  if (categorySlug === 'spa-programs') {
+    return 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=420&q=80';
+  }
+
+  return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=420&q=80';
 }

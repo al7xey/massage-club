@@ -78,7 +78,7 @@ export function MainLayout() {
                   size="sm"
                 >
                   <span className={styles.avatar} aria-hidden="true">
-                    {accountInitial}
+                    {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : accountInitial}
                   </span>
                 </LinkButton>
               </>

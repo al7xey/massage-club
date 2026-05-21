@@ -37,19 +37,15 @@
 }
 
 .actionButton {
-  min-height: 40px !important;
-  border-color: var(--color-line) !important;
-  border-radius: var(--radius-control) !important;
-  background: #ffffff !important;
-  color: var(--color-primary-hover) !important;
-  font-weight: 700 !important;
+  min-height: 40px;
+  font-weight: 800;
 }
 
 .actionButton:link,
 .actionButton:visited,
 .actionButton:hover,
 .actionButton:active {
-  color: var(--color-primary-hover) !important;
+  color: var(--color-primary-hover);
 }
 
 .actions {

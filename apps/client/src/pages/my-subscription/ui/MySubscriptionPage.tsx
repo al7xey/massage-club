@@ -3,7 +3,6 @@ import {
   useFreezeMySubscriptionMutation,
   useGetMySubscriptionQuery,
   useRenewNowMutation,
-  useReplaceCardMutation,
   type SubscriptionStatus,
 } from '@/entities/subscription';
 import { reachGoal } from '@/shared/lib/analytics/yandexMetrika';
@@ -26,15 +25,13 @@ export function MySubscriptionPage() {
   const [freezeSubscription, freezeState] = useFreezeMySubscriptionMutation();
   const [cancelAutoRenewal, cancelState] = useCancelAutoRenewalMutation();
   const [renewNow, renewState] = useRenewNowMutation();
-  const [replaceCard, replaceCardState] = useReplaceCardMutation();
 
   const remainingCredits = subscription?.credits.reduce((sum, credit) => sum + credit.remainingCredits, 0) ?? 0;
   const graceDaysLeft = subscription?.gracePeriodEndsAt
     ? Math.max(0, Math.ceil((new Date(subscription.gracePeriodEndsAt).getTime() - Date.now()) / 86400000))
     : 0;
 
-  const isActionLoading =
-    freezeState.isLoading || cancelState.isLoading || renewState.isLoading || replaceCardState.isLoading;
+  const isActionLoading = freezeState.isLoading || cancelState.isLoading || renewState.isLoading;
 
   return (
     <PageShell
@@ -94,20 +91,11 @@ export function MySubscriptionPage() {
             </p>
 
             <div className={styles.actions}>
-              <LinkButton className={styles.actionButton} size="sm" to={appRoutes.booking()} variant="secondary">
-                Записаться по подписке
+              <LinkButton className={styles.actionButton} size="sm" to={appRoutes.account()} variant="secondary">
+                Вернуться в профиль
               </LinkButton>
               <Button className={styles.actionButton} variant="secondary" disabled={isActionLoading} size="sm" onClick={() => void renewNow(subscription.id)}>
                 Продлить сейчас
-              </Button>
-              <Button
-                className={styles.actionButton}
-                variant="secondary"
-                size="sm"
-                disabled={isActionLoading}
-                onClick={() => void replaceCard(subscription.id)}
-              >
-                Заменить карту
               </Button>
               <Button
                 className={styles.actionButton}
@@ -142,6 +130,9 @@ export function MySubscriptionPage() {
             <h2>Подписка не активна</h2>
             <p className={styles.empty}>Выберите тариф, чтобы получать скидки и включенные посещения.</p>
             <div className={styles.actions}>
+              <LinkButton className={styles.actionButton} size="sm" to={appRoutes.account()} variant="secondary">
+                Вернуться в профиль
+              </LinkButton>
               <LinkButton className={styles.actionButton} size="sm" to={appRoutes.subscriptions()} variant="secondary">
                 Выбрать тариф
               </LinkButton>
