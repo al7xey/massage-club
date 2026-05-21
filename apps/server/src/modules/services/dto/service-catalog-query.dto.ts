@@ -32,12 +32,38 @@ export class ServiceCatalogQueryDto {
   @IsString()
   category?: string;
 
+  @ApiPropertyOptional({ description: 'Comma-separated service category slugs' })
+  @IsOptional()
+  @IsString()
+  categories?: string;
+
   @ApiPropertyOptional({ description: 'Maximum duration in minutes' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   duration?: number;
+
+  @ApiPropertyOptional({ description: 'Minimum duration in minutes' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  minDuration?: number;
+
+  @ApiPropertyOptional({ description: 'Maximum duration in minutes' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  maxDuration?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  minPrice?: number;
 
   @ApiPropertyOptional()
   @IsOptional()

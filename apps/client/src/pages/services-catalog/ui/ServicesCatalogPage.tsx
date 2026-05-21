@@ -32,25 +32,29 @@ export function ServicesCatalogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('popular');
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [minPrice, setMinPrice] = useState(priceMin);
   const [maxPrice, setMaxPrice] = useState(priceMax);
+  const [minDuration, setMinDuration] = useState(durationMin);
   const [maxDuration, setMaxDuration] = useState(durationMax);
   const [page, setPage] = useState(1);
   const [loadedServices, setLoadedServices] = useState<ServiceDto[]>([]);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const filterKey = `${searchQuery.trim()}|${selectedCategory}|${maxPrice}|${maxDuration}|${sortBy}`;
+  const filterKey = `${searchQuery.trim()}|${selectedCategories.join(',')}|${minPrice}-${maxPrice}|${minDuration}-${maxDuration}|${sortBy}`;
   const queryArgs = useMemo(
     () => ({
       page,
       limit: pageLimit,
       search: searchQuery.trim() || undefined,
-      category: selectedCategory || undefined,
-      duration: maxDuration < durationMax ? maxDuration : undefined,
+      categories: selectedCategories.length > 0 ? selectedCategories.join(',') : undefined,
+      minDuration: minDuration > durationMin ? minDuration : undefined,
+      maxDuration: maxDuration < durationMax ? maxDuration : undefined,
+      minPrice: minPrice > priceMin ? minPrice : undefined,
       maxPrice: maxPrice < priceMax ? maxPrice : undefined,
       sort: sortBy,
     }),
-    [maxDuration, maxPrice, page, searchQuery, selectedCategory, sortBy],
+    [maxDuration, maxPrice, minDuration, minPrice, page, searchQuery, selectedCategories, sortBy],
   );
 
   const { data, error, isFetching, isLoading } = useGetServicesQuery(queryArgs);
@@ -90,16 +94,46 @@ export function ServicesCatalogPage() {
   }, [data?.hasMore, isFetching]);
 
   const cards = useMemo(() => loadedServices.map((service) => createServiceCardModel(service)), [loadedServices]);
-  const hasActiveFilters = selectedCategory || maxPrice < priceMax || maxDuration < durationMax || searchQuery.trim();
-  const priceRangeStyle = getRangeStyle(priceMin, maxPrice, priceMin, priceMax);
-  const durationRangeStyle = getRangeStyle(durationMin, maxDuration, durationMin, durationMax);
+  const hasActiveFilters =
+    selectedCategories.length > 0 ||
+    minPrice > priceMin ||
+    maxPrice < priceMax ||
+    minDuration > durationMin ||
+    maxDuration < durationMax ||
+    searchQuery.trim();
+  const priceRangeStyle = getRangeStyle(minPrice, maxPrice, priceMin, priceMax);
+  const durationRangeStyle = getRangeStyle(minDuration, maxDuration, durationMin, durationMax);
 
   const resetFilters = () => {
     setSearchQuery('');
-    setSelectedCategory('');
+    setSelectedCategories([]);
+    setMinPrice(priceMin);
     setMaxPrice(priceMax);
+    setMinDuration(durationMin);
     setMaxDuration(durationMax);
     setSortBy('popular');
+  };
+
+  const toggleCategory = (slug: string) => {
+    setSelectedCategories((current) =>
+      current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug],
+    );
+  };
+
+  const updateMinPrice = (value: number) => {
+    setMinPrice(Math.min(value, maxPrice - priceStep));
+  };
+
+  const updateMaxPrice = (value: number) => {
+    setMaxPrice(Math.max(value, minPrice + priceStep));
+  };
+
+  const updateMinDuration = (value: number) => {
+    setMinDuration(Math.min(value, maxDuration - durationStep));
+  };
+
+  const updateMaxDuration = (value: number) => {
+    setMaxDuration(Math.max(value, minDuration + durationStep));
   };
 
   const loadMore = () => {
@@ -135,7 +169,7 @@ export function ServicesCatalogPage() {
             <p>
               Найдено: <strong>{data?.total ?? cards.length}</strong>
             </p>
-            <SelectField label="Сортировать" value={sortBy} onChange={(event) => setSortBy(event.target.value as SortOption)}>
+            <SelectField label="Сортировать" className={styles.sortSelect} value={sortBy} onChange={(event) => setSortBy(event.target.value as SortOption)}>
               {sortOptions.map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
@@ -156,19 +190,34 @@ export function ServicesCatalogPage() {
               </div>
 
               <div className={styles.filterGroup}>
-                <SelectField label="Категория" value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)}>
-                  <option value="">Все категории</option>
+                <h3>Категории</h3>
+                <div className={styles.categoryGrid}>
                   {categories.map((category) => (
-                    <option key={category.id} value={category.slug}>
-                      {category.name}
-                    </option>
+                    <label className={styles.checkRow} key={category.id}>
+                      <input
+                        type="checkbox"
+                        checked={selectedCategories.includes(category.slug)}
+                        onChange={() => toggleCategory(category.slug)}
+                      />
+                      <span>{category.name}</span>
+                    </label>
                   ))}
-                </SelectField>
+                </div>
               </div>
 
               <div className={styles.filterGroup}>
-                <h3>Стоимость до</h3>
+                <h3>Стоимость</h3>
                 <div className={styles.rangeWrap} style={priceRangeStyle}>
+                  <input
+                    className={`${styles.range} ${styles.rangeMin}`}
+                    aria-label="Минимальная стоимость"
+                    type="range"
+                    min={priceMin}
+                    max={priceMax}
+                    step={priceStep}
+                    value={minPrice}
+                    onChange={(event) => updateMinPrice(Number(event.target.value))}
+                  />
                   <input
                     className={`${styles.range} ${styles.rangeMax}`}
                     aria-label="Максимальная стоимость"
@@ -177,17 +226,28 @@ export function ServicesCatalogPage() {
                     max={priceMax}
                     step={priceStep}
                     value={maxPrice}
-                    onChange={(event) => setMaxPrice(Number(event.target.value))}
+                    onChange={(event) => updateMaxPrice(Number(event.target.value))}
                   />
                 </div>
                 <div className={styles.rangeFields}>
+                  <span>от {minPrice.toLocaleString('ru-RU')} ₽</span>
                   <span>до {maxPrice.toLocaleString('ru-RU')} ₽</span>
                 </div>
               </div>
 
               <div className={styles.filterGroup}>
-                <h3>Длительность до</h3>
+                <h3>Длительность</h3>
                 <div className={styles.rangeWrap} style={durationRangeStyle}>
+                  <input
+                    className={`${styles.range} ${styles.rangeMin}`}
+                    aria-label="Минимальная длительность"
+                    type="range"
+                    min={durationMin}
+                    max={durationMax}
+                    step={durationStep}
+                    value={minDuration}
+                    onChange={(event) => updateMinDuration(Number(event.target.value))}
+                  />
                   <input
                     className={`${styles.range} ${styles.rangeMax}`}
                     aria-label="Максимальная длительность"
@@ -196,10 +256,11 @@ export function ServicesCatalogPage() {
                     max={durationMax}
                     step={durationStep}
                     value={maxDuration}
-                    onChange={(event) => setMaxDuration(Number(event.target.value))}
+                    onChange={(event) => updateMaxDuration(Number(event.target.value))}
                   />
                 </div>
                 <div className={styles.rangeFields}>
+                  <span>от {minDuration} мин</span>
                   <span>до {maxDuration} мин</span>
                 </div>
               </div>

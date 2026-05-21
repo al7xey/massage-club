@@ -55,8 +55,8 @@ export function SubscriptionPlansPage() {
       </section>
 
       {popularServices.length > 0 ? <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={popularServices} /> : null}
-      <StudioShowcase title="Где пройти процедуру" studios={popularStudios} />
-      <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" reviews={mockReviews} />
+      <StudioShowcase title="Где пройти процедуру" actionLabel="Посмотреть на карте" studios={popularStudios} />
+      <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" actionLabel="Смотреть все" reviews={mockReviews} />
     </PageShell>
   );
 }

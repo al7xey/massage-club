@@ -57,13 +57,22 @@ export class ServicesService {
       );
     }
 
-    const category = query.category?.trim().toLowerCase();
-    if (category) {
-      builder.andWhere('(LOWER(category.slug) = :category OR LOWER(category.name) = :category)', { category });
+    const categories = parseCategoryFilter(query.categories ?? query.category);
+    if (categories.length > 0) {
+      builder.andWhere('LOWER(category.slug) IN (:...categories)', { categories });
     }
 
-    if (query.duration) {
-      builder.andWhere('service.duration_minutes <= :duration', { duration: query.duration });
+    const maxDuration = query.maxDuration ?? query.duration;
+    if (query.minDuration !== undefined) {
+      builder.andWhere('service.duration_minutes >= :minDuration', { minDuration: query.minDuration });
+    }
+
+    if (maxDuration) {
+      builder.andWhere('service.duration_minutes <= :maxDuration', { maxDuration });
+    }
+
+    if (query.minPrice !== undefined) {
+      builder.andWhere('service.price_rub >= :minPrice', { minPrice: query.minPrice });
     }
 
     if (query.maxPrice !== undefined) {
@@ -189,4 +198,11 @@ export class ServicesService {
 
     return Boolean(subscription);
   }
+}
+
+function parseCategoryFilter(value?: string) {
+  return (value ?? '')
+    .split(',')
+    .map((category) => category.trim().toLowerCase())
+    .filter(Boolean);
 }

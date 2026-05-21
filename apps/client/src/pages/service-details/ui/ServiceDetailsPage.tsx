@@ -155,8 +155,8 @@ export function ServiceDetailsPage() {
       </section>
 
       {similar.length > 0 ? <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={similar} /> : null}
-      <StudioShowcase title="Где пройти процедуру" studios={studioCards} />
-      <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" reviews={mockReviews} />
+      <StudioShowcase title="Где пройти процедуру" actionLabel="Посмотреть на карте" studios={studioCards} />
+      <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" actionLabel="Смотреть все" reviews={mockReviews} />
     </PageShell>
   );
 }

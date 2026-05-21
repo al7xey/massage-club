@@ -1,5 +1,6 @@
 .card {
   display: flex;
+  cursor: pointer;
   flex-direction: column;
   min-height: 336px;
   overflow: hidden;
@@ -67,9 +68,14 @@
 }
 
 .meta p {
-  color: var(--color-accent);
+  color: var(--color-muted);
   font-size: 14px;
   line-height: 1.35;
+}
+
+.stars {
+  color: var(--color-accent);
+  font-weight: 900;
 }
 
 .meta p strong {
@@ -88,8 +94,113 @@
   flex: 1;
 }
 
+.modalRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  cursor: default;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(32, 35, 42, 0.34);
+}
+
+.modal {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  width: min(720px, calc(100vw - 44px));
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: #ffffff;
+  box-shadow: 0 26px 64px rgba(32, 35, 42, 0.2);
+}
+
+.closeButton {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-round);
+  background: #ffffff;
+  color: var(--color-text);
+  font-size: 28px;
+  line-height: 1;
+  transform: rotate(45deg);
+}
+
+.modalMedia {
+  min-height: 320px;
+  background: var(--color-soft-strong);
+}
+
+.modalBody {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  padding: 34px;
+}
+
+.modalBody span:first-child {
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.modalBody h2,
+.modalBody p {
+  margin: 0;
+}
+
+.modalBody h2 {
+  font-size: var(--font-h2);
+  line-height: 1.12;
+}
+
+.modalBody p {
+  color: var(--color-muted);
+  line-height: 1.65;
+}
+
+.ratingLine strong {
+  color: var(--color-text);
+}
+
+.modalActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
 @media (max-width: 760px) {
   .card {
     min-height: 320px;
+  }
+
+  .modal {
+    grid-template-columns: 1fr;
+  }
+
+  .modalMedia {
+    min-height: 180px;
+  }
+
+  .modalBody {
+    padding: 24px;
   }
 }

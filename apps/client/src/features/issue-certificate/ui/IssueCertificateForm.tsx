@@ -2,9 +2,10 @@ import { FormEvent, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { certificatePresets, useCreateGiftCertificateMutation } from '@/entities/certificate';
+import { useGetServicesQuery } from '@/entities/service';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { appRoutes } from '@/shared/routes';
-import { Button, TextAreaField, TextField } from '@/shared/ui';
+import { Button, SelectField, TextAreaField, TextField } from '@/shared/ui';
 import styles from './IssueCertificateForm.module.css';
 
 const customMinAmount = 1000;
@@ -16,10 +17,11 @@ export function IssueCertificateForm() {
   const { user } = useAuth();
   const [createGiftCertificate, { isLoading }] = useCreateGiftCertificateMutation();
   const [type, setType] = useState<'amount' | 'service'>('amount');
+  const { data: servicesPage } = useGetServicesQuery({ limit: 48, sort: 'popular' }, { skip: type !== 'service' });
   const [format, setFormat] = useState<'email' | 'paper'>('email');
-  const [amountMode, setAmountMode] = useState<'preset' | 'custom'>('preset');
-  const [presetIndex, setPresetIndex] = useState(1);
+  const [amountChoice, setAmountChoice] = useState<number | 'custom'>(3000);
   const [customAmount, setCustomAmount] = useState('1500');
+  const [serviceId, setServiceId] = useState('');
   const [recipient, setRecipient] = useState('');
   const [sender, setSender] = useState('');
   const [email, setEmail] = useState('');
@@ -27,15 +29,20 @@ export function IssueCertificateForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const selectedPreset = certificatePresets[presetIndex] ?? certificatePresets[1];
+  const services = servicesPage?.items ?? [];
+  const selectedService = services.find((service) => service.id === serviceId);
   const resolvedAmount = useMemo(() => {
-    if (amountMode === 'preset') {
-      return selectedPreset.value;
+    if (type === 'service') {
+      return selectedService?.priceRub ?? 0;
+    }
+
+    if (amountChoice !== 'custom') {
+      return amountChoice;
     }
 
     const parsed = Number(customAmount);
     return Number.isFinite(parsed) ? parsed : 0;
-  }, [amountMode, customAmount, selectedPreset.value]);
+  }, [amountChoice, customAmount, selectedService?.priceRub, type]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -59,6 +66,12 @@ export function IssueCertificateForm() {
       return;
     }
 
+    if (type === 'service' && !selectedService) {
+      setError('Выберите услугу для сертификата');
+      setSuccess('');
+      return;
+    }
+
     if (resolvedAmount < customMinAmount || resolvedAmount % customStep !== 0) {
       setError(`Укажите сумму от ${customMinAmount} ₽ с шагом ${customStep} ₽`);
       setSuccess('');
@@ -69,7 +82,7 @@ export function IssueCertificateForm() {
       const certificate = await createGiftCertificate({
         amountRub: resolvedAmount,
         format: format === 'paper' ? 'PAPER' : 'EMAIL',
-        message: (message || `Подарок от ${sender}`).trim(),
+        message: (message || `Подарок от ${sender}${selectedService ? `: ${selectedService.title}` : ''}`).trim(),
         recipientContact: email.trim(),
         recipientName: recipient.trim(),
       }).unwrap();
@@ -104,41 +117,42 @@ export function IssueCertificateForm() {
           </button>
         </div>
 
-        <div className={styles.modeRow}>
-          <Button
-            className={amountMode === 'preset' ? styles.modeActive : styles.modeButton}
-            variant={amountMode === 'preset' ? 'primary' : 'ghost'}
-            aria-pressed={amountMode === 'preset'}
-            onClick={() => setAmountMode('preset')}
-          >
-            Готовые суммы
-          </Button>
-          <Button
-            className={amountMode === 'custom' ? styles.modeActive : styles.modeButton}
-            variant={amountMode === 'custom' ? 'primary' : 'ghost'}
-            aria-pressed={amountMode === 'custom'}
-            onClick={() => setAmountMode('custom')}
-          >
-            Своя сумма
-          </Button>
-        </div>
-
-        {amountMode === 'preset' ? (
+        {type === 'amount' ? (
           <div className={styles.valueRow}>
-            {certificatePresets.map((preset, index) => (
+            {certificatePresets.map((preset) => (
               <Button
                 key={preset.value}
-                className={`${styles.valueButton} ${index === presetIndex ? styles.valueActive : ''}`}
+                className={`${styles.valueButton} ${amountChoice === preset.value ? styles.valueActive : ''}`}
                 size="sm"
-                variant={index === presetIndex ? 'primary' : 'secondary'}
-                aria-pressed={index === presetIndex}
-                onClick={() => setPresetIndex(index)}
+                variant={amountChoice === preset.value ? 'primary' : 'secondary'}
+                aria-pressed={amountChoice === preset.value}
+                onClick={() => setAmountChoice(preset.value)}
               >
                 {preset.label}
               </Button>
             ))}
+            <Button
+              className={`${styles.valueButton} ${amountChoice === 'custom' ? styles.valueActive : ''}`}
+              size="sm"
+              variant={amountChoice === 'custom' ? 'primary' : 'secondary'}
+              aria-pressed={amountChoice === 'custom'}
+              onClick={() => setAmountChoice('custom')}
+            >
+              Своя сумма
+            </Button>
           </div>
         ) : (
+          <SelectField label="Услуга" value={serviceId} onChange={(event) => setServiceId(event.target.value)}>
+            <option value="">Выберите услугу</option>
+            {services.map((service) => (
+              <option key={service.id} value={service.id}>
+                {service.title} · {service.priceRub.toLocaleString('ru-RU')} ₽
+              </option>
+            ))}
+          </SelectField>
+        )}
+
+        {type === 'amount' && amountChoice === 'custom' ? (
           <TextField
             helperText={`Минимум ${customMinAmount} ₽, шаг ${customStep} ₽`}
             label="Своя сумма"
@@ -148,7 +162,7 @@ export function IssueCertificateForm() {
             value={customAmount}
             onChange={(event) => setCustomAmount(event.target.value)}
           />
-        )}
+        ) : null}
       </div>
 
       <div className={styles.step}>

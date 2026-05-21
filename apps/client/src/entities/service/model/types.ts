@@ -32,7 +32,11 @@ export interface ServicesQuery {
   limit?: number;
   search?: string;
   category?: string;
+  categories?: string;
   duration?: number;
+  minDuration?: number;
+  maxDuration?: number;
+  minPrice?: number;
   maxPrice?: number;
   sort?: 'popular' | 'priceAsc' | 'priceDesc' | 'durationAsc' | 'durationDesc' | 'titleAsc';
 }
