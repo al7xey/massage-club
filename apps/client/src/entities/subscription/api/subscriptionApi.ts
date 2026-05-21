@@ -1,10 +1,18 @@
 import { baseApi } from '@/shared/api/baseApi';
 import type { MembershipEntryFeeSettingDto, MySubscriptionDto, SubscriptionPlanDto } from '../model/types';
+import { mockSubscriptionPlans } from '../model/mock';
 
 export const subscriptionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getSubscriptionPlans: builder.query<SubscriptionPlanDto[], void>({
-      query: () => '/subscription-plans',
+      async queryFn(_arg, _api, _extraOptions, fetchWithBaseQuery) {
+        const result = await fetchWithBaseQuery('/subscription-plans');
+        if (result.error) {
+          return { data: mockSubscriptionPlans };
+        }
+
+        return { data: (result.data as SubscriptionPlanDto[]) ?? mockSubscriptionPlans };
+      },
       providesTags: ['SubscriptionPlans'],
     }),
     getMySubscription: builder.query<MySubscriptionDto | null, void>({
@@ -12,7 +20,14 @@ export const subscriptionApi = baseApi.injectEndpoints({
       providesTags: ['MySubscription'],
     }),
     getMembershipEntryFee: builder.query<MembershipEntryFeeSettingDto, void>({
-      query: () => '/settings/membership-entry-fee',
+      async queryFn(_arg, _api, _extraOptions, fetchWithBaseQuery) {
+        const result = await fetchWithBaseQuery('/settings/membership-entry-fee');
+        if (result.error) {
+          return { data: { entryFeeEnabled: false, entryFeeRub: 1200 } };
+        }
+
+        return { data: result.data as MembershipEntryFeeSettingDto };
+      },
       providesTags: ['Settings'],
     }),
     freezeMySubscription: builder.mutation<MySubscriptionDto, string>({

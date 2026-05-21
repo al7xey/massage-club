@@ -18,7 +18,9 @@ export function HomePage() {
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
   const homeTariffCodes = new Set(['LADY', 'LADY_SUPER', 'FAMILY', 'FAMILY_SUPER']);
-  const tariffs = buildTariffs(plans).filter((plan) => homeTariffCodes.has(plan.code)).slice(0, 4);
+  const builtTariffs = buildTariffs(plans);
+  const preferredTariffs = builtTariffs.filter((plan) => homeTariffCodes.has(plan.code));
+  const tariffs = (preferredTariffs.length > 0 ? preferredTariffs : builtTariffs).slice(0, 4);
 
   return (
     <main className={styles.page}>

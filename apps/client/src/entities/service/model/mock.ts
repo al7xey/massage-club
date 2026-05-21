@@ -1,4 +1,16 @@
-﻿import type { ServiceDto } from './types';
+import type { ServiceDto } from './types';
+
+const massageCategory = {
+  id: 'cat-massage',
+  name: 'Массаж',
+  slug: 'massage',
+};
+
+const spaCategory = {
+  id: 'cat-spa',
+  name: 'SPA-программы',
+  slug: 'spa-programs',
+};
 
 export const mockServices: ServiceDto[] = [
   {
@@ -8,6 +20,7 @@ export const mockServices: ServiceDto[] = [
     description: 'Мягкая техника для снятия напряжения, восстановления сна и общего тонуса.',
     durationMinutes: 60,
     priceRub: 3500,
+    category: massageCategory,
   },
   {
     id: 'svc-sport-back',
@@ -16,6 +29,7 @@ export const mockServices: ServiceDto[] = [
     description: 'Интенсивная проработка мышц спины и шейно-воротниковой зоны после нагрузок.',
     durationMinutes: 50,
     priceRub: 3900,
+    category: massageCategory,
   },
   {
     id: 'svc-lymph-drain',
@@ -24,6 +38,7 @@ export const mockServices: ServiceDto[] = [
     description: 'Техника для уменьшения отечности, улучшения микроциркуляции и легкости в теле.',
     durationMinutes: 75,
     priceRub: 4200,
+    category: massageCategory,
   },
   {
     id: 'svc-spa-ritual',
@@ -32,6 +47,7 @@ export const mockServices: ServiceDto[] = [
     description: 'Комплекс с аромамаслами и уходом для глубокого расслабления и восстановления.',
     durationMinutes: 90,
     priceRub: 5100,
+    category: spaCategory,
   },
 ];
 
