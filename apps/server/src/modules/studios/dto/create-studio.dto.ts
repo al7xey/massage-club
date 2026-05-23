@@ -1,5 +1,5 @@
 ﻿import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 
 export class CreateStudioDto {
   @ApiProperty()
@@ -23,4 +23,10 @@ export class CreateStudioDto {
   @IsOptional()
   @IsString()
   photoUrl?: string;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  photoUrls?: string[];
 }

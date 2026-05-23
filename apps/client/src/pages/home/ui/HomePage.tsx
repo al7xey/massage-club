@@ -1,6 +1,5 @@
 import { mockReviews } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
-import { getSiteContentText, useGetPublicSiteContentQuery } from '@/entities/site-content';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { appRoutes } from '@/shared/routes';
@@ -15,7 +14,6 @@ export function HomePage() {
   const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
   const { data: studios = [] } = useGetStudiosQuery();
-  const { data: siteContent = [] } = useGetPublicSiteContentQuery();
 
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
@@ -23,14 +21,10 @@ export function HomePage() {
   const builtTariffs = buildTariffs(plans);
   const preferredTariffs = builtTariffs.filter((plan) => homeTariffCodes.has(plan.code));
   const tariffs = (preferredTariffs.length > 0 ? preferredTariffs : builtTariffs).slice(0, 4);
-  const heroTitle = getSiteContentText(siteContent, 'home.hero.title', 'Время для себя каждый месяц');
-  const heroSubtitle = getSiteContentText(
-    siteContent,
-    'home.hero.subtitle',
-    'Позаботьтесь о своем теле и ментальном здоровье в атмосфере абсолютного спокойствия. Массаж, SPA и уход по единой подписке.',
-  );
-  const heroPrimaryButton = getSiteContentText(siteContent, 'home.hero.primaryButton', 'Выбрать тариф');
-  const heroSecondaryButton = getSiteContentText(siteContent, 'home.hero.secondaryButton', 'Записаться на услугу');
+  const heroTitle = 'Время для себя каждый месяц';
+  const heroSubtitle = 'Позаботьтесь о своем теле и ментальном здоровье в атмосфере абсолютного спокойствия. Массаж, SPA и уход по единой подписке.';
+  const heroPrimaryButton = 'Выбрать тариф';
+  const heroSecondaryButton = 'Записаться на услугу';
 
   return (
     <main className={styles.page}>

@@ -12,8 +12,8 @@
 
 .pageHeader h2,
 .panelHeader h3,
-.masterCard h3,
-.serviceCard h3 {
+.card h3,
+.userCard h3 {
   margin: 0;
   color: #20232a;
 }
@@ -24,12 +24,10 @@
 }
 
 .pageHeader p,
-.panelHeader p,
-.masterCard p,
-.serviceCard p,
+.card p,
+.userCard p,
 .state,
-.stateError,
-.notice {
+.stateError {
   margin: 6px 0 0;
   color: #66706a;
   line-height: 1.55;
@@ -38,16 +36,16 @@
 .statsGrid,
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 16px;
 }
 
 .statCard,
 .panel,
-.masterCard,
-.serviceCard {
+.card,
+.userCard {
   border: 1px solid #dfe5da;
-  border-radius: 18px;
+  border-radius: 16px;
   background: #ffffff;
   box-shadow: 0 14px 40px rgba(32, 35, 42, 0.05);
 }
@@ -57,8 +55,7 @@
 }
 
 .statCard span,
-.metaList dt,
-.contentList small {
+.metaList dt {
   color: #7a827d;
   font-size: 12px;
   font-weight: 800;
@@ -67,6 +64,7 @@
 .statCard strong {
   display: block;
   margin-top: 8px;
+  color: #20232a;
   font-size: 30px;
   line-height: 1;
 }
@@ -76,21 +74,7 @@
 }
 
 .panelHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
   margin-bottom: 16px;
-}
-
-.panelHeader h3 {
-  font-size: 20px;
-}
-
-.twoColumn {
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(360px, 0.7fr);
-  gap: 16px;
 }
 
 .formGrid,
@@ -101,12 +85,11 @@
 }
 
 .filters {
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 }
 
 .formGrid label,
-.filters label,
-.compactForm label {
+.filters label {
   display: grid;
   gap: 7px;
   color: #4d5650;
@@ -118,13 +101,7 @@
 .formGrid select,
 .formGrid textarea,
 .filters input,
-.filters select,
-.compactForm input,
-.compactForm select,
-.compactForm textarea,
-.table select,
-.intervalRow input,
-.intervalRow select {
+.filters select {
   min-height: 42px;
   width: 100%;
   border: 1px solid #d7dfd1;
@@ -135,12 +112,13 @@
   padding: 9px 11px;
 }
 
-.formGrid textarea,
-.compactForm textarea {
+.formGrid textarea {
   resize: vertical;
 }
 
-.fullRow {
+.fullRow,
+.uploadBox,
+.pricePreview {
   grid-column: 1 / -1;
 }
 
@@ -161,8 +139,7 @@
   font-weight: 900;
 }
 
-.checkGroup label,
-.switch {
+.checkGroup label {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -171,8 +148,7 @@
   font-weight: 800;
 }
 
-.checkGroup input,
-.switch input {
+.checkGroup input {
   width: auto;
   min-height: auto;
 }
@@ -187,20 +163,18 @@
 }
 
 .formActions span,
-.uploadBox span {
+.uploadControls span {
   color: #5f7b41;
   font-size: 13px;
   font-weight: 800;
 }
 
-.masterCard,
-.serviceCard {
+.card {
   display: grid;
   overflow: hidden;
 }
 
-.media,
-.serviceImage {
+.media {
   display: grid;
   min-height: 190px;
   place-items: center;
@@ -211,8 +185,7 @@
 }
 
 .media img,
-.serviceImage img,
-.masterCell img {
+.uploadPreview img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -269,137 +242,49 @@
   font-weight: 800;
 }
 
-.linkButton,
-.linkButtonSecondary {
+.linkButton {
   display: inline-flex;
   min-height: 36px;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
+  background: #6f8d4e;
+  color: #ffffff;
   padding: 0 14px;
   font-size: 13px;
   font-weight: 900;
   text-decoration: none;
 }
 
-.linkButton {
-  background: #6f8d4e;
-  color: #ffffff;
-}
-
-.linkButtonSecondary {
-  border: 1px solid #d7dfd1;
-  background: #ffffff;
-  color: #20232a;
-}
-
-.weekGrid {
-  display: grid;
-  gap: 12px;
-}
-
-.dayCard {
-  display: grid;
-  gap: 10px;
-  border: 1px solid #e3e8de;
-  border-radius: 14px;
-  padding: 12px;
-}
-
-.intervalRow {
-  display: grid;
-  grid-template-columns: minmax(150px, 1.2fr) repeat(4, minmax(90px, 1fr)) auto;
-  gap: 8px;
-}
-
-.intervalRow button,
-.inlineAdd {
-  min-height: 40px;
-  border: 1px solid #d7dfd1;
-  border-radius: 12px;
-  background: #ffffff;
-  color: #20232a;
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.compactForm {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-}
-
-.list,
-.contentList {
-  display: grid;
-  gap: 12px;
-}
-
-.listItem {
+.pricePreview {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border: 1px solid #e3e8de;
-  border-radius: 14px;
-  padding: 12px;
-}
-
-.listItem div {
-  display: grid;
-  gap: 4px;
-}
-
-.listItem span,
-.listItem small {
-  color: #66706a;
-}
-
-.schedule {
-  overflow: auto;
-  border: 1px solid #dfe5da;
-  border-radius: 18px;
-  background: #ffffff;
-}
-
-.scheduleHead,
-.scheduleRow {
-  display: grid;
-  min-width: 900px;
-}
-
-.scheduleHead {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  border-bottom: 1px solid #dfe5da;
-  background: #f7f9f4;
-}
-
-.scheduleHead > *,
-.scheduleCell,
-.masterCell {
-  border-right: 1px solid #edf1e9;
-  padding: 12px;
-}
-
-.scheduleRow {
-  border-bottom: 1px solid #edf1e9;
-}
-
-.masterCell {
-  display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
-  color: #20232a;
-  text-decoration: none;
 }
 
-.masterCell span {
+.pricePreview span {
+  border-radius: 999px;
+  background: #edf6e8;
+  color: #4f7134;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.uploadBox {
   display: grid;
-  width: 42px;
-  height: 42px;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  border: 1px dashed #bfd0b5;
+  border-radius: 14px;
+  background: #fafcf8;
+  padding: 14px;
+}
+
+.uploadPreview {
+  display: grid;
+  height: 110px;
   place-items: center;
   overflow: hidden;
   border-radius: 12px;
@@ -408,101 +293,50 @@
   font-weight: 900;
 }
 
-.scheduleCell {
+.uploadControls {
   display: grid;
-  min-height: 110px;
-  align-content: start;
-  gap: 7px;
-}
-
-.freeSlot,
-.unavailable,
-.appointmentChip {
-  border-radius: 10px;
-  padding: 7px 8px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.freeSlot {
-  background: #edf6e8;
-  color: #4f7134;
-}
-
-.unavailable {
-  background: #f1f1ef;
-  color: #8a8f8b;
-}
-
-.appointmentChip {
-  display: grid;
-  gap: 3px;
-  background: #e8eef9;
-  color: #2d4a70;
-}
-
-.appointmentChip span {
-  color: #4e6788;
-}
-
-.scheduleCompact .scheduleCell {
-  min-height: 80px;
-}
-
-.tableWrap {
-  overflow: auto;
-  border: 1px solid #dfe5da;
-  border-radius: 18px;
-  background: #ffffff;
-}
-
-.table {
-  width: 100%;
-  min-width: 820px;
-  border-collapse: collapse;
-}
-
-.table th,
-.table td {
-  border-bottom: 1px solid #edf1e9;
-  padding: 12px;
-  text-align: left;
-  vertical-align: top;
-}
-
-.table th {
-  background: #f7f9f4;
-  color: #66706a;
-  font-size: 12px;
-  font-weight: 900;
-}
-
-.table code {
-  display: block;
-  max-width: 420px;
-  overflow: hidden;
-  color: #4d5650;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.uploadBox {
-  display: grid;
-  grid-column: 1 / -1;
   gap: 8px;
-  border: 1px dashed #bfd0b5;
-  border-radius: 14px;
-  background: #fafcf8;
-  padding: 14px;
-  color: #4d5650;
+}
+
+.uploadControls p {
+  margin: 0;
+  color: #66706a;
+  font-size: 13px;
+}
+
+.uploadControls input {
+  display: none;
+}
+
+.userCard {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 14px;
+  padding: 18px;
+}
+
+.userAvatar {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border-radius: 16px;
+  background: #edf2e8;
+  color: #6f8d4e;
   font-weight: 900;
 }
 
-.uploadBox input {
-  min-height: auto;
-  border: 0;
-  padding: 0;
+.userInfo {
+  display: grid;
+  gap: 8px;
+}
+
+.dangerZone {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #edf1e9;
+  margin-top: 18px;
+  padding-top: 18px;
 }
 
 .state,
@@ -520,13 +354,13 @@
   color: #b54b4b;
 }
 
-@media (max-width: 1100px) {
-  .twoColumn,
-  .formGrid {
+@media (max-width: 760px) {
+  .formGrid,
+  .uploadBox {
     grid-template-columns: 1fr;
   }
 
-  .intervalRow {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .pageHeader h2 {
+    font-size: 24px;
   }
 }

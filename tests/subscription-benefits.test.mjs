@@ -50,6 +50,22 @@ test('applySubscriptionBenefits falls back to percentage discount when there are
   );
 });
 
+test('applySubscriptionBenefits supports regular 20% and SUPER 30% discounts', () => {
+  const regular = applySubscriptionBenefits([{ id: 'massage', priceRub: 5000 }], {
+    discountPercent: 20,
+    remainingCredits: 0,
+  });
+  const superPlan = applySubscriptionBenefits([{ id: 'massage', priceRub: 5000 }], {
+    discountPercent: 30,
+    remainingCredits: 0,
+  });
+
+  assert.equal(regular.totalAmountRub, 4000);
+  assert.equal(regular.items[0]?.discountPercent, 20);
+  assert.equal(superPlan.totalAmountRub, 3500);
+  assert.equal(superPlan.items[0]?.discountPercent, 30);
+});
+
 test('resolveSubscriptionPurchaseMode distinguishes new activation, extension and switching', () => {
   assert.equal(resolveSubscriptionPurchaseMode(undefined, 'plan-a'), 'ACTIVATE');
   assert.equal(resolveSubscriptionPurchaseMode('plan-a', 'plan-a'), 'EXTEND');

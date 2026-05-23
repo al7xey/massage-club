@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useGetMasterQuery } from '@/entities/master';
 import { mockReviews } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
+import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
 import { EmptyState, LinkButton } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
@@ -17,6 +18,7 @@ export function MasterDetailsPage() {
   const { data: master, isLoading } = useGetMasterQuery(id, { skip: !id });
   const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
   const { data: studios = [] } = useGetStudiosQuery();
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -27,6 +29,14 @@ export function MasterDetailsPage() {
   const stats = getMasterStats(id);
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const studioCards = studios.slice(0, 2).map(createStudioCardModel);
+  const photos = useMemo(
+    () => ([...(master?.photoUrls ?? []), master?.photoUrl].filter(Boolean) as string[]).map(resolveMediaUrl),
+    [master],
+  );
+
+  useEffect(() => {
+    setActivePhotoIndex(0);
+  }, [id, photos.length]);
 
   if (isLoading) {
     return (
@@ -51,8 +61,26 @@ export function MasterDetailsPage() {
   return (
     <PageShell title={fullName}>
       <section className={styles.hero}>
-        <div className={styles.portrait} aria-label={`Фото мастера ${fullName}`} role="img">
-          <span>{master.studio?.name ?? 'Massage Club'}</span>
+        <div
+          className={styles.portrait}
+          aria-label={`Фото мастера ${fullName}`}
+          role="img"
+          style={photos[activePhotoIndex] ? { backgroundImage: `url("${photos[activePhotoIndex]}")` } : undefined}
+        >
+          {!photos.length ? <span>{master.studio?.name ?? 'Massage Club'}</span> : null}
+          {photos.length > 1 ? (
+            <div className={styles.galleryControls}>
+              <button type="button" aria-label="Предыдущее фото" onClick={() => setActivePhotoIndex((index) => (index === 0 ? photos.length - 1 : index - 1))}>
+                ←
+              </button>
+              <span>
+                {activePhotoIndex + 1} / {photos.length}
+              </span>
+              <button type="button" aria-label="Следующее фото" onClick={() => setActivePhotoIndex((index) => (index + 1) % photos.length)}>
+                →
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <div className={styles.profile}>

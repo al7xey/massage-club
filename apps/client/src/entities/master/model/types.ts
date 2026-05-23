@@ -10,6 +10,7 @@ export interface MasterDto {
   specialization?: string | null;
   experienceYears?: number;
   photoUrl?: string | null;
+  photoUrls?: string[];
   studio?: StudioDto;
   studios?: StudioDto[];
   services: ServiceDto[];
@@ -27,4 +28,5 @@ export interface MasterCardModel {
   rating: number;
   reviewsCount: number;
   nextSlots: string[];
+  photoUrl?: string | null;
 }

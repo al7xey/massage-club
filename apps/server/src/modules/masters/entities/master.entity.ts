@@ -1,4 +1,15 @@
-﻿import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Service } from '../../services/entities/service.entity';
 import { Studio } from '../../studios/entities/studio.entity';
 
@@ -28,6 +39,9 @@ export class Master {
   @Column({ name: 'photo_url', type: 'text', nullable: true })
   photoUrl?: string | null;
 
+  @Column({ name: 'photo_urls', type: 'jsonb', default: () => "'[]'" })
+  photoUrls: string[];
+
   @ManyToOne(() => Studio, { eager: true, nullable: true })
   @JoinColumn({ name: 'studio_id' })
   studio?: Studio;
@@ -48,4 +62,7 @@ export class Master {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt?: Date | null;
 }

@@ -6,6 +6,7 @@ import { UserRole } from '../../common/enums/user-role.enum';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { JwtUserPayload } from '../../common/types/authenticated-request.type';
+import { AppointmentStatus } from '../appointments/entities/appointment.entity';
 import { CreateGiftCertificateDto } from '../gift-certificates/dto/create-gift-certificate.dto';
 import { UpdateGiftCertificateDto } from '../gift-certificates/dto/update-gift-certificate.dto';
 import { CreateMasterShiftDto } from '../masters/dto/create-master-shift.dto';
@@ -24,6 +25,9 @@ import { AdminService } from './admin.service';
 import { UpdatePhotoDto } from './dto/update-photo.dto';
 import { UpdateMembershipEntryFeeDto } from './dto/update-membership-entry-fee.dto';
 import { UpdateMasterServicesDto, UpdateMasterStudiosDto } from './dto/update-master-relations.dto';
+import { CancelAdminAppointmentDto } from './dto/cancel-admin-appointment.dto';
+import { CreateAdminAppointmentDto } from './dto/create-admin-appointment.dto';
+import { UpdateAdminAppointmentDto } from './dto/update-admin-appointment.dto';
 
 @ApiTags('Admin')
 @ApiBearerAuth()
@@ -45,15 +49,33 @@ export class AdminController {
   }
 
   @Get('appointments')
-  @Roles(UserRole.SUPER_ADMIN)
-  getAppointments() {
-    return this.adminService.getAppointments();
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  getAppointments(@Query() query: { date?: string; studioId?: string; masterId?: string; status?: AppointmentStatus }) {
+    return this.adminService.getSuperAdminAppointments(query);
   }
 
   @Get('users')
-  @Roles(UserRole.SUPER_ADMIN)
-  getUsers() {
-    return this.adminService.getUsers();
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  getUsers(@Query() query: { search?: string; status?: string }) {
+    return this.adminService.getSuperAdminUsers(query);
+  }
+
+  @Post('appointments')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  createAppointment(@Body() dto: CreateAdminAppointmentDto, @CurrentUser() user: JwtUserPayload) {
+    return this.adminService.createAdminAppointment(dto, user);
+  }
+
+  @Patch('appointments/:id')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  updateAppointment(@Param('id') id: string, @Body() dto: UpdateAdminAppointmentDto, @CurrentUser() user: JwtUserPayload) {
+    return this.adminService.updateSuperAdminAppointment(id, dto, user);
+  }
+
+  @Patch('appointments/:id/cancel')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  cancelAppointment(@Param('id') id: string, @Body() dto: CancelAdminAppointmentDto, @CurrentUser() user: JwtUserPayload) {
+    return this.adminService.cancelSuperAdminAppointment(id, dto, user);
   }
 
   @Patch('settings/membership-entry-fee')

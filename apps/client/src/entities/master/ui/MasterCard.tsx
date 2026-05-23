@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { appRoutes } from '@/shared/routes';
+import { resolveMediaUrl } from '@/shared/lib/media';
 import { LinkButton } from '@/shared/ui';
 import type { MasterCardModel } from '../model/types';
 import styles from './MasterCard.module.css';
@@ -9,10 +10,14 @@ interface MasterCardProps {
 }
 
 export function MasterCard({ master }: MasterCardProps) {
+  const photoUrl = resolveMediaUrl(master.photoUrl);
+
   return (
     <article className={styles.card}>
       <Link className={styles.cardLink} to={appRoutes.masterDetails(master.id)}>
-        <div className={styles.media} aria-label={master.fullName} role="img" />
+        <div className={styles.media} aria-label={master.fullName} role="img">
+          {photoUrl ? <img src={photoUrl} alt="" loading="lazy" /> : null}
+        </div>
         <div className={styles.meta}>
           <span className={styles.role}>{master.roleLabel}</span>
           <h3>{master.fullName}</h3>

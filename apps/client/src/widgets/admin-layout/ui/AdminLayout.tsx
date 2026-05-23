@@ -13,22 +13,17 @@ interface AdminNavItem {
 }
 
 const adminNav: AdminNavItem[] = [
-  { label: 'Dashboard', to: '/admin/dashboard', roles: ['ADMIN', 'SUPER_ADMIN'] as UserRole[] },
+  { label: 'Обзор', to: '/admin/dashboard', roles: ['ADMIN', 'SUPER_ADMIN'] as UserRole[] },
   { label: 'Мастера', to: '/admin/masters', roles: ['ADMIN', 'SUPER_ADMIN'] as UserRole[] },
-  { label: 'Расписание', to: '/admin/schedule', roles: ['ADMIN', 'SUPER_ADMIN'] as UserRole[] },
   { label: 'Студии', to: '/admin/studios', roles: ['ADMIN', 'SUPER_ADMIN'] as UserRole[] },
 ];
 
 const superAdminNav: AdminNavItem[] = [
-  { label: 'Dashboard', to: '/super-admin/dashboard', roles: ['SUPER_ADMIN'] as UserRole[] },
+  { label: 'Обзор', to: '/super-admin/dashboard', roles: ['SUPER_ADMIN'] as UserRole[] },
   { label: 'Мастера', to: '/super-admin/masters', roles: ['SUPER_ADMIN'] as UserRole[] },
   { label: 'Услуги', to: '/super-admin/services', roles: ['SUPER_ADMIN'] as UserRole[] },
   { label: 'Студии', to: '/super-admin/studios', roles: ['SUPER_ADMIN'] as UserRole[] },
-  { label: 'Расписание', to: '/super-admin/schedule', roles: ['SUPER_ADMIN'] as UserRole[] },
-  { label: 'Записи', to: '/super-admin/appointments', roles: ['SUPER_ADMIN'] as UserRole[] },
   { label: 'Пользователи', to: '/super-admin/users', roles: ['SUPER_ADMIN'] as UserRole[] },
-  { label: 'Контент сайта', to: '/super-admin/site-content', roles: ['SUPER_ADMIN'] as UserRole[] },
-  { label: 'Журнал действий', to: '/super-admin/audit-log', roles: ['SUPER_ADMIN'] as UserRole[] },
 ];
 
 export function AdminLayout({ mode }: { mode: AdminLayoutMode }) {
@@ -36,7 +31,7 @@ export function AdminLayout({ mode }: { mode: AdminLayoutMode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const nav = mode === 'super-admin' ? superAdminNav : adminNav;
-  const title = mode === 'super-admin' ? 'Super Admin CRM' : 'Admin CRM';
+  const title = mode === 'super-admin' ? 'Super Admin' : 'Admin';
   const section = resolveSectionTitle(location.pathname, nav);
 
   const handleLogout = async () => {
@@ -70,7 +65,7 @@ export function AdminLayout({ mode }: { mode: AdminLayoutMode }) {
       <div className={styles.workspace}>
         <header className={styles.topbar}>
           <div>
-            <span>{mode === 'super-admin' ? 'Супер-админ-панель' : 'Админ-панель'}</span>
+            <span>{mode === 'super-admin' ? 'Супер-админ панель' : 'Админ панель'}</span>
             <h1>{section}</h1>
           </div>
           <div className={styles.user}>
@@ -94,5 +89,5 @@ function resolveSectionTitle(pathname: string, nav: AdminNavItem[]) {
   const item = nav
     .filter((entry) => pathname === entry.to || pathname.startsWith(`${entry.to}/`))
     .sort((left, right) => right.to.length - left.to.length)[0];
-  return item?.label ?? 'Dashboard';
+  return item?.label ?? 'Обзор';
 }

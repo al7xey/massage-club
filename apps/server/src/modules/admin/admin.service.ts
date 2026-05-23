@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { randomUUID } from 'node:crypto';
 import { In, LessThan, MoreThan, Not, Repository } from 'typeorm';
 import { UserRole } from '../../common/enums/user-role.enum';
 import { JwtUserPayload } from '../../common/types/authenticated-request.type';
@@ -36,6 +37,7 @@ import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { CancelAdminAppointmentDto } from './dto/cancel-admin-appointment.dto';
+import { CreateAdminAppointmentDto } from './dto/create-admin-appointment.dto';
 import { MembershipEntryFeeSettingDto, UpdateMembershipEntryFeeDto } from './dto/update-membership-entry-fee.dto';
 import { UpdateAdminAppointmentDto } from './dto/update-admin-appointment.dto';
 import { SystemSetting } from './entities/system-setting.entity';
@@ -266,6 +268,7 @@ export class AdminService {
     const master = await this.findMaster(id);
     const before = snapshotMaster(master);
     master.photoUrl = photoUrl.trim() || null;
+    master.photoUrls = normalizePhotoUrls(master.photoUrls, master.photoUrl);
     const saved = await this.mastersRepository.save(master);
     await this.audit(actor, 'UPDATE_MASTER_PHOTO', 'master', saved.id, before, snapshotMaster(saved));
     return saved;
@@ -275,9 +278,10 @@ export class AdminService {
     const master = await this.findMaster(id);
     const before = snapshotMaster(master);
     master.isActive = false;
-    const saved = await this.mastersRepository.save(master);
-    await this.audit(actor, 'DEACTIVATE_MASTER', 'master', saved.id, before, snapshotMaster(saved));
-    return saved;
+    await this.mastersRepository.save(master);
+    await this.mastersRepository.softDelete(id);
+    await this.audit(actor, 'DELETE_MASTER', 'master', id, before, null);
+    return { deleted: true, id };
   }
 
   async getWeeklySchedule(masterId: string) {
@@ -613,6 +617,29 @@ export class AdminService {
     return this.toAdminUser(saved);
   }
 
+  async deleteUser(id: string, actor: JwtUserPayload) {
+    if (id === actor.sub) {
+      throw new ForbiddenException('You cannot delete yourself');
+    }
+
+    const user = await this.findUser(id);
+    if (user.role === UserRole.SUPER_ADMIN) {
+      throw new ForbiddenException('Deleting another super administrator requires an out-of-band approval');
+    }
+
+    const before = snapshotUser(user);
+    user.isActive = false;
+    user.fullName = 'Удаленный пользователь';
+    user.email = user.email ? `deleted-${user.id}@deleted.local` : null;
+    user.phone = null;
+    user.avatarUrl = null;
+    user.passwordHash = `deleted-${randomUUID()}`;
+    await this.usersRepository.save(user);
+    await this.usersRepository.softDelete(id);
+    await this.audit(actor, 'DELETE_USER', 'user', id, before, null);
+    return { deleted: true, id };
+  }
+
   async getUser(id: string) {
     return this.toAdminUser(await this.findUser(id));
   }
@@ -656,6 +683,43 @@ export class AdminService {
 
   async getSuperAdminAppointment(id: string) {
     return this.findAppointment(id);
+  }
+
+  async createAdminAppointment(dto: CreateAdminAppointmentDto, actor: JwtUserPayload) {
+    const [user, service, master, studio] = await Promise.all([
+      this.findUser(dto.clientId),
+      this.findService(dto.serviceId),
+      this.findMaster(dto.masterId),
+      this.findStudio(dto.studioId),
+    ]);
+    const startsAt = resolveAppointmentStart(dto, new Date());
+    const endsAt = new Date(startsAt.getTime() + service.durationMinutes * 60_000);
+
+    if (!user.isActive) {
+      throw new BadRequestException('Blocked users cannot have new active appointments');
+    }
+
+    await this.ensureMasterCanPerform(master, studio, service);
+    await this.ensureAppointmentSlotAvailable(master.id, startsAt, endsAt);
+
+    const saved = await this.appointmentsRepository.save(
+      this.appointmentsRepository.create({
+        user,
+        service,
+        master,
+        studio,
+        startsAt,
+        endsAt,
+        status: dto.status ?? AppointmentStatus.SCHEDULED,
+        priceRub: dto.priceRub ?? service.priceRub,
+        basePriceRub: service.priceRub,
+        discountPercent: 0,
+        paidBySubscriptionCredit: false,
+        note: dto.note ?? undefined,
+      }),
+    );
+    await this.audit(actor, 'CREATE_APPOINTMENT', 'appointment', saved.id, null, snapshotAppointment(saved));
+    return saved;
   }
 
   async updateSuperAdminAppointment(id: string, dto: UpdateAdminAppointmentDto, actor: JwtUserPayload) {
@@ -719,6 +783,9 @@ export class AdminService {
     if (dto.specialization !== undefined) master.specialization = dto.specialization.trim() || null;
     if (dto.experienceYears !== undefined) master.experienceYears = dto.experienceYears;
     if (dto.photoUrl !== undefined) master.photoUrl = dto.photoUrl.trim() || null;
+    if (dto.photoUrls !== undefined || dto.photoUrl !== undefined) {
+      master.photoUrls = normalizePhotoUrls(dto.photoUrls ?? master.photoUrls, dto.photoUrl ?? master.photoUrl);
+    }
     if (dto.isActive !== undefined) master.isActive = dto.isActive;
     if (isCreate && master.isActive === undefined) master.isActive = true;
 
@@ -1091,6 +1158,17 @@ function getMasterStudioIds(master: Master) {
   return [...ids];
 }
 
+function normalizePhotoUrls(photoUrls?: string[], photoUrl?: string | null) {
+  const urls = (photoUrls ?? [])
+    .map((url) => url.trim())
+    .filter(Boolean);
+  const primary = photoUrl?.trim();
+  if (primary && !urls.includes(primary)) {
+    return [primary, ...urls];
+  }
+  return urls;
+}
+
 function snapshotMaster(master: Master) {
   return {
     id: master.id,
@@ -1100,6 +1178,7 @@ function snapshotMaster(master: Master) {
     specialization: master.specialization ?? null,
     experienceYears: master.experienceYears ?? 0,
     photoUrl: master.photoUrl ?? null,
+    photoUrls: master.photoUrls ?? [],
     isActive: master.isActive,
     studioIds: getMasterStudioIds(master),
     serviceIds: master.services?.map((service) => service.id) ?? [],
@@ -1153,6 +1232,7 @@ function snapshotService(service: Service) {
     durationMinutes: service.durationMinutes,
     priceRub: service.priceRub,
     subscriptionPriceRub: service.subscriptionPriceRub ?? null,
+    superSubscriptionPriceRub: service.superSubscriptionPriceRub ?? null,
     imageUrl: service.imageUrl ?? null,
     galleryUrls: service.galleryUrls ?? [],
     isActive: service.isActive,

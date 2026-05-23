@@ -49,12 +49,6 @@ export class CreateServiceDto {
   @Min(0)
   priceRub: number;
 
-  @ApiPropertyOptional({ example: 3600 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  subscriptionPriceRub?: number;
-
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()

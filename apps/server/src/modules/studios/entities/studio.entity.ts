@@ -20,6 +20,9 @@ export class Studio {
   @Column({ name: 'photo_url', nullable: true })
   photoUrl?: string;
 
+  @Column({ name: 'photo_urls', type: 'jsonb', default: () => "'[]'" })
+  photoUrls: string[];
+
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 

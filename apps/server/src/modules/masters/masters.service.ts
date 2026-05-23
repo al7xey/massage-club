@@ -41,6 +41,7 @@ export class MastersService {
       specialization: dto.specialization,
       experienceYears: dto.experienceYears ?? 0,
       photoUrl: dto.photoUrl,
+      photoUrls: normalizePhotoUrls(dto.photoUrls, dto.photoUrl),
       isActive: dto.isActive ?? true,
     });
     const studioIds = dto.studioIds ?? (dto.studioId ? [dto.studioId] : []);
@@ -66,6 +67,9 @@ export class MastersService {
     if (dto.specialization !== undefined) master.specialization = dto.specialization;
     if (dto.experienceYears !== undefined) master.experienceYears = dto.experienceYears;
     if (dto.photoUrl !== undefined) master.photoUrl = dto.photoUrl;
+    if (dto.photoUrls !== undefined || dto.photoUrl !== undefined) {
+      master.photoUrls = normalizePhotoUrls(dto.photoUrls ?? master.photoUrls, dto.photoUrl ?? master.photoUrl);
+    }
     if (dto.isActive !== undefined) master.isActive = dto.isActive;
     const studioIds = dto.studioIds ?? (dto.studioId ? [dto.studioId] : undefined);
     if (studioIds) {
@@ -144,4 +148,15 @@ function resolveShiftDates(dto: CreateMasterShiftDto) {
   }
 
   return { startsAt, endsAt };
+}
+
+function normalizePhotoUrls(photoUrls?: string[], photoUrl?: string | null) {
+  const urls = (photoUrls ?? [])
+    .map((url) => url.trim())
+    .filter(Boolean);
+  const primary = photoUrl?.trim();
+  if (primary && !urls.includes(primary)) {
+    return [primary, ...urls];
+  }
+  return urls;
 }

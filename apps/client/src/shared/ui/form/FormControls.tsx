@@ -1,8 +1,9 @@
-import { forwardRef, useId, type InputHTMLAttributes, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { forwardRef, useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { cx } from '@/shared/ui/button';
 import styles from './FormControls.module.css';
 
 interface FieldChromeProps {
+  endAdornment?: ReactNode;
   error?: string;
   helperText?: string;
   id?: string;
@@ -13,22 +14,33 @@ export interface TextFieldProps extends FieldChromeProps, Omit<InputHTMLAttribut
 export interface SelectFieldProps extends FieldChromeProps, Omit<SelectHTMLAttributes<HTMLSelectElement>, 'id'> {}
 export interface TextAreaFieldProps extends FieldChromeProps, Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'id'> {}
 
-export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(({ className, error, helperText, id, label, ...props }, ref) => {
+export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(({ className, endAdornment, error, helperText, id, label, ...props }, ref) => {
   const generatedId = useId();
   const controlId = id ?? generatedId;
   const messageId = `${controlId}-message`;
 
+  const input = (
+    <input
+      ref={ref}
+      aria-describedby={error || helperText ? messageId : undefined}
+      aria-invalid={error ? true : undefined}
+      className={cx(styles.control, error && styles.invalid, Boolean(endAdornment) && styles.controlWithAdornment, className)}
+      id={controlId}
+      {...props}
+    />
+  );
+
   return (
     <label className={styles.field} htmlFor={controlId}>
       <span className={styles.label}>{label}</span>
-      <input
-        ref={ref}
-        aria-describedby={error || helperText ? messageId : undefined}
-        aria-invalid={error ? true : undefined}
-        className={cx(styles.control, error && styles.invalid, className)}
-        id={controlId}
-        {...props}
-      />
+      {endAdornment ? (
+        <span className={styles.controlWrap}>
+          {input}
+          <span className={styles.adornment}>{endAdornment}</span>
+        </span>
+      ) : (
+        input
+      )}
       <FieldMessage error={error} helperText={helperText} id={messageId} />
     </label>
   );
@@ -36,7 +48,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(({ classNa
 
 TextField.displayName = 'TextField';
 
-export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(({ children, className, error, helperText, id, label, ...props }, ref) => {
+export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(({ children, className, endAdornment: _endAdornment, error, helperText, id, label, ...props }, ref) => {
   const generatedId = useId();
   const controlId = id ?? generatedId;
   const messageId = `${controlId}-message`;
@@ -61,7 +73,7 @@ export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(({ ch
 
 SelectField.displayName = 'SelectField';
 
-export const TextAreaField = forwardRef<HTMLTextAreaElement, TextAreaFieldProps>(({ className, error, helperText, id, label, ...props }, ref) => {
+export const TextAreaField = forwardRef<HTMLTextAreaElement, TextAreaFieldProps>(({ className, endAdornment: _endAdornment, error, helperText, id, label, ...props }, ref) => {
   const generatedId = useId();
   const controlId = id ?? generatedId;
   const messageId = `${controlId}-message`;

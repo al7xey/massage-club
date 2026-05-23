@@ -76,6 +76,46 @@
   background: var(--color-danger-bg);
 }
 
+.controlWrap {
+  position: relative;
+  display: block;
+}
+
+.controlWithAdornment {
+  padding-right: 48px;
+}
+
+.adornment {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: inline-grid;
+  place-items: center;
+  transform: translateY(-50%);
+}
+
+.adornment button {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.adornment button:hover {
+  background: var(--color-soft);
+  color: var(--color-text);
+}
+
+.adornment svg {
+  width: 20px;
+  height: 20px;
+}
+
 @media (max-width: 760px) {
   .control {
     min-height: 48px;

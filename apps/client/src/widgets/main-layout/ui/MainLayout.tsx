@@ -2,7 +2,6 @@ import { useEffect, useId, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { useGetCartQuery } from '@/entities/cart';
-import { getSiteContentText, useGetPublicSiteContentQuery } from '@/entities/site-content';
 import brandLogo from '@/shared/assets/brand-logo.jpg';
 import { appRoutes } from '@/shared/routes';
 import { LinkButton } from '@/shared/ui';
@@ -35,13 +34,12 @@ export function MainLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isAuthLoading, user } = useAuth();
   const { data: cartItems = [] } = useGetCartQuery(undefined, { skip: !user });
-  const { data: siteContent = [] } = useGetPublicSiteContentQuery();
   const logoRoute = user ? appRoutes.account() : appRoutes.home();
   const accountInitial = (user?.fullName?.trim()?.[0] ?? 'Р').toUpperCase();
   const authState = { backgroundLocation: location, from: location.pathname };
-  const footerText = getSiteContentText(siteContent, 'site.footer.text', 'Wellness-клуб с подпиской на массаж, SPA и уходовые процедуры.');
-  const contactPhone = getSiteContentText(siteContent, 'site.contacts.phone', '8 (800) 555-35-35');
-  const contactEmail = getSiteContentText(siteContent, 'site.contacts.email', 'hello@dlyasebya.ru');
+  const footerText = 'Wellness-клуб с подпиской на массаж, SPA и уходовые процедуры.';
+  const contactPhone = '8 (800) 555-35-35';
+  const contactEmail = 'hello@dlyasebya.ru';
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -232,7 +230,6 @@ export function MainLayout() {
               RelaxUp
             </p>
             <p>{footerText}</p>
-            <p>Wellness-клуб с подпиской на массаж, SPA и уходовые процедуры.</p>
           </div>
           <div>
             <h4>Клуб</h4>

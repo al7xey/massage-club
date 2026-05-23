@@ -13,5 +13,6 @@ export function createMasterCardModel(master: MasterDto, index: number): MasterC
     rating: index % 2 === 0 ? 5 : 4.9,
     reviewsCount: 40 + index * 11,
     nextSlots: [],
+    photoUrl: master.photoUrl ?? master.photoUrls?.[0] ?? null,
   };
 }

@@ -31,6 +31,7 @@ export function RegisterPage() {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const updateField = (field: keyof typeof values, value: string) => {
     setValues((current) => ({ ...current, [field]: value }));
@@ -134,15 +135,27 @@ export function RegisterPage() {
         <TextField
           autoComplete="new-password"
           label="Пароль"
-          type="password"
+          type={isPasswordVisible ? 'text' : 'password'}
           value={values.password}
+          endAdornment={
+            <PasswordToggle
+              isVisible={isPasswordVisible}
+              onClick={() => setIsPasswordVisible((value) => !value)}
+            />
+          }
           onChange={(event) => updateField('password', event.target.value)}
         />
         <TextField
           autoComplete="new-password"
           label="Подтверждение пароля"
-          type="password"
+          type={isPasswordVisible ? 'text' : 'password'}
           value={values.confirmPassword}
+          endAdornment={
+            <PasswordToggle
+              isVisible={isPasswordVisible}
+              onClick={() => setIsPasswordVisible((value) => !value)}
+            />
+          }
           onChange={(event) => updateField('confirmPassword', event.target.value)}
         />
 
@@ -157,6 +170,28 @@ export function RegisterPage() {
         </p>
       </form>
     </AuthModal>
+  );
+}
+
+function PasswordToggle({ isVisible, onClick }: { isVisible: boolean; onClick: () => void }) {
+  return (
+    <button type="button" aria-label={isVisible ? 'Скрыть пароль' : 'Показать пароль'} onClick={onClick}>
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        {isVisible ? (
+          <>
+            <path d="M4 4l16 16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            <path d="M10.7 10.7a2 2 0 0 0 2.6 2.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            <path d="M7.5 7.8C5.8 8.8 4.4 10.2 3.5 12c1.7 3.2 4.8 5.5 8.5 5.5 1.4 0 2.7-.3 3.9-.9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M10.2 6.7c.6-.1 1.2-.2 1.8-.2 3.7 0 6.8 2.3 8.5 5.5-.4.8-1 1.6-1.6 2.3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </>
+        ) : (
+          <>
+            <path d="M3.5 12c1.7-3.2 4.8-5.5 8.5-5.5s6.8 2.3 8.5 5.5c-1.7 3.2-4.8 5.5-8.5 5.5S5.2 15.2 3.5 12Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+            <path d="M12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" strokeWidth="1.8" />
+          </>
+        )}
+      </svg>
+    </button>
   );
 }
 

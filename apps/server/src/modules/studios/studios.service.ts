@@ -22,12 +22,20 @@ export class StudiosService {
   }
 
   create(dto: CreateStudioDto) {
-    return this.studiosRepository.save(this.studiosRepository.create(dto));
+    return this.studiosRepository.save(
+      this.studiosRepository.create({
+        ...dto,
+        photoUrls: normalizePhotoUrls(dto.photoUrls, dto.photoUrl),
+      }),
+    );
   }
 
   async update(id: string, dto: UpdateStudioDto) {
     const studio = await this.findOne(id);
     Object.assign(studio, dto);
+    if (dto.photoUrls !== undefined || dto.photoUrl !== undefined) {
+      studio.photoUrls = normalizePhotoUrls(dto.photoUrls ?? studio.photoUrls, dto.photoUrl ?? studio.photoUrl);
+    }
     return this.studiosRepository.save(studio);
   }
 
@@ -36,4 +44,15 @@ export class StudiosService {
     studio.isActive = false;
     return this.studiosRepository.save(studio);
   }
+}
+
+function normalizePhotoUrls(photoUrls?: string[], photoUrl?: string | null) {
+  const urls = (photoUrls ?? [])
+    .map((url) => url.trim())
+    .filter(Boolean);
+  const primary = photoUrl?.trim();
+  if (primary && !urls.includes(primary)) {
+    return [primary, ...urls];
+  }
+  return urls;
 }

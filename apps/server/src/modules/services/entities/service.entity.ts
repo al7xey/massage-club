@@ -39,6 +39,8 @@ export class Service {
   @Column({ name: 'subscription_price_rub', type: 'integer', nullable: true })
   subscriptionPriceRub?: number | null;
 
+  superSubscriptionPriceRub?: number | null;
+
   @Column({ name: 'image_url', type: 'text', nullable: true })
   imageUrl?: string | null;
 

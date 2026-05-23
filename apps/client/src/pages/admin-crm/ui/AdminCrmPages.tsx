@@ -1,95 +1,61 @@
-import { useEffect, useMemo, useState, type Dispatch, type FormEvent, type ReactNode, type SetStateAction } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import type { AppointmentDto } from '@/entities/appointment';
+import { useEffect, useRef, useState, type DragEvent, type FormEvent, type ReactNode } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import type { MasterDto } from '@/entities/master';
 import type { ServiceDto } from '@/entities/service';
 import type { StudioDto } from '@/entities/studio';
 import {
   type AdminDashboardDto,
-  type AdminSummaryDto,
   type AdminUserDto,
-  type AuditLogDto,
-  type DateAvailabilityDto,
-  type ScheduleOverviewDto,
-  type SiteContentDto,
   type UpsertMasterPayload,
   type UpsertServicePayload,
   type UpsertStudioPayload,
-  type WeeklyScheduleDayDto,
   useBlockSuperAdminUserMutation,
-  useCancelSuperAdminAppointmentMutation,
-  useCreateAdminDateAvailabilityMutation,
   useCreateAdminMasterMutation,
   useCreateAdminStudioMutation,
   useCreateSuperAdminServiceMutation,
-  useDeactivateAdminMasterMutation,
-  useDeactivateSuperAdminServiceMutation,
-  useDeleteAdminDateAvailabilityMutation,
+  useDeleteAdminMasterMutation,
+  useDeleteSuperAdminServiceMutation,
+  useDeleteSuperAdminUserMutation,
   useGetAdminDashboardQuery,
-  useGetAdminDateAvailabilityQuery,
   useGetAdminMasterQuery,
   useGetAdminMastersQuery,
-  useGetAdminScheduleOverviewQuery,
   useGetAdminServicesQuery,
   useGetAdminStudiosQuery,
-  useGetAdminWeeklyScheduleQuery,
-  useGetSuperAdminAppointmentsQuery,
-  useGetSuperAdminAuditLogQuery,
+  useGetSuperAdminServiceQuery,
   useGetSuperAdminServicesQuery,
-  useGetSuperAdminSiteContentQuery,
   useGetSuperAdminUsersQuery,
-  useGetAdminSummaryQuery,
   useUnblockSuperAdminUserMutation,
   useUpdateAdminMasterMutation,
   useUpdateAdminMasterPhotoMutation,
   useUpdateAdminStudioMutation,
-  useUpdateAdminWeeklyScheduleMutation,
-  useUpdateSuperAdminAppointmentMutation,
   useUpdateSuperAdminServiceMutation,
   useUpdateSuperAdminServicePhotoMutation,
-  useUpdateSuperAdminSiteContentMutation,
   useUploadAdminImageMutation,
 } from '@/features/admin';
+import { useAuth } from '@/features/auth';
+import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
-import { Button, cx } from '@/shared/ui';
+import { Button } from '@/shared/ui';
 import styles from './AdminCrmPages.module.css';
-
-const statusOptions = ['SCHEDULED', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] as const;
-const availabilityStatuses: DateAvailabilityDto['status'][] = ['available', 'custom', 'unavailable', 'vacation', 'sick', 'other'];
-const dayNames = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
 
 export function AdminDashboardPage() {
   const dashboard = useGetAdminDashboardQuery();
-  const schedule = useGetAdminScheduleOverviewQuery();
 
   return (
-    <CrmPage
-      title="Рабочее место администратора"
-      description="Быстрый обзор мастеров, студий, сегодняшних записей и расписания."
-      isLoading={dashboard.isLoading}
-      error={dashboard.error}
-    >
+    <CrmPage title="Панель администратора" description="Короткий рабочий обзор без лишних таблиц." isLoading={dashboard.isLoading} error={dashboard.error}>
       <DashboardCards dashboard={dashboard.data} />
-      <section className={styles.panel}>
-        <PanelHeader title="Ближайшая загрузка" subtitle="Сводка по активным мастерам и записям на неделю" />
-        <ScheduleCRMView data={schedule.data} isLoading={schedule.isLoading} compact />
-      </section>
     </CrmPage>
   );
 }
 
 export function SuperAdminDashboardPage() {
   const dashboard = useGetAdminDashboardQuery();
-  const summary = useGetAdminSummaryQuery();
+  const users = useGetSuperAdminUsersQuery();
+  const services = useGetSuperAdminServicesQuery();
 
   return (
-    <CrmPage
-      title="Центр управления сетью"
-      description="CRM-обзор публичного сайта, операций, клиентов и административных изменений."
-      isLoading={dashboard.isLoading || summary.isLoading}
-      error={dashboard.error ?? summary.error}
-    >
-      <DashboardCards dashboard={dashboard.data} summary={summary.data} />
+    <CrmPage title="Супер-админ" description="Мастера, услуги, студии и пользователи в одном простом интерфейсе." isLoading={dashboard.isLoading || users.isLoading || services.isLoading} error={dashboard.error ?? users.error ?? services.error}>
+      <DashboardCards dashboard={dashboard.data} usersCount={users.data?.length ?? 0} servicesCount={services.data?.length ?? 0} />
     </CrmPage>
   );
 }
@@ -104,104 +70,42 @@ export function SuperAdminMastersPage() {
 
 export function AdminMasterDetailsPage() {
   const { id = '' } = useParams();
+  const navigate = useNavigate();
   const master = useGetAdminMasterQuery(id, { skip: !id });
   const studios = useGetAdminStudiosQuery();
   const services = useGetAdminServicesQuery();
-  const [updateMaster, updateMasterState] = useUpdateAdminMasterMutation();
+  const [updateMaster, updateState] = useUpdateAdminMasterMutation();
   const [updatePhoto] = useUpdateAdminMasterPhotoMutation();
+  const [deleteMaster, deleteState] = useDeleteAdminMasterMutation();
 
-  if (!id) {
-    return <ErrorState title="Мастер не найден" />;
-  }
+  const removeMaster = async () => {
+    if (!id || !window.confirm('Удалить мастера? Он исчезнет из админки и публичного сайта.')) return;
+    await deleteMaster(id).unwrap();
+    navigate('/admin/masters', { replace: true });
+  };
 
   return (
-    <CrmPage
-      title={master.data ? fullName(master.data) : 'Карточка мастера'}
-      description="Профиль, фото, услуги, студии, недельный шаблон и исключения по датам."
-      isLoading={master.isLoading || studios.isLoading || services.isLoading}
-      error={master.error ?? studios.error ?? services.error}
-    >
+    <CrmPage title={master.data ? fullName(master.data) : 'Мастер'} description="Редактирование основной карточки мастера." isLoading={master.isLoading || studios.isLoading || services.isLoading} error={master.error ?? studios.error ?? services.error}>
       {master.data ? (
-        <>
-          <section className={styles.panel}>
-            <PanelHeader title="Профиль мастера" subtitle="Эти данные используются в админке и на публичной карточке." />
-            <MasterForm
-              master={master.data}
-              services={services.data ?? []}
-              studios={studios.data ?? []}
-              isSubmitting={updateMasterState.isLoading}
-              submitLabel="Сохранить профиль"
-              onSubmit={(body) => updateMaster({ id, body }).unwrap()}
-              onPhotoUploaded={(photoUrl) => updatePhoto({ id, photoUrl }).unwrap()}
-            />
-          </section>
-          <section className={styles.twoColumn}>
-            <MasterWeeklyScheduleEditor masterId={id} studios={studios.data ?? []} />
-            <MasterDateAvailabilityEditor masterId={id} studios={studios.data ?? []} />
-          </section>
-        </>
+        <section className={styles.panel}>
+          <MasterForm
+            master={master.data}
+            services={services.data ?? []}
+            studios={studios.data ?? []}
+            isSubmitting={updateState.isLoading}
+            submitLabel="Сохранить мастера"
+            onSubmit={(body) => updateMaster({ id, body }).unwrap()}
+            onPhotoUploaded={(photoUrl) => updatePhoto({ id, photoUrl }).unwrap()}
+          />
+          <div className={styles.dangerZone}>
+            <Button variant="danger" isLoading={deleteState.isLoading} onClick={() => void removeMaster()}>
+              Удалить мастера
+            </Button>
+          </div>
+        </section>
       ) : (
         <EmptyState title="Мастер не найден" />
       )}
-    </CrmPage>
-  );
-}
-
-export function AdminSchedulePage() {
-  const [filters, setFilters] = useState({ from: todayInput(), to: addDaysInput(todayInput(), 6), studioId: '', masterId: '', serviceId: '' });
-  const studios = useGetAdminStudiosQuery();
-  const masters = useGetAdminMastersQuery();
-  const services = useGetAdminServicesQuery();
-  const schedule = useGetAdminScheduleOverviewQuery(cleanFilters(filters));
-
-  return (
-    <CrmPage title="Расписание" description="CRM-календарь мастеров, смен, свободных окон и записей." isLoading={studios.isLoading || masters.isLoading || services.isLoading} error={studios.error ?? masters.error ?? services.error}>
-      <section className={styles.panel}>
-        <div className={styles.filters}>
-          <label>
-            С
-            <input type="date" value={filters.from} onChange={(event) => setFilters((current) => ({ ...current, from: event.target.value }))} />
-          </label>
-          <label>
-            По
-            <input type="date" value={filters.to} onChange={(event) => setFilters((current) => ({ ...current, to: event.target.value }))} />
-          </label>
-          <label>
-            Студия
-            <select value={filters.studioId} onChange={(event) => setFilters((current) => ({ ...current, studioId: event.target.value }))}>
-              <option value="">Все студии</option>
-              {(studios.data ?? []).map((studio) => (
-                <option key={studio.id} value={studio.id}>
-                  {studio.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Мастер
-            <select value={filters.masterId} onChange={(event) => setFilters((current) => ({ ...current, masterId: event.target.value }))}>
-              <option value="">Все мастера</option>
-              {(masters.data ?? []).map((master) => (
-                <option key={master.id} value={master.id}>
-                  {fullName(master)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Услуга
-            <select value={filters.serviceId} onChange={(event) => setFilters((current) => ({ ...current, serviceId: event.target.value }))}>
-              <option value="">Все услуги</option>
-              {(services.data ?? []).map((service) => (
-                <option key={service.id} value={service.id}>
-                  {service.title}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </section>
-      <ScheduleCRMView data={schedule.data} isLoading={schedule.isLoading} />
     </CrmPage>
   );
 }
@@ -211,13 +115,13 @@ export function AdminStudiosPage() {
   const [createStudio, createState] = useCreateAdminStudioMutation();
 
   return (
-    <CrmPage title="Студии" description="Адреса и контактные данные филиалов, доступные мастерам и публичному сайту." isLoading={studios.isLoading} error={studios.error}>
+    <CrmPage title="Студии" description="Основная информация филиалов и фото для публичного сайта." isLoading={studios.isLoading} error={studios.error}>
       <section className={styles.panel}>
-        <PanelHeader title="Добавить студию" />
+        <PanelHeader title="Новая студия" />
         <StudioForm
-          submitLabel="Добавить"
+          submitLabel="Добавить студию"
           isSubmitting={createState.isLoading}
-          onSubmit={(body) => createStudio(body as Required<Pick<UpsertStudioPayload, 'address' | 'city' | 'name'>> & UpsertStudioPayload).unwrap()}
+          onSubmit={(body) => createStudio(requiredStudioPayload(body)).unwrap()}
         />
       </section>
       <section className={styles.grid}>
@@ -234,9 +138,9 @@ export function SuperAdminServicesPage() {
   const [createService, createState] = useCreateSuperAdminServiceMutation();
 
   return (
-    <CrmPage title="Услуги" description="Публичные карточки услуг, цены, длительность, фото, правила и SEO-описания." isLoading={services.isLoading} error={services.error}>
+    <CrmPage title="Услуги" description="Цена вводится один раз. Скидочные цены считаются автоматически." isLoading={services.isLoading} error={services.error}>
       <section className={styles.panel}>
-        <PanelHeader title="Новая услуга" subtitle="После сохранения карточка появится в каталоге и форме записи." />
+        <PanelHeader title="Новая услуга" />
         <ServiceForm isSubmitting={createState.isLoading} submitLabel="Создать услугу" onSubmit={(body) => createService(requiredServicePayload(body)).unwrap()} />
       </section>
       <section className={styles.grid}>
@@ -250,81 +154,39 @@ export function SuperAdminServicesPage() {
 
 export function SuperAdminServiceDetailsPage() {
   const { id = '' } = useParams();
-  const services = useGetSuperAdminServicesQuery();
-  const service = services.data?.find((item) => item.id === id || item.slug === id);
+  const navigate = useNavigate();
+  const service = useGetSuperAdminServiceQuery(id, { skip: !id });
   const [updateService, updateState] = useUpdateSuperAdminServiceMutation();
   const [updatePhoto] = useUpdateSuperAdminServicePhotoMutation();
+  const [deleteService, deleteState] = useDeleteSuperAdminServiceMutation();
+
+  const removeService = async () => {
+    if (!service.data || !window.confirm('Удалить услугу? Она будет скрыта с сайта.')) return;
+    await deleteService(service.data.id).unwrap();
+    navigate('/super-admin/services', { replace: true });
+  };
+  const serviceItem = service.data;
 
   return (
-    <CrmPage title={service?.title ?? 'Услуга'} description="Редактирование публичной карточки услуги." isLoading={services.isLoading} error={services.error}>
-      {service ? (
+    <CrmPage title={serviceItem?.title ?? 'Услуга'} description="Простая карточка услуги без ручного ввода скидочных цен." isLoading={service.isLoading} error={service.error}>
+      {serviceItem ? (
         <section className={styles.panel}>
-          <PanelHeader title="Карточка услуги" subtitle="Изменения сохраняются в backend и сразу используются публичным сайтом." />
           <ServiceForm
-            service={service}
+            service={serviceItem}
             isSubmitting={updateState.isLoading}
             submitLabel="Сохранить услугу"
-            onSubmit={(body) => updateService({ id: service.id, body }).unwrap()}
-            onPhotoUploaded={(imageUrl) => updatePhoto({ id: service.id, imageUrl }).unwrap()}
+            onSubmit={(body) => updateService({ id: serviceItem.id, body }).unwrap()}
+            onPhotoUploaded={(imageUrl) => updatePhoto({ id: serviceItem.id, imageUrl }).unwrap()}
           />
+          <div className={styles.dangerZone}>
+            <Button variant="danger" isLoading={deleteState.isLoading} onClick={() => void removeService()}>
+              Удалить услугу
+            </Button>
+          </div>
         </section>
       ) : (
         <EmptyState title="Услуга не найдена" />
       )}
-    </CrmPage>
-  );
-}
-
-export function SuperAdminAppointmentsPage() {
-  const [filters, setFilters] = useState({ date: '', status: '', studioId: '', masterId: '' });
-  const appointments = useGetSuperAdminAppointmentsQuery(cleanFilters(filters));
-  const masters = useGetAdminMastersQuery();
-  const studios = useGetAdminStudiosQuery();
-
-  return (
-    <CrmPage title="Записи" description="Перенос, отмена и статусы клиентских записей." isLoading={appointments.isLoading || masters.isLoading || studios.isLoading} error={appointments.error ?? masters.error ?? studios.error}>
-      <section className={styles.panel}>
-        <div className={styles.filters}>
-          <label>
-            Дата
-            <input type="date" value={filters.date} onChange={(event) => setFilters((current) => ({ ...current, date: event.target.value }))} />
-          </label>
-          <label>
-            Статус
-            <select value={filters.status} onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}>
-              <option value="">Все</option>
-              {statusOptions.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Студия
-            <select value={filters.studioId} onChange={(event) => setFilters((current) => ({ ...current, studioId: event.target.value }))}>
-              <option value="">Все</option>
-              {(studios.data ?? []).map((studio) => (
-                <option key={studio.id} value={studio.id}>
-                  {studio.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Мастер
-            <select value={filters.masterId} onChange={(event) => setFilters((current) => ({ ...current, masterId: event.target.value }))}>
-              <option value="">Все</option>
-              {(masters.data ?? []).map((master) => (
-                <option key={master.id} value={master.id}>
-                  {fullName(master)}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      </section>
-      <AppointmentTable appointments={appointments.data ?? []} />
     </CrmPage>
   );
 }
@@ -334,12 +196,12 @@ export function SuperAdminUsersPage() {
   const users = useGetSuperAdminUsersQuery(cleanFilters(filters));
 
   return (
-    <CrmPage title="Пользователи" description="Поиск клиентов и сотрудников, блокировка и разблокировка аккаунтов." isLoading={users.isLoading} error={users.error}>
+    <CrmPage title="Пользователи" description="Поиск, блокировка и удаление аккаунтов." isLoading={users.isLoading} error={users.error}>
       <section className={styles.panel}>
         <div className={styles.filters}>
           <label>
             Поиск
-            <input value={filters.search} onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))} placeholder="Имя, телефон или email" />
+            <input value={filters.search} onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))} placeholder="Имя, email или телефон" />
           </label>
           <label>
             Статус
@@ -351,27 +213,7 @@ export function SuperAdminUsersPage() {
           </label>
         </div>
       </section>
-      <UserTable users={users.data ?? []} />
-    </CrmPage>
-  );
-}
-
-export function SuperAdminSiteContentPage() {
-  const content = useGetSuperAdminSiteContentQuery();
-
-  return (
-    <CrmPage title="Контент сайта" description="Редактируемые тексты, контакты, футер и блоки публичного сайта." isLoading={content.isLoading} error={content.error}>
-      <SiteContentEditor items={content.data ?? []} />
-    </CrmPage>
-  );
-}
-
-export function SuperAdminAuditLogPage() {
-  const auditLog = useGetSuperAdminAuditLogQuery();
-
-  return (
-    <CrmPage title="Журнал действий" description="Все критичные изменения мастеров, услуг, контента, записей и пользователей." isLoading={auditLog.isLoading} error={auditLog.error}>
-      <AuditLogTable items={auditLog.data ?? []} />
+      <UserCards users={users.data ?? []} />
     </CrmPage>
   );
 }
@@ -384,14 +226,9 @@ function MastersWorkspace({ mode }: { mode: 'admin' | 'super-admin' }) {
   const [createMaster, createState] = useCreateAdminMasterMutation();
 
   return (
-    <CrmPage
-      title="Мастера"
-      description={mode === 'super-admin' ? 'Полный CRUD мастеров, привязка к студиям и услугам.' : 'Управление профилями мастеров и расписанием.'}
-      isLoading={masters.isLoading || studios.isLoading || services.isLoading}
-      error={masters.error ?? studios.error ?? services.error}
-    >
+    <CrmPage title="Мастера" description="Карточки мастеров, фото, студии и услуги." isLoading={masters.isLoading || studios.isLoading || services.isLoading} error={masters.error ?? studios.error ?? services.error}>
       <section className={styles.panel}>
-        <PanelHeader title="Добавить мастера" />
+        <PanelHeader title="Новый мастер" />
         <MasterForm
           services={services.data ?? []}
           studios={studios.data ?? []}
@@ -403,7 +240,7 @@ function MastersWorkspace({ mode }: { mode: 'admin' | 'super-admin' }) {
       <section className={styles.panel}>
         <div className={styles.filters}>
           <label>
-            Поиск мастера
+            Поиск
             <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Имя или телефон" />
           </label>
         </div>
@@ -449,20 +286,13 @@ function CrmPage({
   );
 }
 
-function DashboardCards({ dashboard, summary }: { dashboard?: AdminDashboardDto; summary?: AdminSummaryDto }) {
+function DashboardCards({ dashboard, servicesCount, usersCount }: { dashboard?: AdminDashboardDto; servicesCount?: number; usersCount?: number }) {
   const cards = [
-    ['Активные мастера', dashboard?.masters ?? 0],
+    ['Мастера', dashboard?.masters ?? 0],
     ['Студии', dashboard?.activeStudios ?? 0],
-    ['Сегодня записей', dashboard?.todayAppointments ?? 0],
-    ['Конфликты расписания', dashboard?.scheduleConflicts ?? 0],
-    ...(summary
-      ? [
-          ['Пользователи', summary.users],
-          ['Выручка, ₽', summary.paymentsRub],
-          ['Абонементы', summary.activeSubscriptions],
-          ['Сертификаты', summary.giftCertificates],
-        ]
-      : []),
+    ['Записи сегодня', dashboard?.todayAppointments ?? 0],
+    ...(servicesCount !== undefined ? [['Услуги', servicesCount]] : []),
+    ...(usersCount !== undefined ? [['Пользователи', usersCount]] : []),
   ];
 
   return (
@@ -478,16 +308,22 @@ function DashboardCards({ dashboard, summary }: { dashboard?: AdminDashboardDto;
 }
 
 function AdminMasterCard({ master, mode }: { master: MasterDto; mode: 'admin' | 'super-admin' }) {
-  const [deactivate, state] = useDeactivateAdminMasterMutation();
+  const [deleteMaster, deleteState] = useDeleteAdminMasterMutation();
   const detailsPath = mode === 'super-admin' ? `/super-admin/masters/${master.id}` : appRoutes.adminMasterDetails(master.id);
+  const photoUrl = resolveMediaUrl(master.photoUrl ?? master.photoUrls?.[0]);
+
+  const remove = async () => {
+    if (!window.confirm(`Удалить мастера ${fullName(master)}?`)) return;
+    await deleteMaster(master.id).unwrap();
+  };
 
   return (
-    <article className={styles.masterCard}>
-      <div className={styles.media}>{master.photoUrl ? <img src={master.photoUrl} alt="" /> : <span>{initials(fullName(master))}</span>}</div>
+    <article className={styles.card}>
+      <div className={styles.media}>{photoUrl ? <img src={photoUrl} alt="" /> : <span>{initials(fullName(master))}</span>}</div>
       <div className={styles.cardBody}>
         <div className={styles.cardTitleRow}>
           <h3>{fullName(master)}</h3>
-          <StatusPill active={master.isActive} />
+          <span className={master.isActive ? styles.statusActive : styles.statusMuted}>{master.isActive ? 'Активен' : 'Скрыт'}</span>
         </div>
         <p>{master.specialization || 'Специализация не указана'}</p>
         <dl className={styles.metaList}>
@@ -497,7 +333,7 @@ function AdminMasterCard({ master, mode }: { master: MasterDto; mode: 'admin' | 
           </div>
           <div>
             <dt>Студии</dt>
-            <dd>{(master.studios?.length ? master.studios : master.studio ? [master.studio] : []).map((studio) => studio.name).join(', ') || 'Не назначены'}</dd>
+            <dd>{masterStudios(master).map((studio) => studio.name).join(', ') || 'Не назначены'}</dd>
           </div>
           <div>
             <dt>Услуги</dt>
@@ -508,14 +344,9 @@ function AdminMasterCard({ master, mode }: { master: MasterDto; mode: 'admin' | 
           <Link className={styles.linkButton} to={detailsPath}>
             Редактировать
           </Link>
-          <Link className={styles.linkButtonSecondary} to={detailsPath}>
-            Расписание
-          </Link>
-          {master.isActive ? (
-            <Button size="sm" variant="danger" isLoading={state.isLoading} onClick={() => void deactivate(master.id)}>
-              Скрыть
-            </Button>
-          ) : null}
+          <Button size="sm" variant="danger" isLoading={deleteState.isLoading} onClick={() => void remove()}>
+            Удалить
+          </Button>
         </div>
       </div>
     </article>
@@ -556,8 +387,8 @@ function MasterForm({
         description: values.description.trim(),
         specialization: values.specialization.trim(),
         experienceYears: Number(values.experienceYears) || 0,
-        photoUrl: values.photoUrl.trim(),
-        isActive: values.isActive,
+        photoUrl: values.photoUrl,
+        photoUrls: values.photoUrl ? [values.photoUrl] : [],
         studioIds: values.studioIds,
         serviceIds: values.serviceIds,
       });
@@ -589,28 +420,17 @@ function MasterForm({
         Описание
         <textarea rows={4} value={values.description} onChange={(event) => setValues((current) => ({ ...current, description: event.target.value }))} />
       </label>
-      <label className={styles.fullRow}>
-        Фото
-        <input value={values.photoUrl} onChange={(event) => setValues((current) => ({ ...current, photoUrl: event.target.value }))} placeholder="/uploads/..." />
-      </label>
-      {onPhotoUploaded ? (
-        <ImageUploader
-          label="Загрузить фото мастера"
-          onUploaded={async (url) => {
-            await onPhotoUploaded(url);
-            setValues((current) => ({ ...current, photoUrl: url }));
-          }}
-        />
-      ) : null}
+      <ImageUploader
+        label="Фото мастера"
+        value={values.photoUrl}
+        onChange={(photoUrl) => setValues((current) => ({ ...current, photoUrl }))}
+        onUploaded={onPhotoUploaded}
+      />
       <fieldset className={styles.checkGroup}>
         <legend>Студии</legend>
         {studios.map((studio) => (
           <label key={studio.id}>
-            <input
-              type="checkbox"
-              checked={values.studioIds.includes(studio.id)}
-              onChange={() => setValues((current) => ({ ...current, studioIds: toggleId(current.studioIds, studio.id) }))}
-            />
+            <input type="checkbox" checked={values.studioIds.includes(studio.id)} onChange={() => setValues((current) => ({ ...current, studioIds: toggleId(current.studioIds, studio.id) }))} />
             {studio.name}
           </label>
         ))}
@@ -619,19 +439,11 @@ function MasterForm({
         <legend>Услуги</legend>
         {services.map((service) => (
           <label key={service.id}>
-            <input
-              type="checkbox"
-              checked={values.serviceIds.includes(service.id)}
-              onChange={() => setValues((current) => ({ ...current, serviceIds: toggleId(current.serviceIds, service.id) }))}
-            />
+            <input type="checkbox" checked={values.serviceIds.includes(service.id)} onChange={() => setValues((current) => ({ ...current, serviceIds: toggleId(current.serviceIds, service.id) }))} />
             {service.title}
           </label>
         ))}
       </fieldset>
-      <label className={styles.switch}>
-        <input type="checkbox" checked={values.isActive} onChange={(event) => setValues((current) => ({ ...current, isActive: event.target.checked }))} />
-        Активен на сайте
-      </label>
       <div className={styles.formActions}>
         <Button type="submit" isLoading={isSubmitting}>
           {submitLabel}
@@ -642,230 +454,22 @@ function MasterForm({
   );
 }
 
-function MasterWeeklyScheduleEditor({ masterId, studios }: { masterId: string; studios: StudioDto[] }) {
-  const schedule = useGetAdminWeeklyScheduleQuery(masterId);
-  const [updateSchedule, updateState] = useUpdateAdminWeeklyScheduleMutation();
-  const [days, setDays] = useState<WeeklyScheduleDayDto[]>(() => defaultScheduleDays(studios[0]?.id));
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    setDays(schedule.data?.length ? schedule.data : defaultScheduleDays(studios[0]?.id));
-  }, [schedule.data, studios]);
-
-  const save = async () => {
-    setMessage('');
-    try {
-      const response = await updateSchedule({ id: masterId, days }).unwrap();
-      setMessage(response.warnings?.length ? 'Сохранено, есть предупреждения по будущим записям' : 'Расписание сохранено');
-    } catch (error) {
-      setMessage(getErrorText(error));
-    }
-  };
-
-  return (
-    <section className={styles.panel}>
-      <PanelHeader title="Недельный шаблон" subtitle="Можно добавлять несколько интервалов в один день." />
-      {schedule.isLoading ? <LoadingState /> : null}
-      <div className={styles.weekGrid}>
-        {days.map((day) => (
-          <article className={styles.dayCard} key={day.dayOfWeek}>
-            <label className={styles.switch}>
-              <input
-                type="checkbox"
-                checked={day.isWorking}
-                onChange={(event) =>
-                  setDays((current) =>
-                    current.map((item) =>
-                      item.dayOfWeek === day.dayOfWeek
-                        ? { ...item, isWorking: event.target.checked, intervals: event.target.checked && item.intervals.length === 0 ? [defaultInterval(studios[0]?.id)] : item.intervals }
-                        : item,
-                    ),
-                  )
-                }
-              />
-              {dayNames[day.dayOfWeek - 1]}
-            </label>
-            {day.isWorking
-              ? day.intervals.map((interval, index) => (
-                  <div className={styles.intervalRow} key={`${day.dayOfWeek}-${index}`}>
-                    <select
-                      value={interval.studioId}
-                      onChange={(event) => updateInterval(setDays, day.dayOfWeek, index, { studioId: event.target.value })}
-                    >
-                      {studios.map((studio) => (
-                        <option key={studio.id} value={studio.id}>
-                          {studio.name}
-                        </option>
-                      ))}
-                    </select>
-                    <input type="time" value={interval.startTime} onChange={(event) => updateInterval(setDays, day.dayOfWeek, index, { startTime: event.target.value })} />
-                    <input type="time" value={interval.endTime} onChange={(event) => updateInterval(setDays, day.dayOfWeek, index, { endTime: event.target.value })} />
-                    <input type="time" value={interval.breakStartTime ?? ''} onChange={(event) => updateInterval(setDays, day.dayOfWeek, index, { breakStartTime: event.target.value || null })} />
-                    <input type="time" value={interval.breakEndTime ?? ''} onChange={(event) => updateInterval(setDays, day.dayOfWeek, index, { breakEndTime: event.target.value || null })} />
-                    <button type="button" onClick={() => removeInterval(setDays, day.dayOfWeek, index)}>
-                      Убрать
-                    </button>
-                  </div>
-                ))
-              : null}
-            {day.isWorking ? (
-              <button type="button" className={styles.inlineAdd} onClick={() => addInterval(setDays, day.dayOfWeek, studios[0]?.id)}>
-                + Интервал
-              </button>
-            ) : null}
-          </article>
-        ))}
-      </div>
-      <div className={styles.formActions}>
-        <Button isLoading={updateState.isLoading} onClick={save}>
-          Сохранить шаблон
-        </Button>
-        {message ? <span>{message}</span> : null}
-      </div>
-    </section>
-  );
-}
-
-function MasterDateAvailabilityEditor({ masterId, studios }: { masterId: string; studios: StudioDto[] }) {
-  const availability = useGetAdminDateAvailabilityQuery({ id: masterId });
-  const [createAvailability, createState] = useCreateAdminDateAvailabilityMutation();
-  const [deleteAvailability] = useDeleteAdminDateAvailabilityMutation();
-  const [form, setForm] = useState({ date: todayInput(), status: 'custom' as DateAvailabilityDto['status'], startTime: '10:00', endTime: '18:00', studioId: studios[0]?.id ?? '', reason: '' });
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    if (!form.studioId && studios[0]?.id) {
-      setForm((current) => ({ ...current, studioId: studios[0].id }));
-    }
-  }, [form.studioId, studios]);
-
-  const save = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setMessage('');
-    try {
-      await createAvailability({
-        id: masterId,
-        body: {
-          date: form.date,
-          status: form.status,
-          startTime: ['available', 'custom'].includes(form.status) ? form.startTime : null,
-          endTime: ['available', 'custom'].includes(form.status) ? form.endTime : null,
-          studioId: form.studioId || undefined,
-          reason: form.reason,
-        },
-      }).unwrap();
-      setMessage('Исключение сохранено');
-    } catch (error) {
-      setMessage(getErrorText(error));
-    }
-  };
-
-  return (
-    <section className={styles.panel}>
-      <PanelHeader title="Исключения по датам" subtitle="Отпуск, больничный, особое время работы или точечная доступность." />
-      <form className={styles.compactForm} onSubmit={save}>
-        <input type="date" value={form.date} onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))} />
-        <select value={form.status} onChange={(event) => setForm((current) => ({ ...current, status: event.target.value as DateAvailabilityDto['status'] }))}>
-          {availabilityStatuses.map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
-        <select value={form.studioId} onChange={(event) => setForm((current) => ({ ...current, studioId: event.target.value }))}>
-          <option value="">Без студии</option>
-          {studios.map((studio) => (
-            <option key={studio.id} value={studio.id}>
-              {studio.name}
-            </option>
-          ))}
-        </select>
-        <input type="time" value={form.startTime} onChange={(event) => setForm((current) => ({ ...current, startTime: event.target.value }))} />
-        <input type="time" value={form.endTime} onChange={(event) => setForm((current) => ({ ...current, endTime: event.target.value }))} />
-        <input value={form.reason} onChange={(event) => setForm((current) => ({ ...current, reason: event.target.value }))} placeholder="Причина" />
-        <Button type="submit" isLoading={createState.isLoading}>
-          Добавить
-        </Button>
-      </form>
-      {message ? <p className={styles.notice}>{message}</p> : null}
-      <div className={styles.list}>
-        {(availability.data ?? []).map((item) => (
-          <article className={styles.listItem} key={item.id}>
-            <div>
-              <strong>{formatDate(item.date)}</strong>
-              <span>{item.status} {item.startTime ? `${item.startTime}-${item.endTime}` : ''}</span>
-              {item.reason ? <small>{item.reason}</small> : null}
-            </div>
-            <Button size="sm" variant="danger" onClick={() => void deleteAvailability({ masterId, availabilityId: item.id })}>
-              Удалить
-            </Button>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function ScheduleCRMView({ compact, data, isLoading }: { compact?: boolean; data?: ScheduleOverviewDto; isLoading?: boolean }) {
-  const dates = useMemo(() => buildDateColumns(data?.from, data?.to, compact ? 3 : 7), [compact, data?.from, data?.to]);
-
-  if (isLoading) {
-    return <LoadingState />;
-  }
-
-  if (!data?.masters.length) {
-    return <EmptyState title="В расписании пока нет мастеров" />;
-  }
-
-  return (
-    <div className={cx(styles.schedule, compact && styles.scheduleCompact)}>
-      <div className={styles.scheduleHead} style={{ gridTemplateColumns: `220px repeat(${dates.length}, minmax(150px, 1fr))` }}>
-        <span>Мастер</span>
-        {dates.map((date) => (
-          <strong key={date}>{formatDate(date)}</strong>
-        ))}
-      </div>
-      {data.masters.map((master) => (
-        <div className={styles.scheduleRow} style={{ gridTemplateColumns: `220px repeat(${dates.length}, minmax(150px, 1fr))` }} key={master.id}>
-          <Link className={styles.masterCell} to={appRoutes.adminMasterDetails(master.id)}>
-            <span>{master.photoUrl ? <img src={master.photoUrl} alt="" /> : initials(fullName(master))}</span>
-            <strong>{fullName(master)}</strong>
-          </Link>
-          {dates.map((date) => {
-            const dayAppointments = data.appointments.filter((appointment) => appointment.master.id === master.id && appointment.startsAt.slice(0, 10) === date);
-            const dayShifts = data.shifts.filter((shift) => shift.master.id === master.id && shift.startsAt.slice(0, 10) === date);
-            return (
-              <div className={styles.scheduleCell} key={`${master.id}-${date}`}>
-                {dayShifts.length === 0 ? <span className={styles.unavailable}>Не работает</span> : null}
-                {dayShifts.map((shift) => (
-                  <span className={styles.freeSlot} key={shift.id}>
-                    {formatTime(shift.startsAt)}-{formatTime(shift.endsAt)}
-                  </span>
-                ))}
-                {dayAppointments.map((appointment) => (
-                  <article className={styles.appointmentChip} key={appointment.id}>
-                    <strong>{appointment.service.title}</strong>
-                    <span>{formatTime(appointment.startsAt)} {appointment.status}</span>
-                  </article>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function ServiceCardEditable({ service }: { service: ServiceDto }) {
-  const [deactivate, state] = useDeactivateSuperAdminServiceMutation();
+  const [deleteService, deleteState] = useDeleteSuperAdminServiceMutation();
+  const imageUrl = resolveMediaUrl(service.imageUrl ?? service.galleryUrls?.[0]);
+
+  const remove = async () => {
+    if (!window.confirm(`Удалить услугу "${service.title}"?`)) return;
+    await deleteService(service.id).unwrap();
+  };
+
   return (
-    <article className={styles.serviceCard}>
-      <div className={styles.serviceImage}>{service.imageUrl ? <img src={service.imageUrl} alt="" /> : <span>{service.title.slice(0, 2)}</span>}</div>
+    <article className={styles.card}>
+      <div className={styles.media}>{imageUrl ? <img src={imageUrl} alt="" /> : <span>{service.title.slice(0, 2)}</span>}</div>
       <div className={styles.cardBody}>
         <div className={styles.cardTitleRow}>
           <h3>{service.title}</h3>
-          <StatusPill active={service.isActive !== false} />
+          <span className={service.isActive !== false ? styles.statusActive : styles.statusMuted}>{service.isActive !== false ? 'На сайте' : 'Скрыта'}</span>
         </div>
         <p>{service.shortDescription || service.description}</p>
         <dl className={styles.metaList}>
@@ -874,23 +478,21 @@ function ServiceCardEditable({ service }: { service: ServiceDto }) {
             <dd>{formatMoney(service.priceRub)}</dd>
           </div>
           <div>
+            <dt>Абонемент</dt>
+            <dd>{formatMoney(calculateDiscountedPrice(service.priceRub, 20))}</dd>
+          </div>
+          <div>
             <dt>Длительность</dt>
             <dd>{service.durationMinutes} мин</dd>
           </div>
-          <div>
-            <dt>Категория</dt>
-            <dd>{service.category?.name ?? 'Без категории'}</dd>
-          </div>
         </dl>
         <div className={styles.cardActions}>
-          <Link className={styles.linkButton} to={appRoutes.superAdminServiceDetails(service.id)}>
+          <Link className={styles.linkButton} to={`/super-admin/services/${service.id}`}>
             Редактировать
           </Link>
-          {service.isActive !== false ? (
-            <Button size="sm" variant="danger" isLoading={state.isLoading} onClick={() => void deactivate(service.id)}>
-              Скрыть
-            </Button>
-          ) : null}
+          <Button size="sm" variant="danger" isLoading={deleteState.isLoading} onClick={() => void remove()}>
+            Удалить
+          </Button>
         </div>
       </div>
     </article>
@@ -917,6 +519,8 @@ function ServiceForm({
     setValues(serviceValues(service));
   }, [service]);
 
+  const price = Number(values.priceRub) || 0;
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setMessage('');
@@ -927,16 +531,9 @@ function ServiceForm({
         shortDescription: values.shortDescription.trim(),
         description: values.description.trim(),
         durationMinutes: Number(values.durationMinutes) || 60,
-        priceRub: Number(values.priceRub) || 0,
-        subscriptionPriceRub: values.subscriptionPriceRub ? Number(values.subscriptionPriceRub) : undefined,
-        imageUrl: values.imageUrl.trim(),
-        galleryUrls: splitLines(values.galleryUrls),
-        contraindications: values.contraindications.trim(),
-        benefits: values.benefits.trim(),
-        rules: values.rules.trim(),
-        seoTitle: values.seoTitle.trim(),
-        seoDescription: values.seoDescription.trim(),
-        isActive: values.isActive,
+        priceRub: price,
+        imageUrl: values.imageUrl,
+        galleryUrls: values.imageUrl ? [values.imageUrl] : [],
       });
       setMessage('Сохранено');
     } catch (error) {
@@ -952,69 +549,34 @@ function ServiceForm({
       </label>
       <label>
         Slug
-        <input value={values.slug} onChange={(event) => setValues((current) => ({ ...current, slug: event.target.value }))} />
-      </label>
-      <label>
-        Цена, ₽
-        <input min="0" type="number" value={values.priceRub} onChange={(event) => setValues((current) => ({ ...current, priceRub: event.target.value }))} />
-      </label>
-      <label>
-        Цена по подписке, ₽
-        <input min="0" type="number" value={values.subscriptionPriceRub} onChange={(event) => setValues((current) => ({ ...current, subscriptionPriceRub: event.target.value }))} />
+        <input value={values.slug} onChange={(event) => setValues((current) => ({ ...current, slug: event.target.value }))} placeholder="Заполнится автоматически" />
       </label>
       <label>
         Длительность, мин
-        <input min="15" type="number" value={values.durationMinutes} onChange={(event) => setValues((current) => ({ ...current, durationMinutes: event.target.value }))} />
+        <input min="15" step="15" type="number" value={values.durationMinutes} onChange={(event) => setValues((current) => ({ ...current, durationMinutes: event.target.value }))} />
       </label>
+      <label>
+        Базовая цена
+        <input min="0" type="number" value={values.priceRub} onChange={(event) => setValues((current) => ({ ...current, priceRub: event.target.value }))} />
+      </label>
+      <div className={styles.pricePreview}>
+        <span>Цена по абонементу: {formatMoney(calculateDiscountedPrice(price, 20))}</span>
+        <span>Super: {formatMoney(calculateDiscountedPrice(price, 30))}</span>
+      </div>
       <label className={styles.fullRow}>
         Короткое описание
-        <input value={values.shortDescription} onChange={(event) => setValues((current) => ({ ...current, shortDescription: event.target.value }))} />
+        <textarea rows={2} value={values.shortDescription} onChange={(event) => setValues((current) => ({ ...current, shortDescription: event.target.value }))} />
       </label>
       <label className={styles.fullRow}>
         Описание
         <textarea required rows={4} value={values.description} onChange={(event) => setValues((current) => ({ ...current, description: event.target.value }))} />
       </label>
-      <label className={styles.fullRow}>
-        Фото
-        <input value={values.imageUrl} onChange={(event) => setValues((current) => ({ ...current, imageUrl: event.target.value }))} placeholder="/uploads/..." />
-      </label>
-      {onPhotoUploaded ? (
-        <ImageUploader
-          label="Загрузить фото услуги"
-          onUploaded={async (url) => {
-            await onPhotoUploaded(url);
-            setValues((current) => ({ ...current, imageUrl: url }));
-          }}
-        />
-      ) : null}
-      <label className={styles.fullRow}>
-        Галерея
-        <textarea rows={3} value={values.galleryUrls} onChange={(event) => setValues((current) => ({ ...current, galleryUrls: event.target.value }))} placeholder="Каждый URL с новой строки" />
-      </label>
-      <label>
-        Противопоказания
-        <textarea rows={3} value={values.contraindications} onChange={(event) => setValues((current) => ({ ...current, contraindications: event.target.value }))} />
-      </label>
-      <label>
-        Преимущества
-        <textarea rows={3} value={values.benefits} onChange={(event) => setValues((current) => ({ ...current, benefits: event.target.value }))} />
-      </label>
-      <label className={styles.fullRow}>
-        Правила
-        <textarea rows={3} value={values.rules} onChange={(event) => setValues((current) => ({ ...current, rules: event.target.value }))} />
-      </label>
-      <label>
-        SEO title
-        <input value={values.seoTitle} onChange={(event) => setValues((current) => ({ ...current, seoTitle: event.target.value }))} />
-      </label>
-      <label>
-        SEO description
-        <input value={values.seoDescription} onChange={(event) => setValues((current) => ({ ...current, seoDescription: event.target.value }))} />
-      </label>
-      <label className={styles.switch}>
-        <input type="checkbox" checked={values.isActive} onChange={(event) => setValues((current) => ({ ...current, isActive: event.target.checked }))} />
-        Опубликована
-      </label>
+      <ImageUploader
+        label="Фото услуги"
+        value={values.imageUrl}
+        onChange={(imageUrl) => setValues((current) => ({ ...current, imageUrl }))}
+        onUploaded={onPhotoUploaded}
+      />
       <div className={styles.formActions}>
         <Button type="submit" isLoading={isSubmitting}>
           {submitLabel}
@@ -1027,15 +589,10 @@ function ServiceForm({
 
 function StudioEditableCard({ studio }: { studio: StudioDto }) {
   const [updateStudio, updateState] = useUpdateAdminStudioMutation();
+
   return (
-    <article className={styles.panel}>
-      <PanelHeader title={studio.name} subtitle={studio.address} />
-      <StudioForm
-        studio={studio}
-        isSubmitting={updateState.isLoading}
-        submitLabel="Сохранить"
-        onSubmit={(body) => updateStudio({ id: studio.id, body }).unwrap()}
-      />
+    <article className={styles.card}>
+      <StudioForm studio={studio} submitLabel="Сохранить" isSubmitting={updateState.isLoading} onSubmit={(body) => updateStudio({ id: studio.id, body }).unwrap()} />
     </article>
   );
 }
@@ -1051,14 +608,12 @@ function StudioForm({
   studio?: StudioDto;
   submitLabel: string;
 }) {
-  const [values, setValues] = useState(() => ({
-    name: studio?.name ?? '',
-    city: studio?.city ?? '',
-    address: studio?.address ?? '',
-    phone: studio?.phone ?? '',
-    photoUrl: studio?.photoUrl ?? '',
-  }));
+  const [values, setValues] = useState(() => studioValues(studio));
   const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    setValues(studioValues(studio));
+  }, [studio]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -1072,261 +627,147 @@ function StudioForm({
   };
 
   return (
-    <form className={styles.compactForm} onSubmit={submit}>
-      <input required value={values.name} onChange={(event) => setValues((current) => ({ ...current, name: event.target.value }))} placeholder="Название" />
-      <input required value={values.city} onChange={(event) => setValues((current) => ({ ...current, city: event.target.value }))} placeholder="Город" />
-      <input required value={values.address} onChange={(event) => setValues((current) => ({ ...current, address: event.target.value }))} placeholder="Адрес" />
-      <input value={values.phone} onChange={(event) => setValues((current) => ({ ...current, phone: event.target.value }))} placeholder="Телефон" />
-      <input value={values.photoUrl} onChange={(event) => setValues((current) => ({ ...current, photoUrl: event.target.value }))} placeholder="Фото" />
-      <Button type="submit" isLoading={isSubmitting}>
-        {submitLabel}
-      </Button>
-      {message ? <span>{message}</span> : null}
+    <form className={styles.formGrid} onSubmit={submit}>
+      <label>
+        Название
+        <input required value={values.name} onChange={(event) => setValues((current) => ({ ...current, name: event.target.value }))} />
+      </label>
+      <label>
+        Город
+        <input required value={values.city} onChange={(event) => setValues((current) => ({ ...current, city: event.target.value }))} />
+      </label>
+      <label>
+        Адрес
+        <input required value={values.address} onChange={(event) => setValues((current) => ({ ...current, address: event.target.value }))} />
+      </label>
+      <label>
+        Телефон
+        <input value={values.phone} onChange={(event) => setValues((current) => ({ ...current, phone: event.target.value }))} />
+      </label>
+      <ImageUploader label="Фото студии" value={values.photoUrl} onChange={(photoUrl) => setValues((current) => ({ ...current, photoUrl, photoUrls: photoUrl ? [photoUrl] : [] }))} />
+      <div className={styles.formActions}>
+        <Button type="submit" isLoading={isSubmitting}>
+          {submitLabel}
+        </Button>
+        {message ? <span>{message}</span> : null}
+      </div>
     </form>
   );
 }
 
-function AppointmentTable({ appointments }: { appointments: AppointmentDto[] }) {
-  const [updateAppointment] = useUpdateSuperAdminAppointmentMutation();
-  const [cancelAppointment] = useCancelSuperAdminAppointmentMutation();
-
-  if (!appointments.length) {
-    return <EmptyState title="Записей не найдено" />;
-  }
-
-  return (
-    <div className={styles.tableWrap}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Дата</th>
-            <th>Клиент</th>
-            <th>Услуга</th>
-            <th>Мастер</th>
-            <th>Студия</th>
-            <th>Статус</th>
-            <th />
-          </tr>
-        </thead>
-        <tbody>
-          {appointments.map((appointment) => (
-            <tr key={appointment.id}>
-              <td>{formatDateTime(appointment.startsAt)}</td>
-              <td>{appointment.user?.fullName ?? 'Клиент'}</td>
-              <td>{appointment.service.title}</td>
-              <td>{fullName(appointment.master)}</td>
-              <td>{appointment.studio.name}</td>
-              <td>
-                <select value={appointment.status} onChange={(event) => void updateAppointment({ id: appointment.id, body: { status: event.target.value } })}>
-                  {statusOptions.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-              </td>
-              <td>
-                {appointment.status !== 'CANCELLED' ? (
-                  <Button size="sm" variant="danger" onClick={() => void cancelAppointment({ id: appointment.id, reason: 'Cancelled from CRM' })}>
-                    Отменить
-                  </Button>
-                ) : null}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function UserTable({ users }: { users: AdminUserDto[] }) {
+function UserCards({ users }: { users: AdminUserDto[] }) {
+  const { user: currentUser } = useAuth();
   const [blockUser] = useBlockSuperAdminUserMutation();
   const [unblockUser] = useUnblockSuperAdminUserMutation();
+  const [deleteUser, deleteState] = useDeleteSuperAdminUserMutation();
 
   if (!users.length) {
     return <EmptyState title="Пользователи не найдены" />;
   }
 
-  return (
-    <div className={styles.tableWrap}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Имя</th>
-            <th>Email</th>
-            <th>Телефон</th>
-            <th>Роль</th>
-            <th>Статус</th>
-            <th />
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td>{user.fullName}</td>
-              <td>{user.email ?? '-'}</td>
-              <td>{user.phone ?? '-'}</td>
-              <td>{user.role}</td>
-              <td>{user.status}</td>
-              <td>
-                {user.status === 'blocked' ? (
-                  <Button size="sm" onClick={() => void unblockUser(user.id)}>
-                    Разблокировать
-                  </Button>
-                ) : (
-                  <Button size="sm" variant="danger" onClick={() => void blockUser(user.id)}>
-                    Заблокировать
-                  </Button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function SiteContentEditor({ items }: { items: SiteContentDto[] }) {
-  if (!items.length) {
-    return <EmptyState title="Контент пока не создан" />;
-  }
+  const remove = async (user: AdminUserDto) => {
+    if (!window.confirm(`Удалить пользователя ${user.fullName}?`)) return;
+    await deleteUser(user.id).unwrap();
+  };
 
   return (
-    <section className={styles.contentList}>
-      {items.map((item) => (
-        <SiteContentRow item={item} key={item.key} />
-      ))}
+    <section className={styles.grid}>
+      {users.map((user) => {
+        const isSelf = currentUser?.id === user.id;
+        return (
+          <article className={styles.userCard} key={user.id}>
+            <div className={styles.userAvatar}>{initials(user.fullName || user.email || 'U')}</div>
+            <div className={styles.userInfo}>
+              <h3>{user.fullName || 'Без имени'}</h3>
+              <p>{user.email ?? user.phone ?? 'Контакты не указаны'}</p>
+              <span className={user.status === 'active' ? styles.statusActive : styles.statusMuted}>{user.status === 'active' ? 'Активен' : 'Заблокирован'}</span>
+            </div>
+            <div className={styles.cardActions}>
+              {user.status === 'blocked' ? (
+                <Button size="sm" disabled={isSelf} onClick={() => void unblockUser(user.id)}>
+                  Разблокировать
+                </Button>
+              ) : (
+                <Button size="sm" variant="secondary" disabled={isSelf} onClick={() => void blockUser(user.id)}>
+                  Заблокировать
+                </Button>
+              )}
+              <Button size="sm" variant="danger" disabled={isSelf} isLoading={deleteState.isLoading} onClick={() => void remove(user)}>
+                Удалить
+              </Button>
+            </div>
+          </article>
+        );
+      })}
     </section>
   );
 }
 
-function SiteContentRow({ item }: { item: SiteContentDto }) {
-  const [updateContent, updateState] = useUpdateSuperAdminSiteContentMutation();
-  const [values, setValues] = useState(() => ({
-    title: item.title,
-    type: item.type,
-    value: serializeValue(item.value),
-  }));
-  const [message, setMessage] = useState('');
-
-  const save = async () => {
-    setMessage('');
-    try {
-      await updateContent({
-        key: item.key,
-        body: {
-          title: values.title,
-          type: values.type,
-          value: parseSiteContentValue(values.value, values.type),
-        },
-      }).unwrap();
-      setMessage('Сохранено');
-    } catch (error) {
-      setMessage(getErrorText(error));
-    }
-  };
-
-  return (
-    <article className={styles.panel}>
-      <PanelHeader title={item.key} subtitle={item.title} />
-      <div className={styles.formGrid}>
-        <label>
-          Заголовок
-          <input value={values.title} onChange={(event) => setValues((current) => ({ ...current, title: event.target.value }))} />
-        </label>
-        <label>
-          Тип
-          <select value={values.type} onChange={(event) => setValues((current) => ({ ...current, type: event.target.value as SiteContentDto['type'] }))}>
-            <option value="text">text</option>
-            <option value="image">image</option>
-            <option value="html">html</option>
-            <option value="json">json</option>
-          </select>
-        </label>
-        <label className={styles.fullRow}>
-          Значение
-          <textarea rows={values.type === 'json' ? 6 : 3} value={values.value} onChange={(event) => setValues((current) => ({ ...current, value: event.target.value }))} />
-        </label>
-      </div>
-      <div className={styles.formActions}>
-        <Button isLoading={updateState.isLoading} onClick={save}>
-          Сохранить
-        </Button>
-        {message ? <span>{message}</span> : null}
-      </div>
-    </article>
-  );
-}
-
-function AuditLogTable({ items }: { items: AuditLogDto[] }) {
-  if (!items.length) {
-    return <EmptyState title="Журнал пока пуст" />;
-  }
-
-  return (
-    <div className={styles.tableWrap}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Дата</th>
-            <th>Роль</th>
-            <th>Действие</th>
-            <th>Сущность</th>
-            <th>Новое значение</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item) => (
-            <tr key={item.id}>
-              <td>{formatDateTime(item.createdAt)}</td>
-              <td>{item.actorRole}</td>
-              <td>{item.action}</td>
-              <td>{item.entityType} {item.entityId ?? ''}</td>
-              <td>
-                <code>{JSON.stringify(item.newValue ?? {})}</code>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function ImageUploader({ label, onUploaded }: { label: string; onUploaded: (url: string) => Promise<unknown> }) {
+function ImageUploader({
+  label,
+  onChange,
+  onUploaded,
+  value,
+}: {
+  label: string;
+  onChange: (url: string) => void;
+  onUploaded?: (url: string) => Promise<unknown>;
+  value?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [uploadImage, state] = useUploadAdminImageMutation();
   const [message, setMessage] = useState('');
+  const previewUrl = resolveMediaUrl(value);
 
-  const upload = async (file: File | undefined) => {
+  const upload = async (file?: File) => {
     if (!file) return;
     setMessage('');
     try {
       const result = await uploadImage(file).unwrap();
-      await onUploaded(result.url);
+      onChange(result.url);
+      await onUploaded?.(result.url);
       setMessage('Фото загружено');
     } catch (error) {
       setMessage(getErrorText(error));
+    } finally {
+      if (inputRef.current) {
+        inputRef.current.value = '';
+      }
     }
   };
 
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    void upload(event.dataTransfer.files[0]);
+  };
+
   return (
-    <label className={styles.uploadBox}>
-      {label}
-      <input accept="image/*" disabled={state.isLoading} type="file" onChange={(event) => void upload(event.target.files?.[0])} />
-      {message ? <span>{message}</span> : null}
-    </label>
+    <div className={styles.uploadBox} onDragOver={(event) => event.preventDefault()} onDrop={handleDrop}>
+      <div className={styles.uploadPreview}>{previewUrl ? <img src={previewUrl} alt="" /> : <span>Фото</span>}</div>
+      <div className={styles.uploadControls}>
+        <strong>{label}</strong>
+        <p>Перетащите изображение сюда или выберите файл.</p>
+        <input ref={inputRef} accept="image/*" disabled={state.isLoading} type="file" onChange={(event) => void upload(event.target.files?.[0])} />
+        <div className={styles.formActions}>
+          <Button size="sm" variant="secondary" disabled={state.isLoading} onClick={() => inputRef.current?.click()}>
+            {state.isLoading ? 'Загрузка...' : 'Выбрать фото'}
+          </Button>
+          {value ? (
+            <Button size="sm" variant="ghost" onClick={() => onChange('')}>
+              Убрать
+            </Button>
+          ) : null}
+        </div>
+        {message ? <span>{message}</span> : null}
+      </div>
+    </div>
   );
 }
 
-function PanelHeader({ subtitle, title }: { subtitle?: string; title: string }) {
+function PanelHeader({ title }: { title: string }) {
   return (
     <header className={styles.panelHeader}>
-      <div>
-        <h3>{title}</h3>
-        {subtitle ? <p>{subtitle}</p> : null}
-      </div>
+      <h3>{title}</h3>
     </header>
   );
 }
@@ -1339,12 +780,8 @@ function EmptyState({ title }: { title: string }) {
   return <div className={styles.state}>{title}</div>;
 }
 
-function ErrorState({ title = 'Не удалось загрузить данные' }: { title?: string }) {
-  return <div className={styles.stateError}>{title}</div>;
-}
-
-function StatusPill({ active }: { active: boolean }) {
-  return <span className={active ? styles.statusActive : styles.statusMuted}>{active ? 'Активен' : 'Скрыт'}</span>;
+function ErrorState() {
+  return <div className={styles.stateError}>Не удалось загрузить данные</div>;
 }
 
 function fullName(master: MasterDto) {
@@ -1360,6 +797,10 @@ function initials(value: string) {
     .toUpperCase();
 }
 
+function masterStudios(master: MasterDto) {
+  return master.studios?.length ? master.studios : master.studio ? [master.studio] : [];
+}
+
 function masterValues(master: MasterDto | undefined, studios: StudioDto[]) {
   return {
     fullName: master ? fullName(master) : '',
@@ -1367,9 +808,8 @@ function masterValues(master: MasterDto | undefined, studios: StudioDto[]) {
     specialization: master?.specialization ?? '',
     experienceYears: String(master?.experienceYears ?? 0),
     description: master?.bio ?? '',
-    photoUrl: master?.photoUrl ?? '',
-    isActive: master?.isActive ?? true,
-    studioIds: master ? (master.studios?.length ? master.studios : master.studio ? [master.studio] : []).map((studio) => studio.id) : studios[0]?.id ? [studios[0].id] : [],
+    photoUrl: master?.photoUrl ?? master?.photoUrls?.[0] ?? '',
+    studioIds: master ? masterStudios(master).map((studio) => studio.id) : studios[0]?.id ? [studios[0].id] : [],
     serviceIds: master?.services?.map((service) => service.id) ?? [],
   };
 }
@@ -1382,15 +822,18 @@ function serviceValues(service?: ServiceDto) {
     description: service?.description ?? '',
     durationMinutes: String(service?.durationMinutes ?? 60),
     priceRub: String(service?.priceRub ?? 0),
-    subscriptionPriceRub: service?.subscriptionPriceRub ? String(service.subscriptionPriceRub) : '',
-    imageUrl: service?.imageUrl ?? '',
-    galleryUrls: (service?.galleryUrls ?? []).join('\n'),
-    contraindications: service?.contraindications ?? '',
-    benefits: service?.benefits ?? '',
-    rules: service?.rules ?? '',
-    seoTitle: service?.seoTitle ?? '',
-    seoDescription: service?.seoDescription ?? '',
-    isActive: service?.isActive ?? true,
+    imageUrl: service?.imageUrl ?? service?.galleryUrls?.[0] ?? '',
+  };
+}
+
+function studioValues(studio?: StudioDto) {
+  return {
+    name: studio?.name ?? '',
+    city: studio?.city ?? '',
+    address: studio?.address ?? '',
+    phone: studio?.phone ?? '',
+    photoUrl: studio?.photoUrl ?? studio?.photoUrls?.[0] ?? '',
+    photoUrls: studio?.photoUrls ?? [],
   };
 }
 
@@ -1400,6 +843,15 @@ function requiredMasterPayload(body: UpsertMasterPayload) {
     fullName: body.fullName || 'Новый мастер',
     studioIds: body.studioIds?.length ? body.studioIds : [],
   };
+}
+
+function requiredStudioPayload(body: UpsertStudioPayload) {
+  return {
+    ...body,
+    name: body.name || 'Новая студия',
+    city: body.city || 'Москва',
+    address: body.address || 'Адрес не указан',
+  } as Required<Pick<UpsertStudioPayload, 'address' | 'city' | 'name'>> & UpsertStudioPayload;
 }
 
 function requiredServicePayload(body: UpsertServicePayload) {
@@ -1417,98 +869,8 @@ function toggleId(values: string[], id: string) {
   return values.includes(id) ? values.filter((value) => value !== id) : [...values, id];
 }
 
-function defaultScheduleDays(studioId = ''): WeeklyScheduleDayDto[] {
-  return Array.from({ length: 7 }, (_, index) => ({
-    dayOfWeek: index + 1,
-    isWorking: index < 5,
-    intervals: index < 5 ? [defaultInterval(studioId)] : [],
-  }));
-}
-
-function defaultInterval(studioId = '') {
-  return {
-    studioId,
-    isWorking: true,
-    startTime: '10:00',
-    endTime: '18:00',
-    breakStartTime: '14:00',
-    breakEndTime: '15:00',
-  };
-}
-
-function updateInterval(
-  setDays: Dispatch<SetStateAction<WeeklyScheduleDayDto[]>>,
-  dayOfWeek: number,
-  index: number,
-  patch: Partial<WeeklyScheduleDayDto['intervals'][number]>,
-) {
-  setDays((current) =>
-    current.map((day) =>
-      day.dayOfWeek === dayOfWeek
-        ? {
-            ...day,
-            intervals: day.intervals.map((interval, intervalIndex) => (intervalIndex === index ? { ...interval, ...patch } : interval)),
-          }
-        : day,
-    ),
-  );
-}
-
-function addInterval(setDays: Dispatch<SetStateAction<WeeklyScheduleDayDto[]>>, dayOfWeek: number, studioId = '') {
-  setDays((current) =>
-    current.map((day) => (day.dayOfWeek === dayOfWeek ? { ...day, intervals: [...day.intervals, defaultInterval(studioId)] } : day)),
-  );
-}
-
-function removeInterval(setDays: Dispatch<SetStateAction<WeeklyScheduleDayDto[]>>, dayOfWeek: number, index: number) {
-  setDays((current) =>
-    current.map((day) =>
-      day.dayOfWeek === dayOfWeek
-        ? {
-            ...day,
-            intervals: day.intervals.filter((_, intervalIndex) => intervalIndex !== index),
-          }
-        : day,
-    ),
-  );
-}
-
 function cleanFilters<T extends Record<string, string>>(filters: T) {
   return Object.fromEntries(Object.entries(filters).filter(([, value]) => value)) as Partial<T>;
-}
-
-function todayInput() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function addDaysInput(date: string, days: number) {
-  const value = new Date(`${date}T00:00:00`);
-  value.setDate(value.getDate() + days);
-  return value.toISOString().slice(0, 10);
-}
-
-function buildDateColumns(from?: string, to?: string, limit = 7) {
-  const start = from ? new Date(from) : new Date();
-  const end = to ? new Date(to) : new Date(start.getTime() + (limit - 1) * 86_400_000);
-  const dates: string[] = [];
-  const cursor = new Date(start);
-  while (cursor <= end && dates.length < limit) {
-    dates.push(cursor.toISOString().slice(0, 10));
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
-  }
-  return dates;
-}
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat('ru-RU', { day: '2-digit', month: 'short' }).format(new Date(value));
-}
-
-function formatDateTime(value: string) {
-  return new Intl.DateTimeFormat('ru-RU', { day: '2-digit', hour: '2-digit', minute: '2-digit', month: 'short' }).format(new Date(value));
-}
-
-function formatTime(value: string) {
-  return new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit' }).format(new Date(value));
 }
 
 function formatMoney(value: number) {
@@ -1519,22 +881,8 @@ function formatNumber(value: unknown) {
   return Number(value ?? 0).toLocaleString('ru-RU');
 }
 
-function serializeValue(value: unknown) {
-  return typeof value === 'string' ? value : JSON.stringify(value ?? {}, null, 2);
-}
-
-function parseSiteContentValue(value: string, type: SiteContentDto['type']) {
-  if (type !== 'json') {
-    return value;
-  }
-  return JSON.parse(value);
-}
-
-function splitLines(value: string) {
-  return value
-    .split(/[\n,]/)
-    .map((line) => line.trim())
-    .filter(Boolean);
+function calculateDiscountedPrice(priceRub: number, discountPercent: number) {
+  return Math.round(Math.max(0, priceRub) * (1 - discountPercent / 100));
 }
 
 function slugify(value: string) {

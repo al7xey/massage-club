@@ -48,6 +48,12 @@ export class CreateMasterDto {
   @IsString()
   photoUrl?: string;
 
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  photoUrls?: string[];
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsUUID()

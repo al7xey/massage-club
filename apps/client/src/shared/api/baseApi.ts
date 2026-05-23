@@ -75,7 +75,6 @@ export const baseApi = createApi({
     'Reviews',
     'Service',
     'Services',
-    'SiteContent',
     'Settings',
     'Studios',
     'SubscriptionPlans',

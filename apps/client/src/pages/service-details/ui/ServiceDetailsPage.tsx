@@ -7,6 +7,7 @@ import { createServiceCardModel, type ServiceDto, useGetServiceQuery, useGetServ
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
+import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
 import { Button, LinkButton } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
@@ -30,6 +31,8 @@ export function ServiceDetailsPage() {
 
   const selected = service ?? servicesPage?.items[0];
   const selectedPrice = selected?.priceRub ?? 0;
+  const regularSubscriptionPrice = selected?.subscriptionPriceRub ?? Math.round(selectedPrice * 0.8);
+  const superSubscriptionPrice = selected?.superSubscriptionPriceRub ?? Math.round(selectedPrice * 0.7);
   const similar = (servicesPage?.items ?? [])
     .filter((item) => item.id !== selected?.id)
     .slice(0, 4)
@@ -133,8 +136,8 @@ export function ServiceDetailsPage() {
           <h2>Стоимость</h2>
           <div className={styles.priceList}>
             <PriceRow title="Разовый визит" note="Без клубного тарифа" price={selectedPrice} />
-            <PriceRow title="Клубная цена" note="Тарифы 20%" price={Math.round(selectedPrice * 0.8)} badge="-20%" />
-            <PriceRow title="SUPER-тариф" note="Максимальная выгода" price={Math.round(selectedPrice * 0.7)} badge="-30%" featured />
+            <PriceRow title="Клубная цена" note="Тарифы 20%" price={regularSubscriptionPrice} badge="-20%" />
+            <PriceRow title="SUPER-тариф" note="Максимальная выгода" price={superSubscriptionPrice} badge="-30%" featured />
           </div>
           <div className={styles.actions}>
             <Button fullWidth onClick={() => void handleBook()}>
@@ -217,13 +220,13 @@ function PriceRow({
 }
 
 function getServiceGallery(service: ServiceDto | undefined) {
-  const source = service as (ServiceDto & { photoUrl?: string; photoUrls?: string[] }) | undefined;
-  const urls = source?.photoUrls?.length ? source.photoUrls : [source?.photoUrl].filter(Boolean);
+  const urls = [...(service?.galleryUrls ?? []), service?.imageUrl].filter(Boolean) as string[];
+  const count = Math.max(3, urls.length);
 
-  return [0, 1, 2].map((index) => ({
+  return Array.from({ length: count }, (_, index) => ({
     label: `Фото ${index + 1}`,
     tone: index,
-    url: urls[index],
+    url: resolveMediaUrl(urls[index]),
   }));
 }
 

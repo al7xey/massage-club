@@ -19,8 +19,9 @@ export class ServicesService {
     @InjectRepository(Subscription) private readonly subscriptionsRepository: Repository<Subscription>,
   ) {}
 
-  findAll() {
-    return this.servicesRepository.find({ where: { isActive: true }, order: { title: 'ASC' } });
+  async findAll() {
+    const services = await this.servicesRepository.find({ where: { isActive: true }, order: { title: 'ASC' } });
+    return services.map(fillSubscriptionPrices);
   }
 
   async findCategories(userId?: string) {
@@ -112,7 +113,7 @@ export class ServicesService {
       .getManyAndCount();
 
     return {
-      items,
+      items: items.map(fillSubscriptionPrices),
       page,
       limit,
       total,
@@ -131,7 +132,7 @@ export class ServicesService {
       throw new NotFoundException('Service not found');
     }
 
-    return service;
+    return fillSubscriptionPrices(service);
   }
 
   async create(dto: CreateServiceDto) {
@@ -146,7 +147,7 @@ export class ServicesService {
       externalSource: dto.externalSource,
       externalId: dto.externalId,
       priceRub: dto.priceRub,
-      subscriptionPriceRub: dto.subscriptionPriceRub,
+      subscriptionPriceRub: calculateDiscountedPrice(dto.priceRub, 20),
       imageUrl: dto.imageUrl,
       galleryUrls: dto.galleryUrls ?? [],
       contraindications: dto.contraindications,
@@ -159,26 +160,31 @@ export class ServicesService {
     if (dto.categoryId) {
       service.category = await this.categoriesRepository.findOneByOrFail({ id: dto.categoryId });
     }
-    return this.servicesRepository.save(service);
+    return fillSubscriptionPrices(await this.servicesRepository.save(service));
   }
 
   async update(id: string, dto: UpdateServiceDto) {
     const service = await this.findOne(id);
-    Object.assign(service, dto);
+    const nextDto = { ...dto };
+    Object.assign(service, nextDto);
+    if (dto.priceRub !== undefined) {
+      service.subscriptionPriceRub = calculateDiscountedPrice(dto.priceRub, 20);
+    }
     if (dto.categoryId) {
       service.category = await this.categoriesRepository.findOneByOrFail({ id: dto.categoryId });
     }
-    return this.servicesRepository.save(service);
+    return fillSubscriptionPrices(await this.servicesRepository.save(service));
   }
 
   async remove(id: string) {
     const service = await this.findOne(id);
     service.isActive = false;
-    return this.servicesRepository.save(service);
+    return fillSubscriptionPrices(await this.servicesRepository.save(service));
   }
 
   async findAdminAll() {
-    return this.servicesRepository.find({ order: { title: 'ASC' } });
+    const services = await this.servicesRepository.find({ where: { isActive: true }, order: { title: 'ASC' } });
+    return services.map(fillSubscriptionPrices);
   }
 
   async findAdminOne(id: string) {
@@ -186,7 +192,7 @@ export class ServicesService {
     if (!service) {
       throw new NotFoundException('Service not found');
     }
-    return service;
+    return fillSubscriptionPrices(service);
   }
 
   private async resolveVisibility(userId?: string) {
@@ -227,4 +233,15 @@ function parseCategoryFilter(value?: string) {
     .split(',')
     .map((category) => category.trim().toLowerCase())
     .filter(Boolean);
+}
+
+function calculateDiscountedPrice(priceRub: number, discountPercent: number) {
+  const normalizedDiscount = Math.min(100, Math.max(0, Math.round(discountPercent)));
+  return Math.round(Math.max(0, priceRub) * (1 - normalizedDiscount / 100));
+}
+
+function fillSubscriptionPrices<T extends Service>(service: T): T {
+  service.subscriptionPriceRub = calculateDiscountedPrice(service.priceRub, 20);
+  service.superSubscriptionPriceRub = calculateDiscountedPrice(service.priceRub, 30);
+  return service;
 }

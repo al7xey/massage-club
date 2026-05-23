@@ -13,3 +13,5 @@ coverage
 *.pid
 *.tsbuildinfo
 .vite-*
+apps/server/uploads/
+uploads/

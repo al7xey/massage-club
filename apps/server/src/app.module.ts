@@ -11,7 +11,6 @@ import { MastersModule } from './modules/masters/masters.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { ServicesModule } from './modules/services/services.module';
-import { SiteContentModule } from './modules/site-content/site-content.module';
 import { StudiosModule } from './modules/studios/studios.module';
 import { SubscriptionPlansModule } from './modules/subscription-plans/subscription-plans.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
@@ -34,7 +33,6 @@ import { HealthController } from './health.controller';
     UsersModule,
     StudiosModule,
     ServicesModule,
-    SiteContentModule,
     MastersModule,
     SubscriptionPlansModule,
     SubscriptionsModule,

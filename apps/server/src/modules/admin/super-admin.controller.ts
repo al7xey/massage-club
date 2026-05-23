@@ -15,6 +15,7 @@ import { CreateStudioDto } from '../studios/dto/create-studio.dto';
 import { UpdateStudioDto } from '../studios/dto/update-studio.dto';
 import { AdminService } from './admin.service';
 import { CancelAdminAppointmentDto } from './dto/cancel-admin-appointment.dto';
+import { CreateAdminAppointmentDto } from './dto/create-admin-appointment.dto';
 import { UpdatePhotoDto, UpdateServiceGalleryDto, UpdateServicePhotoDto } from './dto/update-photo.dto';
 import { UpdateAdminAppointmentDto } from './dto/update-admin-appointment.dto';
 
@@ -151,9 +152,19 @@ export class SuperAdminController {
     return this.adminService.unblockUser(id, user);
   }
 
+  @Delete('users/:id')
+  deleteUser(@Param('id') id: string, @CurrentUser() user: JwtUserPayload) {
+    return this.adminService.deleteUser(id, user);
+  }
+
   @Get('appointments')
   getAppointments(@Query() query: { date?: string; studioId?: string; masterId?: string; status?: AppointmentStatus }) {
     return this.adminService.getSuperAdminAppointments(query);
+  }
+
+  @Post('appointments')
+  createAppointment(@Body() dto: CreateAdminAppointmentDto, @CurrentUser() user: JwtUserPayload) {
+    return this.adminService.createAdminAppointment(dto, user);
   }
 
   @Get('appointments/:id')

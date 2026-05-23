@@ -3,6 +3,7 @@ import { mockReviews } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
+import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
 import { EmptyState, LinkButton } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
@@ -136,7 +137,7 @@ function getStudioGallery(studio: ReturnType<typeof createStudioCardModel>, inde
 
   return labels.map((label, photoIndex) => ({
     label,
-    url: photos[photoIndex],
+    url: resolveMediaUrl(photos[photoIndex]),
     tone: (index + photoIndex) % 3,
   }));
 }

@@ -56,28 +56,9 @@ export class CrmAdminRebuild20260523000000 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "services" ADD COLUMN IF NOT EXISTS "seo_title" text`);
     await queryRunner.query(`ALTER TABLE "services" ADD COLUMN IF NOT EXISTS "seo_description" text`);
 
-    await queryRunner.query(`
-      DO $$ BEGIN
-        CREATE TYPE "site_content_type_enum" AS ENUM ('text', 'image', 'html', 'json');
-      EXCEPTION
-        WHEN duplicate_object THEN null;
-      END $$;
-    `);
-    await queryRunner.query(`
-      CREATE TABLE IF NOT EXISTS "site_content" (
-        "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-        "key" text NOT NULL UNIQUE,
-        "title" text NOT NULL,
-        "value" jsonb,
-        "type" "site_content_type_enum" NOT NULL DEFAULT 'text',
-        "updated_at" timestamptz NOT NULL DEFAULT now()
-      )
-    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE IF EXISTS "site_content"`);
-    await queryRunner.query(`DROP TYPE IF EXISTS "site_content_type_enum"`);
     await queryRunner.query(`ALTER TABLE "services" DROP COLUMN IF EXISTS "seo_description"`);
     await queryRunner.query(`ALTER TABLE "services" DROP COLUMN IF EXISTS "seo_title"`);
     await queryRunner.query(`ALTER TABLE "services" DROP COLUMN IF EXISTS "rules"`);

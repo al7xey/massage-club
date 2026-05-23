@@ -3,18 +3,14 @@ import { Navigate } from 'react-router-dom';
 import { AccountPage } from '@/pages/account';
 import { AccountSettingsPage } from '@/pages/account-settings';
 import {
-  AdminDashboardPage,
   AdminMasterDetailsPage,
+  AdminDashboardPage,
   AdminMastersPage,
-  AdminSchedulePage,
   AdminStudiosPage,
-  SuperAdminAppointmentsPage,
-  SuperAdminAuditLogPage,
   SuperAdminDashboardPage,
   SuperAdminMastersPage,
   SuperAdminServiceDetailsPage,
   SuperAdminServicesPage,
-  SuperAdminSiteContentPage,
   SuperAdminUsersPage,
 } from '@/pages/admin-crm';
 import { AuthPage } from '@/pages/auth';
@@ -74,7 +70,6 @@ export const adminRoutes: AppRouteConfig[] = [
   { path: 'masters', element: <AdminMastersPage /> },
   { path: 'masters/:id', element: <AdminMasterDetailsPage /> },
   { path: 'studios', element: <AdminStudiosPage /> },
-  { path: 'schedule', element: <AdminSchedulePage /> },
 ];
 
 export const superAdminRoutes: AppRouteConfig[] = [
@@ -85,11 +80,7 @@ export const superAdminRoutes: AppRouteConfig[] = [
   { path: 'services', element: <SuperAdminServicesPage /> },
   { path: 'services/:id', element: <SuperAdminServiceDetailsPage /> },
   { path: 'studios', element: <AdminStudiosPage /> },
-  { path: 'schedule', element: <AdminSchedulePage /> },
-  { path: 'appointments', element: <SuperAdminAppointmentsPage /> },
   { path: 'users', element: <SuperAdminUsersPage /> },
-  { path: 'site-content', element: <SuperAdminSiteContentPage /> },
-  { path: 'audit-log', element: <SuperAdminAuditLogPage /> },
 ];
 
 export { LoginPage, RegisterPage };

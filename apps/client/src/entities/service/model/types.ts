@@ -18,6 +18,7 @@ export interface ServiceDto {
   externalId?: string | null;
   priceRub: number;
   subscriptionPriceRub?: number | null;
+  superSubscriptionPriceRub?: number | null;
   imageUrl?: string | null;
   galleryUrls?: string[];
   contraindications?: string | null;
