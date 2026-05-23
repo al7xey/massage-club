@@ -32,13 +32,21 @@ export class MastersService {
   }
 
   async create(dto: CreateMasterDto) {
+    const name = normalizeMasterName(dto);
     const master = this.mastersRepository.create({
-      firstName: dto.firstName,
-      lastName: dto.lastName,
-      bio: dto.bio,
+      firstName: name.firstName,
+      lastName: name.lastName,
+      bio: dto.description ?? dto.bio,
+      phone: dto.phone,
+      specialization: dto.specialization,
+      experienceYears: dto.experienceYears ?? 0,
+      photoUrl: dto.photoUrl,
+      isActive: dto.isActive ?? true,
     });
-    if (dto.studioId) {
-      master.studio = await this.studiosRepository.findOneByOrFail({ id: dto.studioId });
+    const studioIds = dto.studioIds ?? (dto.studioId ? [dto.studioId] : []);
+    if (studioIds.length) {
+      master.studios = await this.studiosRepository.findBy({ id: In(studioIds) });
+      master.studio = master.studios[0];
     }
     if (dto.serviceIds?.length) {
       master.services = await this.servicesRepository.findBy({ id: In(dto.serviceIds) });
@@ -48,9 +56,21 @@ export class MastersService {
 
   async update(id: string, dto: UpdateMasterDto) {
     const master = await this.findOne(id);
-    Object.assign(master, dto);
-    if (dto.studioId) {
-      master.studio = await this.studiosRepository.findOneByOrFail({ id: dto.studioId });
+    if (dto.fullName !== undefined || dto.firstName !== undefined || dto.lastName !== undefined) {
+      const name = normalizeMasterName(dto, master);
+      master.firstName = name.firstName;
+      master.lastName = name.lastName;
+    }
+    if (dto.bio !== undefined || dto.description !== undefined) master.bio = dto.description ?? dto.bio;
+    if (dto.phone !== undefined) master.phone = dto.phone;
+    if (dto.specialization !== undefined) master.specialization = dto.specialization;
+    if (dto.experienceYears !== undefined) master.experienceYears = dto.experienceYears;
+    if (dto.photoUrl !== undefined) master.photoUrl = dto.photoUrl;
+    if (dto.isActive !== undefined) master.isActive = dto.isActive;
+    const studioIds = dto.studioIds ?? (dto.studioId ? [dto.studioId] : undefined);
+    if (studioIds) {
+      master.studios = await this.studiosRepository.findBy({ id: In(studioIds) });
+      master.studio = master.studios[0];
     }
     if (dto.serviceIds) {
       master.services = await this.servicesRepository.findBy({ id: In(dto.serviceIds) });
@@ -69,11 +89,12 @@ export class MastersService {
   }
 
   async createShift(dto: CreateMasterShiftDto) {
+    const dates = resolveShiftDates(dto);
     const shift = this.shiftsRepository.create({
       master: await this.mastersRepository.findOneByOrFail({ id: dto.masterId }),
       studio: await this.studiosRepository.findOneByOrFail({ id: dto.studioId }),
-      startsAt: new Date(dto.startsAt),
-      endsAt: new Date(dto.endsAt),
+      startsAt: dates.startsAt,
+      endsAt: dates.endsAt,
       isAvailable: dto.isAvailable ?? true,
     });
     return this.shiftsRepository.save(shift);
@@ -93,4 +114,34 @@ export class MastersService {
     await this.shiftsRepository.delete(id);
     return { deleted: true };
   }
+}
+
+function normalizeMasterName(dto: CreateMasterDto | UpdateMasterDto, fallback?: Master) {
+  if (dto.fullName) {
+    const parts = dto.fullName.trim().split(/\s+/);
+    return { firstName: parts.shift() ?? '', lastName: parts.join(' ') || ' ' };
+  }
+  return {
+    firstName: dto.firstName ?? fallback?.firstName ?? '',
+    lastName: dto.lastName ?? fallback?.lastName ?? ' ',
+  };
+}
+
+function resolveShiftDates(dto: CreateMasterShiftDto) {
+  const startsAt = dto.startsAt
+    ? new Date(dto.startsAt)
+    : dto.date && dto.startTime
+      ? new Date(`${dto.date.slice(0, 10)}T${dto.startTime}:00.000+03:00`)
+      : null;
+  const endsAt = dto.endsAt
+    ? new Date(dto.endsAt)
+    : dto.date && dto.endTime
+      ? new Date(`${dto.date.slice(0, 10)}T${dto.endTime}:00.000+03:00`)
+      : null;
+
+  if (!startsAt || !endsAt) {
+    throw new NotFoundException('Valid shift date and time are required');
+  }
+
+  return { startsAt, endsAt };
 }

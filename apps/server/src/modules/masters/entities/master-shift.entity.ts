@@ -1,4 +1,4 @@
-﻿import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Studio } from '../../studios/entities/studio.entity';
 import { Master } from './master.entity';
 
@@ -23,4 +23,10 @@ export class MasterShift {
 
   @Column({ name: 'is_available', default: true })
   isAvailable: boolean;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

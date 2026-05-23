@@ -15,6 +15,9 @@ export class Service {
   @Column({ type: 'text' })
   description: string;
 
+  @Column({ name: 'short_description', type: 'text', nullable: true })
+  shortDescription?: string | null;
+
   @Column({ name: 'duration_minutes' })
   durationMinutes: number;
 
@@ -32,6 +35,30 @@ export class Service {
 
   @Column({ name: 'price_rub' })
   priceRub: number;
+
+  @Column({ name: 'subscription_price_rub', type: 'integer', nullable: true })
+  subscriptionPriceRub?: number | null;
+
+  @Column({ name: 'image_url', type: 'text', nullable: true })
+  imageUrl?: string | null;
+
+  @Column({ name: 'gallery_urls', type: 'jsonb', default: () => "'[]'" })
+  galleryUrls: string[];
+
+  @Column({ type: 'text', nullable: true })
+  contraindications?: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  benefits?: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  rules?: string | null;
+
+  @Column({ name: 'seo_title', type: 'text', nullable: true })
+  seoTitle?: string | null;
+
+  @Column({ name: 'seo_description', type: 'text', nullable: true })
+  seoDescription?: string | null;
 
   @ManyToOne(() => ServiceCategory, (category) => category.services, { nullable: true, eager: true })
   @JoinColumn({ name: 'category_id' })

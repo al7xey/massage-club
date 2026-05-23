@@ -52,7 +52,7 @@ export class AppointmentsController {
 
   @Patch(':id/status')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN)
   updateStatus(@Param('id') id: string, @Body() dto: UpdateAppointmentStatusDto) {
     return this.appointmentsService.updateStatus(id, dto.status);
   }

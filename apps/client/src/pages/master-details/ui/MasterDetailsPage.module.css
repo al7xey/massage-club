@@ -1,219 +1,137 @@
-.top,
-.description {
+.hero {
   display: grid;
-  grid-template-columns: 1fr minmax(380px, 460px);
-  gap: 40px;
-}
-
-.profilePanel {
-  display: grid;
-  gap: 20px;
-}
-
-.heroImage {
-  position: relative;
-  min-height: 500px;
-  overflow: hidden;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
   border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-  background: var(--color-soft-strong);
+  border-radius: var(--radius-card-large);
+  background:
+    radial-gradient(circle at 92% 10%, rgba(111, 141, 78, 0.12), transparent 28%),
+    #ffffff;
   box-shadow: var(--shadow-card);
+  padding: 18px;
 }
 
-.heroImage::before,
-.heroImage::after {
+.portrait {
+  position: relative;
+  min-height: 520px;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.84), transparent 25%),
+    linear-gradient(145deg, #edf3e7 0%, #f8efe3 100%);
+}
+
+.portrait::before,
+.portrait::after {
   position: absolute;
   content: "";
 }
 
-.heroImage::before {
-  right: 10%;
+.portrait::before {
+  right: 16%;
   bottom: 0;
-  width: 46%;
-  height: 72%;
-  border-radius: 220px 220px 0 0;
-  background: #ffffff;
+  left: 16%;
+  height: 76%;
+  border-radius: 240px 240px 0 0;
+  background: rgba(255, 255, 255, 0.74);
 }
 
-.heroImage::after {
-  top: 18%;
+.portrait::after {
+  top: 16%;
   left: 50%;
-  width: 104px;
-  height: 104px;
-  border: 14px solid rgba(111, 141, 78, 0.16);
+  width: 112px;
+  height: 112px;
+  border: 14px solid rgba(111, 141, 78, 0.14);
   border-radius: var(--radius-round);
   transform: translateX(-50%);
 }
 
-.heroImage span {
+.portrait span {
   position: absolute;
   top: 16px;
   left: 16px;
   z-index: 1;
+  max-width: calc(100% - 32px);
   border-radius: var(--radius-control);
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.86);
   color: var(--color-text);
-  padding: 8px 13px;
+  padding: 8px 12px;
   font-size: 12px;
   font-weight: 800;
   backdrop-filter: blur(8px);
 }
 
-.thumbs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-}
-
-.thumbItem {
-  display: grid;
-  min-height: 98px;
-  place-items: center;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card-small);
-  background: #ffffff;
-  color: var(--color-primary);
-  padding: 12px;
-  text-align: center;
-  box-shadow: var(--shadow-card);
-}
-
-.thumbItem[data-active="true"] {
-  border-color: var(--color-primary);
-  background: var(--color-soft);
-}
-
-.thumbItem span {
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.35;
-}
-
-.sideCard,
-.infoPanel {
-  border: 1px solid var(--color-line);
+.profile {
   border-radius: var(--radius-card);
-  background: #ffffff;
-  box-shadow: var(--shadow-card);
-  padding: 24px;
+  background: var(--color-surface-soft);
+}
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 34px;
 }
 
 .roleLabel {
-  display: inline-block;
-  color: var(--color-primary);
+  width: fit-content;
+  border-radius: var(--radius-control);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  padding: 7px 12px;
   font-size: 12px;
   font-weight: 900;
   text-transform: uppercase;
 }
 
-.sideCard h2,
-.sideCard p,
-.infoPanel h3,
-.description h2,
-.description h3,
-.description p {
+.profile p {
   margin: 0;
 }
 
-.sideCard h2,
-.description h2 {
-  margin-top: 10px;
-  font-size: var(--font-h2);
-  line-height: 1.12;
-}
-
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 14px !important;
+.lead {
+  max-width: 680px;
+  margin-top: 16px;
   color: var(--color-muted);
+  font-size: 18px;
+  line-height: 1.58;
 }
 
-.facts {
+.stats {
   display: grid;
-  gap: 12px;
-  margin: 20px 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 28px;
 }
 
-.facts div {
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card-small);
-  background: var(--gradient-surface);
-  padding: 16px;
-}
-
-.facts span,
-.note,
-.description p,
-.infoPanel ol,
-.benefits li span {
-  color: var(--color-muted);
-}
-
-.facts span {
-  display: block;
-  font-size: 12px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.facts strong {
-  display: block;
-  margin-top: 8px;
-  color: var(--color-text);
-  font-size: 16px;
-}
-
-.ctaButton {
-  margin-top: 12px;
-}
-
-.note {
-  margin-top: 12px !important;
-  line-height: 1.65;
-  text-align: center;
-}
-
-.description {
-  margin-top: 44px;
-}
-
-.description p {
-  margin-top: 10px;
-  line-height: 1.62;
-}
-
-.description h3 {
-  margin-top: 24px;
-  font-size: 22px;
-}
-
-.benefits {
+.stats div {
   display: grid;
-  gap: 12px;
-  margin: 18px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.benefits li {
-  display: grid;
-  gap: 4px;
+  gap: 7px;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card-small);
   background: #ffffff;
-  padding: 16px;
+  padding: 15px;
 }
 
-.benefits li strong {
+.stats span {
+  color: var(--color-subtle);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.stats strong {
   color: var(--color-text);
+  font-size: 16px;
+  line-height: 1.25;
 }
 
-.infoPanel ol {
-  margin: 14px 0 0;
-  padding-left: 22px;
-  line-height: 1.7;
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 22px;
 }
 
 .state {
@@ -226,19 +144,35 @@
   text-align: center;
 }
 
-@media (max-width: 920px) {
-  .top,
-  .description {
-    grid-template-columns: 1fr;
+@media (max-width: 1120px) {
+  .hero {
+    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
   }
 }
 
 @media (max-width: 760px) {
-  .heroImage {
-    min-height: 340px;
+  .hero {
+    grid-template-columns: 1fr;
   }
 
-  .thumbs {
-    grid-template-columns: repeat(2, 1fr);
+  .hero {
+    padding: 12px;
   }
+
+  .portrait {
+    min-height: 420px;
+  }
+
+  .profile {
+    padding: 22px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
 }

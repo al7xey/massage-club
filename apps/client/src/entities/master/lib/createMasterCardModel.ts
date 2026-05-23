@@ -7,7 +7,7 @@ export function createMasterCardModel(master: MasterDto, index: number): MasterC
   return {
     id: master.id,
     fullName,
-    experienceLabel: 'Мастер массажа и SPA',
+    experienceLabel: 'Стаж 5+ лет',
     roleLabel: 'Мастер массажа и SPA',
     summary: master.bio ?? `Работает со всем стартовым каталогом RelaxUp: ${servicesCount} услуг.`,
     rating: index % 2 === 0 ? 5 : 4.9,

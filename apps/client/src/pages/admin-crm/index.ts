@@ -1,0 +1,15 @@
+export {
+  AdminDashboardPage,
+  AdminMasterDetailsPage,
+  AdminMastersPage,
+  AdminSchedulePage,
+  AdminStudiosPage,
+  SuperAdminAppointmentsPage,
+  SuperAdminAuditLogPage,
+  SuperAdminDashboardPage,
+  SuperAdminMastersPage,
+  SuperAdminServiceDetailsPage,
+  SuperAdminServicesPage,
+  SuperAdminSiteContentPage,
+  SuperAdminUsersPage,
+} from './ui/AdminCrmPages';

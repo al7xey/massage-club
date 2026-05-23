@@ -1,4 +1,5 @@
-import { FormEvent, useMemo, useState } from 'react';
+import type { PublicUserDto } from '@massage/shared';
+import { FormEvent, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
@@ -26,14 +27,12 @@ export function LoginPage() {
     state?.denied ? 'Нет доступа к выбранному разделу. Войдите под аккаунтом с нужной ролью.' : '',
   );
   const [isLoading, setIsLoading] = useState(false);
-  const successPath = useMemo(() => resolvePostAuthPath(state), [state]);
-
   const submitLogin = async (nextIdentifier: string, nextPassword: string) => {
     setIsLoading(true);
 
     try {
-      await login(nextIdentifier, nextPassword);
-      navigate(successPath, { replace: true });
+      const authenticatedUser = await login(nextIdentifier, nextPassword);
+      navigate(resolvePostAuthPath(state, authenticatedUser.role), { replace: true });
     } catch (loginError) {
       const apiMessage = getApiErrorMessage(loginError, 'Не удалось войти');
       setError(mapLoginErrorMessage(apiMessage));
@@ -146,7 +145,15 @@ function mapLoginErrorMessage(message: string) {
   return message;
 }
 
-function resolvePostAuthPath(state: AuthLocationState | null) {
+function resolvePostAuthPath(state: AuthLocationState | null, role: PublicUserDto['role']) {
+  if (role === 'ADMIN') {
+    return appRoutes.admin();
+  }
+
+  if (role === 'SUPER_ADMIN') {
+    return appRoutes.superAdmin();
+  }
+
   if (!state) {
     return appRoutes.account();
   }
@@ -159,5 +166,9 @@ function resolvePostAuthPath(state: AuthLocationState | null) {
     return `${appRoutes.booking()}?serviceId=${encodeURIComponent(state.serviceId)}`;
   }
 
-  return state.from ?? appRoutes.account();
+  if (state.from && !state.from.startsWith('/admin') && !state.from.startsWith('/super-admin')) {
+    return state.from;
+  }
+
+  return appRoutes.account();
 }

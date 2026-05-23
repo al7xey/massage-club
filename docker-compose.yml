@@ -1,4 +1,4 @@
-﻿services:
+services:
   postgres:
     image: postgres:16-alpine
     container_name: massage-postgres
@@ -16,6 +16,86 @@
       interval: 10s
       timeout: 5s
       retries: 5
+
+  api-1:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    restart: unless-stopped
+    environment: &api_environment
+      NODE_ENV: ${DOCKER_NODE_ENV:-docker}
+      SERVER_PORT: 3000
+      API_PREFIX: api
+      CORS_ORIGIN: ${DOCKER_CORS_ORIGIN:-http://localhost:8080,http://127.0.0.1:8080}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-massage_subscriptions}
+      POSTGRES_USER: ${POSTGRES_USER:-massage_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-massage_password}
+      DATABASE_SYNCHRONIZE: ${DOCKER_DATABASE_SYNCHRONIZE:-true}
+      DATABASE_LOGGING: ${DATABASE_LOGGING:-false}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is required and must be at least 32 characters}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required and must be at least 32 characters}
+      JWT_ACCESS_EXPIRES_IN: ${JWT_ACCESS_EXPIRES_IN:-15m}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3000/api/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api-2:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    restart: unless-stopped
+    environment: *api_environment
+    depends_on:
+      postgres:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3000/api/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  seed:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    restart: "no"
+    environment: *api_environment
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["node", "dist/database/seed.js"]
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/client/Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    restart: unless-stopped
+    depends_on:
+      api-1:
+        condition: service_healthy
+      api-2:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-8080}:80"
 
 volumes:
   postgres_data:

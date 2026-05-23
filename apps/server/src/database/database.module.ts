@@ -15,7 +15,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         password: configService.get<string>('POSTGRES_PASSWORD', 'massage_password'),
         database: configService.get<string>('POSTGRES_DB', 'massage_subscriptions'),
         autoLoadEntities: true,
-        synchronize: configService.get<string>('DATABASE_SYNCHRONIZE', 'true') === 'true',
+        synchronize:
+          configService.get<string>('NODE_ENV', 'development') !== 'production' &&
+          configService.get<string>('DATABASE_SYNCHRONIZE', 'true') === 'true',
         logging: configService.get<string>('DATABASE_LOGGING', 'false') === 'true',
       }),
     }),

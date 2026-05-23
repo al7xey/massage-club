@@ -1,5 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap");
 
+:global(html),
+:global(body),
+:global(#root) {
+  margin: 0;
+  background: #ffffff;
+}
+
 .app {
   --color-bg: #ffffff;
   --color-text: #20232a;
@@ -18,7 +25,7 @@
   --color-danger-bg: #fff3f3;
   --container-max: 1240px;
   --container-page: min(var(--container-max), calc(100% - 56px));
-  --page-padding-top: 58px;
+  --page-padding-top: 34px;
   --page-padding-bottom: 56px;
   --section-gap: 64px;
   --grid-gap: 22px;
@@ -40,7 +47,17 @@
   --font-body: 15px;
   --font-small: 13px;
   --control-height: 46px;
+  --button-font-weight: 700;
+  --catalog-card-min-width: 290px;
+  --catalog-card-gap-row: 28px;
+  --catalog-card-gap-column: 22px;
   --catalog-card-height: auto;
+  --mobile-tile-gap: 8px;
+  --mobile-tile-padding: 10px;
+  --mobile-tile-media-radius: 14px;
+  --mobile-icon-action-size: 36px;
+  --mobile-listing-control-height: 34px;
+  --mobile-listing-button-font: 11px;
   position: fixed;
   inset: 0;
   overflow: auto;
@@ -70,6 +87,10 @@
 .app select,
 .app textarea {
   font: inherit;
+}
+
+.app button {
+  font-weight: var(--button-font-weight);
 }
 
 .app button,
@@ -108,13 +129,45 @@
 
 @media (max-width: 760px) {
   .app {
-    --container-page: calc(100% - 28px);
-    --page-padding-top: 30px;
-    --page-padding-bottom: 56px;
+    --container-page: calc(100% - 32px);
+    --page-padding-top: 24px;
+    --page-padding-bottom: 38px;
     --section-gap: 54px;
     --font-h1: 32px;
     --font-h2: 24px;
     --font-h3: 18px;
+    --control-height: 48px;
+    --radius-card-small: 16px;
+    --radius-card: 16px;
+    --radius-card-large: 22px;
+    --catalog-card-min-width: 148px;
+    --catalog-card-gap-row: 12px;
+    --catalog-card-gap-column: 10px;
     --catalog-card-height: auto;
+  }
+
+  .app button,
+  .app select,
+  .app input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
+    min-height: 44px;
+  }
+
+  .app input,
+  .app select,
+  .app textarea {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .app {
+    --container-page: calc(100% - 24px);
+    --page-padding-top: 20px;
+    --section-gap: 42px;
+    --font-h1: 28px;
+    --font-h2: 22px;
+    --catalog-card-min-width: 142px;
+    --mobile-tile-padding: 9px;
+    --mobile-icon-action-size: 34px;
   }
 }

@@ -11,7 +11,10 @@
   "scripts": {
     "build": "npm run build --workspace @massage/shared && npm run build --workspace server && npm run build --workspace client",
     "build:shared": "npm run build --workspace @massage/shared",
-    "dev": "npm run build --workspace @massage/shared && concurrently \"npm run dev --workspace server\" \"npm run dev --workspace client\"",
+    "dev": "npm run dev:stable",
+    "dev:client": "npm run dev --workspace client -- --host 127.0.0.1 --clearScreen false",
+    "dev:server": "npm run dev --workspace server",
+    "dev:stable": "npm run build --workspace @massage/shared && concurrently --names server,client --kill-others-on-fail \"npm run dev:server\" \"npm run dev:client\"",
     "seed": "npm run seed --workspace server",
     "test": "node --test tests/subscription-benefits.test.mjs",
     "docker:up": "docker compose up -d",

@@ -3,7 +3,6 @@ import { NestFactory } from '@nestjs/core';
 import { UserRole } from '@massage/shared';
 import { hash } from 'bcryptjs';
 import { DataSource, Repository } from 'typeorm';
-import { AppModule } from '../app.module';
 import { normalizePhone } from '../common/utils/normalize-contact.util';
 import { SystemSetting } from '../modules/admin/entities/system-setting.entity';
 import { GiftCertificate } from '../modules/gift-certificates/entities/gift-certificate.entity';
@@ -526,6 +525,8 @@ const planSeeds = [
 ] as const;
 
 async function seed() {
+  process.env.DATABASE_SYNCHRONIZE = process.env.SEED_DATABASE_SYNCHRONIZE ?? 'false';
+  const { AppModule } = await import('../app.module');
   const app = await NestFactory.createApplicationContext(AppModule, { logger: ['error', 'warn', 'log'] });
   const dataSource = app.get(DataSource);
 
@@ -543,8 +544,10 @@ async function seed() {
   const settings = dataSource.getRepository(SystemSetting);
 
   const passwordHash = await hash('password123', 10);
-  const userTestPasswordHash = await hash('user123', 10);
-  const adminTestPasswordHash = await hash('admin123', 10);
+  const userTestPasswordHash = await hash('user12345', 12);
+  const adminTestPasswordHash = await hash('admin12345', 12);
+  const crmAdminPasswordHash = await hash('Admin12345!', 12);
+  const crmSuperAdminPasswordHash = await hash('SuperAdmin12345!', 12);
 
   await findOrCreate(users, { email: 'client@example.com' } as Partial<User>, () => ({
     email: 'client@example.com',
@@ -582,11 +585,29 @@ async function seed() {
     isActive: true,
   }));
 
+  await findOrCreate(users, { email: 'admin@massage.local' } as Partial<User>, () => ({
+    email: 'admin@massage.local',
+    passwordHash: crmAdminPasswordHash,
+    fullName: 'CRM Администратор',
+    phone: normalizePhone('+79995550001'),
+    role: UserRole.ADMIN,
+    isActive: true,
+  }));
+
   await findOrCreate(users, { email: 'superadmin@example.com' } as Partial<User>, () => ({
     email: 'superadmin@example.com',
     passwordHash,
     fullName: 'Ирина Супервайзер',
     phone: normalizePhone('+79990000003'),
+    role: UserRole.SUPER_ADMIN,
+    isActive: true,
+  }));
+
+  await findOrCreate(users, { email: 'superadmin@massage.local' } as Partial<User>, () => ({
+    email: 'superadmin@massage.local',
+    passwordHash: crmSuperAdminPasswordHash,
+    fullName: 'CRM Суперадминистратор',
+    phone: normalizePhone('+79995550002'),
     role: UserRole.SUPER_ADMIN,
     isActive: true,
   }));
@@ -671,19 +692,7 @@ async function seed() {
     }));
   }
 
-  const firstMaster = await masters.findOneByOrFail({ firstName: 'Екатерина', lastName: 'Реснянская' });
-  const now = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(10, 0, 0, 0);
-  const tomorrowEnd = new Date(tomorrow);
-  tomorrowEnd.setHours(18, 0, 0, 0);
-
-  if ((await shifts.count()) === 0) {
-    await shifts.save([
-      shifts.create({ master: firstMaster, studio: studioCenter, startsAt: tomorrow, endsAt: tomorrowEnd, isAvailable: true }),
-    ]);
-  }
+  await seedMasterShifts(masters, shifts, 14);
 
   for (const planSeed of planSeeds) {
     await findOrCreate(plans, { code: planSeed.code } as Partial<SubscriptionPlan>, () => ({
@@ -795,7 +804,7 @@ async function seed() {
   }
 
   await app.close();
-  console.log('Seed data created successfully. Demo logins: user@test.ru/user123, admin@test.ru/admin123.');
+  console.log('Seed data created successfully. Demo logins: user@test.ru/user12345, admin@test.ru/admin12345, admin@massage.local/Admin12345!, superadmin@massage.local/SuperAdmin12345!.');
 }
 
 function slugify(value: string) {
@@ -842,6 +851,41 @@ function slugify(value: string) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 80);
+}
+
+async function seedMasterShifts(masters: Repository<Master>, shifts: Repository<MasterShift>, daysCount: number) {
+  const activeMasters = await masters.find({ where: { isActive: true } });
+
+  for (const master of activeMasters) {
+    if (!master.studio) {
+      continue;
+    }
+
+    for (let dayOffset = 0; dayOffset < daysCount; dayOffset += 1) {
+      const startsAt = new Date();
+      startsAt.setDate(startsAt.getDate() + dayOffset);
+      startsAt.setHours(10, 0, 0, 0);
+
+      const endsAt = new Date(startsAt);
+      endsAt.setHours(20, 0, 0, 0);
+
+      const existingShift = await shifts.findOne({
+        where: {
+          master: { id: master.id },
+          startsAt,
+        },
+      });
+
+      if (existingShift) {
+        existingShift.studio = master.studio;
+        existingShift.endsAt = endsAt;
+        existingShift.isAvailable = true;
+        await shifts.save(existingShift);
+      } else {
+        await shifts.save(shifts.create({ master, studio: master.studio, startsAt, endsAt, isAvailable: true }));
+      }
+    }
+  }
 }
 
 seed().catch((error) => {

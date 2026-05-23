@@ -44,6 +44,10 @@
 }
 
 @media (max-width: 760px) {
+  .page {
+    padding-top: var(--page-padding-top);
+  }
+
   .header {
     grid-template-columns: 1fr;
     gap: 18px;
@@ -56,5 +60,16 @@
 
   .actions {
     justify-content: flex-start;
+  }
+
+  .actions > * {
+    flex: 0 0 auto;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .actions > * {
+    width: auto;
   }
 }

@@ -12,8 +12,13 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { AuthResponseDto, AuthTokensDto } from './types/auth-response.type';
 
+const MAX_FAILED_LOGIN_ATTEMPTS = 5;
+const LOGIN_LOCK_MS = 15 * 60 * 1000;
+
 @Injectable()
 export class AuthService {
+  private readonly failedLogins = new Map<string, { count: number; lockedUntil?: number }>();
+
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
     private readonly jwtService: JwtService,
@@ -34,7 +39,7 @@ export class AuthService {
 
     const user = this.usersRepository.create({
       email,
-      passwordHash: await hash(dto.password, 10),
+      passwordHash: await hash(dto.password, this.configService.get<number>('BCRYPT_ROUNDS', 12)),
       fullName,
       phone,
       role: UserRole.CLIENT,
@@ -47,6 +52,10 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const identifier = dto.identifier.trim();
+    const attemptKey = normalizeLoginAttemptKey(identifier);
+
+    this.ensureLoginIsNotLocked(attemptKey);
+
     const user = isEmailIdentifier(identifier)
       ? await this.usersRepository.findOne({
           where: { email: normalizeEmail(identifier) ?? undefined, isActive: true },
@@ -56,13 +65,16 @@ export class AuthService {
         });
 
     if (!user) {
-      throw new UnauthorizedException('Account not found');
+      this.recordFailedLogin(attemptKey);
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     if (!(await compare(dto.password, user.passwordHash))) {
-      throw new UnauthorizedException('Invalid password');
+      this.recordFailedLogin(attemptKey);
+      throw new UnauthorizedException('Invalid credentials');
     }
 
+    this.failedLogins.delete(attemptKey);
     return this.buildAuthResponse(user);
   }
 
@@ -147,4 +159,29 @@ export class AuthService {
       }
     }
   }
+
+  private ensureLoginIsNotLocked(attemptKey: string) {
+    const attempt = this.failedLogins.get(attemptKey);
+    if (!attempt?.lockedUntil) {
+      return;
+    }
+
+    if (attempt.lockedUntil <= Date.now()) {
+      this.failedLogins.delete(attemptKey);
+      return;
+    }
+
+    throw new UnauthorizedException('Too many failed login attempts. Try again later.');
+  }
+
+  private recordFailedLogin(attemptKey: string) {
+    const current = this.failedLogins.get(attemptKey);
+    const count = (current?.count ?? 0) + 1;
+    const lockedUntil = count >= MAX_FAILED_LOGIN_ATTEMPTS ? Date.now() + LOGIN_LOCK_MS : undefined;
+    this.failedLogins.set(attemptKey, { count, lockedUntil });
+  }
+}
+
+function normalizeLoginAttemptKey(identifier: string) {
+  return identifier.trim().toLowerCase();
 }

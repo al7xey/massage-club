@@ -19,9 +19,9 @@
   gap: 16px;
   width: var(--container-page);
   min-width: 0;
-  min-height: 72px;
+  min-height: 68px;
   margin: 0 auto;
-  padding: 0;
+  padding: 10px 0 6px;
   padding-inline: 0;
 }
 
@@ -43,8 +43,8 @@
 
 .brandMark {
   display: inline-grid;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   place-items: center;
   overflow: hidden;
   flex: 0 0 auto;
@@ -79,7 +79,7 @@
 }
 
 .nav a {
-  padding: 10px 1px;
+  padding: 7px 1px;
   white-space: nowrap;
   transition: color 0.18s ease;
 }
@@ -91,7 +91,7 @@
 
 .actions {
   position: relative;
-  right: 0;
+  right: -14px;
   justify-self: end;
   justify-content: flex-end;
   gap: 10px;
@@ -99,36 +99,91 @@
   flex-wrap: nowrap;
 }
 
+.menuButton,
+.mobileCloseButton,
+.bottomNav,
+.mobileMenuLayer {
+  display: none;
+}
+
+.menuButton,
+.mobileCloseButton,
+.bottomNavMenuButton {
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+}
+
+.menuButton,
+.mobileCloseButton {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  place-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-round);
+  background: var(--color-surface);
+}
+
+.menuButton span,
+.mobileCloseButton span {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: var(--radius-round);
+  background: currentColor;
+}
+
+.menuButton span::before,
+.menuButton span::after,
+.mobileCloseButton span::before,
+.mobileCloseButton span::after {
+  position: absolute;
+  left: 0;
+  width: 18px;
+  height: 2px;
+  border-radius: inherit;
+  background: currentColor;
+  content: "";
+}
+
+.menuButton span::before {
+  top: -6px;
+}
+
+.menuButton span::after {
+  top: 6px;
+}
+
+.mobileCloseButton span {
+  transform: rotate(45deg);
+}
+
+.mobileCloseButton span::before {
+  top: 0;
+  transform: rotate(90deg);
+}
+
+.mobileCloseButton span::after {
+  display: none;
+}
+
 .iconButton {
   position: relative;
-  width: 40px;
-  min-width: 40px;
-  height: 40px;
-  min-height: 40px;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
   padding: 0;
   border-radius: var(--radius-round);
 }
 
 .cartIcon {
-  position: relative;
   display: block;
-  width: 17px;
-  height: 14px;
-  border: 2px solid currentColor;
-  border-top: 0;
-  border-radius: 0 0 5px 5px;
-}
-
-.cartIcon::before {
-  position: absolute;
-  top: -7px;
-  left: 3px;
-  width: 8px;
-  height: 7px;
-  border: 2px solid currentColor;
-  border-bottom: 0;
-  border-radius: 8px 8px 0 0;
-  content: "";
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
 }
 
 .cartBadge {
@@ -150,13 +205,13 @@
 
 .avatar {
   display: inline-grid;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   place-items: center;
   border-radius: var(--radius-round);
   background: var(--color-soft);
   color: var(--color-primary-hover);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
   overflow: hidden;
 }
@@ -218,6 +273,10 @@
   line-height: 1.2;
 }
 
+.footerMain .footerBrand + p + p {
+  display: none;
+}
+
 @media (max-width: 920px) {
   .header {
     min-height: 0;
@@ -252,6 +311,192 @@
     gap: 28px;
     width: var(--container-page);
     padding: 34px 0 30px;
+  }
+}
+
+@media (max-width: 760px) {
+  .shell {
+    padding-bottom: calc(74px + env(safe-area-inset-bottom));
+  }
+
+  .header {
+    position: relative;
+    top: auto;
+    border-bottom: 0;
+    box-shadow: none;
+  }
+
+  .headerInner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    min-height: 60px;
+    padding: 8px 0;
+  }
+
+  .logo {
+    min-width: 0;
+    font-size: 18px;
+  }
+
+  .brandMark {
+    width: 34px;
+    height: 34px;
+  }
+
+  .nav,
+  .actions {
+    display: none;
+  }
+
+  .menuButton {
+    display: inline-grid;
+    justify-self: end;
+  }
+
+  .mobileMenuLayer {
+    position: fixed;
+    z-index: 60;
+    inset: 0;
+    display: block;
+  }
+
+  .mobileMenuBackdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(32, 35, 42, 0.34);
+  }
+
+  .mobileMenuPanel {
+    position: absolute;
+    right: 10px;
+    bottom: calc(78px + env(safe-area-inset-bottom));
+    left: 10px;
+    display: grid;
+    max-height: min(620px, calc(100vh - 116px));
+    overflow: auto;
+    gap: 16px;
+    border: 1px solid var(--color-line);
+    border-radius: 26px;
+    background: var(--color-surface);
+    padding: 16px;
+    box-shadow: 0 22px 54px rgba(32, 35, 42, 0.18);
+  }
+
+  .mobileMenuHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .mobileMenuHeader strong {
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  .mobileCloseButton {
+    display: inline-grid;
+  }
+
+  .mobileMenuNav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .mobileMenuNav a {
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-line);
+    border-radius: 18px;
+    background: var(--color-surface-soft);
+    padding: 8px 10px;
+    color: var(--color-text);
+    font-size: 13px;
+    font-weight: 800;
+    text-align: center;
+  }
+
+  .mobileMenuNav .mobileActiveLink {
+    border-color: transparent;
+    background: var(--gradient-primary);
+    color: var(--color-on-primary);
+  }
+
+  .mobileMenuActions {
+    display: grid;
+    gap: 10px;
+  }
+
+  .bottomNav {
+    position: fixed;
+    z-index: 55;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    min-height: calc(58px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--color-line);
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 -10px 28px rgba(32, 35, 42, 0.08);
+    padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
+    backdrop-filter: blur(18px);
+  }
+
+  .bottomNavLink,
+  .bottomNavActive,
+  .bottomNavMenuButton {
+    display: grid;
+    min-width: 0;
+    min-height: 46px;
+    place-items: center;
+    align-content: center;
+    gap: 0;
+    border-radius: 16px;
+    padding: 0;
+    color: var(--color-muted);
+  }
+
+  .bottomNavActive {
+    background: rgba(111, 141, 78, 0.12);
+    color: var(--color-primary-hover);
+  }
+
+  .bottomNav svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .bottomNav span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .footer {
+    margin-top: 38px;
+  }
+
+  .footerMain {
+    padding-bottom: 24px;
+  }
+}
+
+@media (max-width: 380px) {
+  .mobileMenuNav {
+    grid-template-columns: 1fr;
   }
 }
 

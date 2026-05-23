@@ -33,7 +33,7 @@ export function CertificatesPage() {
   );
 
   return (
-    <PageShell title="Сертификаты" description="Подарите близким заботу и спокойное время для себя." actions={actions}>
+    <PageShell title="Сертификаты" actions={actions}>
       <section className={styles.layout}>
         {mode === 'new' ? (
           <IssueCertificateForm />

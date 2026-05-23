@@ -13,7 +13,7 @@ interface ReviewsShowcaseProps {
 export function ReviewsShowcase({ title, reviews, subtitle, actionLabel }: ReviewsShowcaseProps) {
   return (
     <section className={styles.section}>
-      <SectionHeader title={title} subtitle={subtitle} actionLabel={actionLabel} actionHref={actionLabel ? appRoutes.reviews() : undefined} />
+      <SectionHeader title={title} actionLabel={actionLabel} actionHref={actionLabel ? appRoutes.reviews() : undefined} />
       <div className={styles.grid}>
         {reviews.map((review) => (
           <ReviewCard key={review.id} review={review} />

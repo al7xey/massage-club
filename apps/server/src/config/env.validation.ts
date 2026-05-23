@@ -15,10 +15,11 @@ export interface AppEnvironment {
   JWT_REFRESH_SECRET: string;
   JWT_ACCESS_EXPIRES_IN: string;
   JWT_REFRESH_EXPIRES_IN: string;
+  BCRYPT_ROUNDS: number;
 }
 
 export function validateEnv(config: Record<string, unknown>): AppEnvironment {
-  return {
+  const env: AppEnvironment = {
     NODE_ENV: readString(config, 'NODE_ENV', 'development'),
     CLIENT_PORT: readNumber(config, 'CLIENT_PORT', 5173),
     SERVER_PORT: readNumber(config, 'SERVER_PORT', 3000),
@@ -35,7 +36,29 @@ export function validateEnv(config: Record<string, unknown>): AppEnvironment {
     JWT_REFRESH_SECRET: readString(config, 'JWT_REFRESH_SECRET', 'dev_refresh_secret_change_me'),
     JWT_ACCESS_EXPIRES_IN: readString(config, 'JWT_ACCESS_EXPIRES_IN', '15m'),
     JWT_REFRESH_EXPIRES_IN: readString(config, 'JWT_REFRESH_EXPIRES_IN', '7d'),
+    BCRYPT_ROUNDS: readNumber(config, 'BCRYPT_ROUNDS', 12),
   };
+
+  validateProductionSafety(env);
+  return env;
+}
+
+function validateProductionSafety(env: AppEnvironment) {
+  if (env.NODE_ENV !== 'production') {
+    return;
+  }
+
+  if (env.DATABASE_SYNCHRONIZE === 'true') {
+    throw new Error('DATABASE_SYNCHRONIZE must be false in production');
+  }
+
+  if (env.JWT_ACCESS_SECRET === 'dev_access_secret_change_me' || env.JWT_REFRESH_SECRET === 'dev_refresh_secret_change_me') {
+    throw new Error('JWT secrets must be changed in production');
+  }
+
+  if (env.JWT_ACCESS_SECRET.length < 32 || env.JWT_REFRESH_SECRET.length < 32) {
+    throw new Error('JWT secrets must be at least 32 characters in production');
+  }
 }
 
 function readString(config: Record<string, unknown>, key: keyof AppEnvironment, fallback: string) {

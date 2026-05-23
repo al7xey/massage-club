@@ -1,13 +1,14 @@
 import type { UserRole } from '@massage/shared';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
+import { ForbiddenPage } from '@/pages/forbidden';
 import { appRoutes } from '@/shared/routes';
 
-interface ProtectedRouteProps {
+interface RoleBasedRouteProps {
   allowedRoles?: UserRole[];
 }
 
-export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
+export function RoleBasedRoute({ allowedRoles }: RoleBasedRouteProps) {
   const { isAuthLoading, user } = useAuth();
   const location = useLocation();
 
@@ -20,8 +21,12 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to={appRoutes.login()} state={{ denied: true, from: location.pathname }} replace />;
+    return <ForbiddenPage />;
   }
 
   return <Outlet />;
+}
+
+export function ProtectedRoute(props: RoleBasedRouteProps) {
+  return <RoleBasedRoute {...props} />;
 }

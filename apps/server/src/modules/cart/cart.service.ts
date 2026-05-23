@@ -1,5 +1,5 @@
 import { applySubscriptionBenefits } from '@massage/shared';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { Appointment, AppointmentStatus } from '../appointments/entities/appointment.entity';
@@ -45,6 +45,10 @@ export class CartService {
       this.servicesRepository.findOneByOrFail({ id: dto.serviceId }),
     ]);
 
+    if (!user.isActive) {
+      throw new ForbiddenException('Blocked users cannot add services to cart');
+    }
+
     return this.cartRepository.save(this.cartRepository.create({ user, service }));
   }
 
@@ -81,6 +85,11 @@ export class CartService {
 
       if (cartItems.length === 0) {
         throw new BadRequestException('Cart is empty');
+      }
+
+      const cartUser = cartItems[0].user;
+      if (!cartUser.isActive) {
+        throw new ForbiddenException('Blocked users cannot create appointments');
       }
 
       const itemIds = dto.items.map((item) => item.cartItemId);
@@ -157,7 +166,7 @@ export class CartService {
           throw new NotFoundException('Master not found');
         }
 
-        if (!master.studio || master.studio.id !== studio.id) {
+        if (!masterWorksInStudio(master, studio.id)) {
           throw new BadRequestException('Master does not work in selected studio');
         }
 
@@ -266,6 +275,10 @@ export class CartService {
       throw new BadRequestException('Master already has an appointment in this time slot');
     }
   }
+}
+
+function masterWorksInStudio(master: Master, studioId: string) {
+  return Boolean(master.studio?.id === studioId || master.studios?.some((studio) => studio.id === studioId));
 }
 
 function isClassicMassage(service: Service) {

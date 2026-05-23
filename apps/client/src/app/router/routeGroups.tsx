@@ -1,8 +1,22 @@
 import type { ReactNode } from 'react';
+import { Navigate } from 'react-router-dom';
 import { AccountPage } from '@/pages/account';
 import { AccountSettingsPage } from '@/pages/account-settings';
-import { AdminDashboardPage } from '@/pages/admin-dashboard';
-import { AdminSectionPage } from '@/pages/admin-section';
+import {
+  AdminDashboardPage,
+  AdminMasterDetailsPage,
+  AdminMastersPage,
+  AdminSchedulePage,
+  AdminStudiosPage,
+  SuperAdminAppointmentsPage,
+  SuperAdminAuditLogPage,
+  SuperAdminDashboardPage,
+  SuperAdminMastersPage,
+  SuperAdminServiceDetailsPage,
+  SuperAdminServicesPage,
+  SuperAdminSiteContentPage,
+  SuperAdminUsersPage,
+} from '@/pages/admin-crm';
 import { AuthPage } from '@/pages/auth';
 import { BookingPage } from '@/pages/booking';
 import { CartPage } from '@/pages/cart';
@@ -55,8 +69,27 @@ export const accountRoutes: AppRouteConfig[] = [
 ];
 
 export const adminRoutes: AppRouteConfig[] = [
-  { path: 'admin', element: <AdminDashboardPage /> },
-  { path: 'admin/:section', element: <AdminSectionPage /> },
+  { index: true, element: <Navigate to="dashboard" replace /> },
+  { path: 'dashboard', element: <AdminDashboardPage /> },
+  { path: 'masters', element: <AdminMastersPage /> },
+  { path: 'masters/:id', element: <AdminMasterDetailsPage /> },
+  { path: 'studios', element: <AdminStudiosPage /> },
+  { path: 'schedule', element: <AdminSchedulePage /> },
+];
+
+export const superAdminRoutes: AppRouteConfig[] = [
+  { index: true, element: <Navigate to="dashboard" replace /> },
+  { path: 'dashboard', element: <SuperAdminDashboardPage /> },
+  { path: 'masters', element: <SuperAdminMastersPage /> },
+  { path: 'masters/:id', element: <AdminMasterDetailsPage /> },
+  { path: 'services', element: <SuperAdminServicesPage /> },
+  { path: 'services/:id', element: <SuperAdminServiceDetailsPage /> },
+  { path: 'studios', element: <AdminStudiosPage /> },
+  { path: 'schedule', element: <AdminSchedulePage /> },
+  { path: 'appointments', element: <SuperAdminAppointmentsPage /> },
+  { path: 'users', element: <SuperAdminUsersPage /> },
+  { path: 'site-content', element: <SuperAdminSiteContentPage /> },
+  { path: 'audit-log', element: <SuperAdminAuditLogPage /> },
 ];
 
 export { LoginPage, RegisterPage };

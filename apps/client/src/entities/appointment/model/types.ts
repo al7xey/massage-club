@@ -1,6 +1,7 @@
 import type { MasterDto } from '@/entities/master';
 import type { ServiceDto } from '@/entities/service';
 import type { StudioDto } from '@/entities/studio';
+import type { PublicUserDto } from '@massage/shared';
 
 export interface AppointmentDto {
   id: string;
@@ -13,6 +14,7 @@ export interface AppointmentDto {
   paidBySubscriptionCredit: boolean;
   note?: string | null;
   createdAt: string;
+  user?: PublicUserDto;
   service: ServiceDto;
   studio: StudioDto;
   master: MasterDto;

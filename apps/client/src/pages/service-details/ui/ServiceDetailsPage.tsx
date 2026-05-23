@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { useAddCartItemMutation } from '@/entities/cart';
 import { mockReviews } from '@/entities/review';
-import { createServiceCardModel, useGetServiceQuery, useGetServicesQuery } from '@/entities/service';
+import { createServiceCardModel, type ServiceDto, useGetServiceQuery, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
+import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import { appRoutes } from '@/shared/routes';
 import { Button, LinkButton } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
+import { PlansCarousel } from '@/widgets/plans-carousel';
 import { ReviewsShowcase } from '@/widgets/reviews-showcase';
 import { ServiceShowcase } from '@/widgets/service-showcase';
 import { StudioShowcase } from '@/widgets/studio-showcase';
@@ -19,23 +21,41 @@ export function ServiceDetailsPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
   const [addCartItem] = useAddCartItemMutation();
   const { data: service } = useGetServiceQuery(id, { skip: !id });
-  const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
+  const { data: servicesPage } = useGetServicesQuery({ limit: 5, sort: 'popular' });
   const { data: studios = [] } = useGetStudiosQuery();
+  const { data: plans = [] } = useGetSubscriptionPlansQuery();
 
   const selected = service ?? servicesPage?.items[0];
   const selectedPrice = selected?.priceRub ?? 0;
-  const similar = (servicesPage?.items ?? []).filter((item) => item.id !== selected?.id).map((item) => createServiceCardModel(item));
+  const similar = (servicesPage?.items ?? [])
+    .filter((item) => item.id !== selected?.id)
+    .slice(0, 4)
+    .map((item) => createServiceCardModel(item));
   const studioCards = studios.slice(0, 2).map(createStudioCardModel);
+  const serviceTariffs = buildTariffs(plans).slice(0, 4);
   const title = selected?.title ?? 'Услуга';
   const description = selected?.description ?? 'Описание услуги загружается из базы данных.';
   const durationLabel = selected?.durationLabel?.trim() || `${selected?.durationMinutes ?? 0} мин`;
+  const photoItems = useMemo(() => getServiceGallery(selected), [selected]);
+  const activePhoto = photoItems[activePhotoIndex] ?? photoItems[0];
+  const displayDuration = getDurationDisplay(selected?.durationMinutes, durationLabel);
+  const categoryLabel = getServiceCategoryLabel(selected);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
+    setActivePhotoIndex(0);
   }, [id]);
+
+  const showPreviousPhoto = () => {
+    setActivePhotoIndex((index) => (index === 0 ? photoItems.length - 1 : index - 1));
+  };
+
+  const showNextPhoto = () => {
+    setActivePhotoIndex((index) => (index + 1) % photoItems.length);
+  };
 
   const navigateToAuth = (action: 'book' | 'cart') => {
     navigate(appRoutes.login(), {
@@ -71,49 +91,60 @@ export function ServiceDetailsPage() {
   };
 
   return (
-    <PageShell title={title} description={description}>
+    <PageShell title={title}>
       <section className={styles.top}>
-        <div className={styles.gallery}>
-          <div className={styles.heroImage}>
-            <span>{selected?.category?.name ?? 'Услуга'}</span>
-            <Button
-              className={styles.favoriteButton}
-              size="sm"
-              variant="ghost"
-              aria-pressed={isFavorite}
-              aria-label={isFavorite ? 'Убрать из избранного' : 'Добавить в избранное'}
-              onClick={() => setIsFavorite((value) => !value)}
-            >
-              {isFavorite ? '♥' : '♡'}
-            </Button>
+        <div className={styles.visual}>
+          <div
+            className={styles.servicePhoto}
+            data-tone={activePhoto?.tone}
+            role="img"
+            aria-label={`Фото услуги ${title}`}
+            style={activePhoto?.url ? { backgroundImage: `url("${activePhoto.url}")` } : undefined}
+          />
+          <div className={styles.photoBadges}>
+            <span>{categoryLabel}</span>
+            <span>{displayDuration}</span>
           </div>
-          <div className={styles.thumbs}>
-            {[selected?.category?.name ?? 'Категория', durationLabel, formatPrice(selectedPrice), 'RelaxUp'].map((label, index) => (
-              <div className={styles.thumbButton} key={`${label}-${index}`} data-active={index === 0 ? 'true' : undefined}>
-                <span>{label}</span>
-              </div>
+          <div className={styles.galleryControls}>
+            <button type="button" aria-label="Предыдущее фото" onClick={showPreviousPhoto}>
+              ←
+            </button>
+            <span>
+              {activePhotoIndex + 1} / {photoItems.length}
+            </span>
+            <button type="button" aria-label="Следующее фото" onClick={showNextPhoto}>
+              →
+            </button>
+          </div>
+          <div className={styles.galleryDots}>
+            {photoItems.map((photo, index) => (
+              <button
+                key={`${photo.label}-${index}`}
+                type="button"
+                aria-label={`Показать фото ${index + 1}`}
+                aria-pressed={index === activePhotoIndex}
+                onClick={() => setActivePhotoIndex(index)}
+              />
             ))}
           </div>
         </div>
 
-        <aside className={styles.sideCard}>
-          <h2>Стоимость и запись</h2>
-          <p className={styles.meta}>
-            <span>{durationLabel}</span>
-            <span>{selected?.category?.name ?? 'Каталог RelaxUp'}</span>
-          </p>
-          <div className={styles.prices}>
-            <PriceRow tone="base" title="Обычная запись" note="Без преимуществ клуба" price={selectedPrice} />
-            <PriceRow tone="club" title="С тарифом 20%" note="ЛЕДИ, МИСТЕР или СЕМЕЙНЫЙ" price={Math.round(selectedPrice * 0.8)} badge="-20%" />
-            <PriceRow tone="super" title="С тарифом 30%" note="SUPER-тарифы" price={Math.round(selectedPrice * 0.7)} badge="-30%" />
+        <aside className={styles.bookingCard}>
+          <h2>Стоимость</h2>
+          <div className={styles.priceList}>
+            <PriceRow title="Разовый визит" note="Без клубного тарифа" price={selectedPrice} />
+            <PriceRow title="Клубная цена" note="Тарифы 20%" price={Math.round(selectedPrice * 0.8)} badge="-20%" />
+            <PriceRow title="SUPER-тариф" note="Максимальная выгода" price={Math.round(selectedPrice * 0.7)} badge="-30%" featured />
           </div>
-          <Button fullWidth onClick={() => void handleBook()}>
-            Записаться
-          </Button>
-          <Button fullWidth variant="secondary" onClick={() => void handleAddToCart()}>
-            В корзину
-          </Button>
-          <p className={styles.note}>Клубная скидка применяется по активному тарифу. Включенные услуги списываются из подписки.</p>
+          <div className={styles.actions}>
+            <Button fullWidth onClick={() => void handleBook()}>
+              Записаться
+            </Button>
+            <Button fullWidth variant="secondary" onClick={() => void handleAddToCart()}>
+              В корзину
+            </Button>
+          </div>
+          <p className={styles.note}>Клубная цена применяется по активному тарифу.</p>
         </aside>
       </section>
 
@@ -124,7 +155,7 @@ export function ServiceDetailsPage() {
           {selected?.composition ? (
             <>
               <h3>Состав / этапы</h3>
-              <ul className={styles.benefits}>
+              <ul className={styles.composition}>
                 {selected.composition
                   .split(';')
                   .map((item) => item.trim())
@@ -136,26 +167,23 @@ export function ServiceDetailsPage() {
             </>
           ) : null}
         </div>
-        <aside className={styles.infoPanel}>
-          <h3>Важно</h3>
-          <ol>
-            <li>Формулировки по противопоказаниям и эстетическим процедурам требуют юридической проверки.</li>
-            <li>Приходите за 10-15 минут до начала процедуры.</li>
-            <li>Итоговая длительность для SPA-программ показана как в исходном прайсе.</li>
-          </ol>
-        </aside>
       </section>
 
-      <section className={styles.giftBanner}>
-        <div>
-          <h2>Подарочные сертификаты</h2>
-          <p>Скидка на сертификаты зависит от тарифа: 10% или 20%.</p>
-          <LinkButton to={appRoutes.certificates()}>Оформить сертификат</LinkButton>
-        </div>
-      </section>
+      {serviceTariffs.length > 0 ? (
+        <PlansCarousel
+          title="Тарифы клуба"
+          items={serviceTariffs}
+          dotIdPrefix="service-details-plans"
+          topAction={
+            <LinkButton size="sm" to={appRoutes.subscriptions()} variant="secondary">
+              Смотреть все
+            </LinkButton>
+          }
+        />
+      ) : null}
 
       {similar.length > 0 ? <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={similar} /> : null}
-      <StudioShowcase title="Где пройти процедуру" actionLabel="Посмотреть на карте" studios={studioCards} />
+      <StudioShowcase title="Где пройти процедуру" actionLabel="Подробнее" studios={studioCards} />
       <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" actionLabel="Смотреть все" reviews={mockReviews} />
     </PageShell>
   );
@@ -163,24 +191,51 @@ export function ServiceDetailsPage() {
 
 function PriceRow({
   badge,
+  featured = false,
   note,
   price,
   title,
-  tone,
 }: {
   badge?: string;
+  featured?: boolean;
   note: string;
   price: number;
   title: string;
-  tone: 'base' | 'club' | 'super';
 }) {
   return (
-    <div data-tone={tone}>
-      <div>
-        <span>{title} {badge ? <em>{badge}</em> : null}</span>
+    <div className={styles.priceRow} data-featured={featured ? 'true' : undefined}>
+      <div className={styles.priceCopy}>
+        <span>
+          {title}
+          {badge ? <em>{badge}</em> : null}
+        </span>
         <small>{note}</small>
       </div>
-      <strong>{formatPrice(price)}</strong>
+      <strong className={styles.priceValue}>{formatPrice(price)}</strong>
     </div>
   );
+}
+
+function getServiceGallery(service: ServiceDto | undefined) {
+  const source = service as (ServiceDto & { photoUrl?: string; photoUrls?: string[] }) | undefined;
+  const urls = source?.photoUrls?.length ? source.photoUrls : [source?.photoUrl].filter(Boolean);
+
+  return [0, 1, 2].map((index) => ({
+    label: `Фото ${index + 1}`,
+    tone: index,
+    url: urls[index],
+  }));
+}
+
+function getDurationDisplay(durationMinutes?: number, fallback = '') {
+  if (durationMinutes) {
+    return `${durationMinutes} минут`;
+  }
+
+  const match = fallback.match(/\d+/);
+  return match ? `${match[0]} минут` : fallback;
+}
+
+function getServiceCategoryLabel(service: ServiceDto | undefined) {
+  return service?.category?.name ?? 'Массаж для женщин';
 }

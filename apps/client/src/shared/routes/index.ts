@@ -21,6 +21,10 @@
   accountAppointments: () => '/account/appointments',
   accountPayments: () => '/account/payments',
   accountSupport: () => '/account/support',
-  admin: () => '/admin',
+  admin: () => '/admin/dashboard',
+  adminMasterDetails: (id: string) => `/admin/masters/${id}`,
   adminSection: (section: string) => `/admin/${section}`,
+  superAdmin: () => '/super-admin/dashboard',
+  superAdminServiceDetails: (id: string) => `/super-admin/services/${id}`,
+  superAdminSection: (section: string) => `/super-admin/${section}`,
 } as const;

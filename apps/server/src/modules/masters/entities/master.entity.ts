@@ -14,11 +14,27 @@ export class Master {
   lastName: string;
 
   @Column({ type: 'text', nullable: true })
-  bio?: string;
+  bio?: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  phone?: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  specialization?: string | null;
+
+  @Column({ name: 'experience_years', default: 0 })
+  experienceYears: number;
+
+  @Column({ name: 'photo_url', type: 'text', nullable: true })
+  photoUrl?: string | null;
 
   @ManyToOne(() => Studio, { eager: true, nullable: true })
   @JoinColumn({ name: 'studio_id' })
   studio?: Studio;
+
+  @ManyToMany(() => Studio, { eager: true })
+  @JoinTable({ name: 'master_studios' })
+  studios: Studio[];
 
   @ManyToMany(() => Service, { eager: true })
   @JoinTable({ name: 'master_services' })

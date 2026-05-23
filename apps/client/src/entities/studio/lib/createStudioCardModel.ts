@@ -1,6 +1,6 @@
 import type { StudioCardModel, StudioDto } from '../model/types';
 
-const studioMetaByName: Record<string, Omit<StudioCardModel, 'id' | 'title' | 'address' | 'photoUrl'>> = {
+const studioMetaByName: Record<string, Omit<StudioCardModel, 'id' | 'title' | 'address' | 'photoUrl' | 'photoUrls'>> = {
   'Massage Club Центр': {
     phone: '+7 (495) 000-00-01',
     openLabel: 'Ежедневно: 10:00 - 20:00',
@@ -28,6 +28,7 @@ export function createStudioCardModel(studio: StudioDto, index = 0): StudioCardM
     title: studio.name,
     address: studio.address,
     photoUrl: studio.photoUrl,
+    photoUrls: studio.photoUrls ?? (studio.photoUrl ? [studio.photoUrl] : []),
     ...meta,
   };
 }

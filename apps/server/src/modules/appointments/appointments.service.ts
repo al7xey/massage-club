@@ -3,6 +3,8 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable,
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, LessThan, LessThanOrEqual, MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { MasterShift } from '../masters/entities/master-shift.entity';
+import { MasterDateAvailability, MasterDateAvailabilityStatus } from '../masters/entities/master-date-availability.entity';
+import { MasterWeeklySchedule } from '../masters/entities/master-weekly-schedule.entity';
 import { Master } from '../masters/entities/master.entity';
 import { Payment, PaymentStatus } from '../payments/entities/payment.entity';
 import { Service } from '../services/entities/service.entity';
@@ -16,7 +18,7 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { ServiceSlotsQueryDto } from './dto/service-slots-query.dto';
 import { Appointment, AppointmentStatus } from './entities/appointment.entity';
 
-const SLOT_STEP_MINUTES = 30;
+const SLOT_STEP_MINUTES = 60;
 
 @Injectable()
 export class AppointmentsService {
@@ -27,6 +29,8 @@ export class AppointmentsService {
     @InjectRepository(Studio) private readonly studiosRepository: Repository<Studio>,
     @InjectRepository(Master) private readonly mastersRepository: Repository<Master>,
     @InjectRepository(MasterShift) private readonly shiftsRepository: Repository<MasterShift>,
+    @InjectRepository(MasterWeeklySchedule) private readonly weeklySchedulesRepository: Repository<MasterWeeklySchedule>,
+    @InjectRepository(MasterDateAvailability) private readonly dateAvailabilityRepository: Repository<MasterDateAvailability>,
     @InjectRepository(Subscription) private readonly subscriptionsRepository: Repository<Subscription>,
     @InjectRepository(SubscriptionCredit) private readonly creditsRepository: Repository<SubscriptionCredit>,
     @InjectRepository(Payment) private readonly paymentsRepository: Repository<Payment>,
@@ -44,7 +48,11 @@ export class AppointmentsService {
       throw new NotFoundException('Master not found');
     }
 
-    if (!master.studio || master.studio.id !== studio.id) {
+    if (!user.isActive) {
+      throw new ForbiddenException('Blocked users cannot create appointments');
+    }
+
+    if (!masterWorksInStudio(master, studio.id)) {
       throw new BadRequestException('Master does not work in selected studio');
     }
 
@@ -140,7 +148,8 @@ export class AppointmentsService {
       },
     });
 
-    const slots = shifts.flatMap((shift) => buildSlots(shift.startsAt, shift.endsAt, appointmentDurationMinutes));
+    const windows = await this.getAvailabilityWindows(master.id, query.date, shifts);
+    const slots = windows.flatMap((window) => buildSlots(window.startsAt, window.endsAt, appointmentDurationMinutes));
     const availableSlots = slots.filter((slot) => {
       const slotEnd = new Date(slot.getTime() + appointmentDurationMinutes * 60_000);
       return !appointments.some((appointment) => appointment.startsAt < slotEnd && appointment.endsAt > slot);
@@ -184,9 +193,11 @@ export class AppointmentsService {
 
     const availableSlots = new Set<string>();
 
-    for (const shift of shifts) {
-      const masterAppointments = appointments.filter((appointment) => appointment.master.id === shift.master.id);
-      const slots = buildSlots(shift.startsAt, shift.endsAt, service.durationMinutes);
+    for (const master of masters) {
+      const masterAppointments = appointments.filter((appointment) => appointment.master.id === master.id);
+      const masterShifts = shifts.filter((shift) => shift.master.id === master.id);
+      const windows = await this.getAvailabilityWindows(master.id, query.date, masterShifts);
+      const slots = windows.flatMap((window) => buildSlots(window.startsAt, window.endsAt, service.durationMinutes));
 
       for (const slot of slots) {
         const slotEnd = new Date(slot.getTime() + service.durationMinutes * 60_000);
@@ -237,13 +248,18 @@ export class AppointmentsService {
       },
     });
 
-    return masters
-      .filter((master) => {
-        const hasShift = shifts.some((shift) => shift.master.id === master.id);
-        const hasConflict = appointments.some((appointment) => appointment.master.id === master.id);
-        return hasShift && !hasConflict;
-      })
-      .sort((left, right) => left.lastName.localeCompare(right.lastName) || left.firstName.localeCompare(right.firstName));
+    const availableMasters: Master[] = [];
+    for (const master of masters) {
+      const masterShifts = shifts.filter((shift) => shift.master.id === master.id);
+      const windows = await this.getAvailabilityWindows(master.id, startsAt.toISOString().slice(0, 10), masterShifts);
+      const hasWindow = windows.some((window) => window.startsAt <= startsAt && window.endsAt >= endsAt);
+      const hasConflict = appointments.some((appointment) => appointment.master.id === master.id);
+      if (hasWindow && !hasConflict) {
+        availableMasters.push(master);
+      }
+    }
+
+    return availableMasters.sort((left, right) => left.lastName.localeCompare(right.lastName) || left.firstName.localeCompare(right.firstName));
   }
 
   async cancel(userId: string, id: string) {
@@ -279,7 +295,11 @@ export class AppointmentsService {
     });
 
     if (!shift) {
-      throw new BadRequestException('Master is not available in selected time');
+      const windows = await this.getAvailabilityWindows(masterId, startsAt.toISOString().slice(0, 10));
+      const hasWindow = windows.some((window) => window.startsAt <= startsAt && window.endsAt >= endsAt);
+      if (!hasWindow) {
+        throw new BadRequestException('Master is not available in selected time');
+      }
     }
 
     const conflict = await this.appointmentsRepository.findOne({
@@ -318,16 +338,54 @@ export class AppointmentsService {
 
   private async findEligibleMasters(studioId: string, serviceId: string) {
     const masters = await this.mastersRepository.find({
-      where: {
-        isActive: true,
-        studio: { id: studioId },
-      },
-      relations: ['services'],
+      where: { isActive: true },
+      relations: ['services', 'studios', 'studio'],
       order: { lastName: 'ASC' },
     });
 
-    return masters.filter((master) => master.services.some((service) => service.id === serviceId));
+    return masters.filter(
+      (master) => masterWorksInStudio(master, studioId) && master.services.some((service) => service.id === serviceId),
+    );
   }
+
+  private async getAvailabilityWindows(masterId: string, date: string, shifts?: Array<{ startsAt: Date; endsAt: Date }>) {
+    const dateKey = date.slice(0, 10);
+    const override = await this.dateAvailabilityRepository.findOne({
+      where: { master: { id: masterId }, date: dateKey },
+      order: { updatedAt: 'DESC' },
+    });
+
+    if (override) {
+      if (![MasterDateAvailabilityStatus.AVAILABLE, MasterDateAvailabilityStatus.CUSTOM].includes(override.status)) {
+        return [];
+      }
+
+      if (override.startTime && override.endTime) {
+        return [{ startsAt: parseMoscowDateTime(dateKey, override.startTime), endsAt: parseMoscowDateTime(dateKey, override.endTime) }];
+      }
+    }
+
+    if (shifts?.length) {
+      return shifts.map((shift) => ({ startsAt: shift.startsAt, endsAt: shift.endsAt }));
+    }
+
+    const dayOfWeek = getMoscowDayOfWeek(dateKey);
+    const weeklyRows = await this.weeklySchedulesRepository.find({
+      where: { master: { id: masterId }, dayOfWeek, isWorking: true },
+      order: { intervalIndex: 'ASC' },
+    });
+
+    return weeklyRows
+      .filter((row) => row.startTime && row.endTime)
+      .map((row) => ({
+        startsAt: parseMoscowDateTime(dateKey, row.startTime as string),
+        endsAt: parseMoscowDateTime(dateKey, row.endTime as string),
+      }));
+  }
+}
+
+function masterWorksInStudio(master: Master, studioId: string) {
+  return Boolean(master.studio?.id === studioId || master.studios?.some((studio) => studio.id === studioId));
 }
 
 function isClassicMassage(service: Service) {
@@ -347,4 +405,14 @@ function buildSlots(startsAt: Date, endsAt: Date, durationMinutes: number) {
   }
 
   return slots;
+}
+
+function parseMoscowDateTime(date: string, time: string) {
+  return new Date(`${date.slice(0, 10)}T${time}:00.000+03:00`);
+}
+
+function getMoscowDayOfWeek(date: string) {
+  const value = parseMoscowDateTime(date, '12:00');
+  const day = value.getUTCDay();
+  return day === 0 ? 7 : day;
 }

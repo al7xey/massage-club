@@ -68,11 +68,10 @@ export function AccountPage() {
     <main className={styles.page}>
       <section className={styles.topbar}>
         <div className={styles.profileBadge}>
-          <div className={styles.avatar}>
+          <Link className={styles.avatar} to={appRoutes.accountSettings()} aria-label="Открыть настройки профиля">
             {user.avatarUrl ? <img src={user.avatarUrl} alt={userDisplayName} /> : accountInitial}
-          </div>
+          </Link>
           <div className={styles.profileIdentity}>
-            <span className={styles.overline}>Профиль клиента</span>
             <h1>{userDisplayName}</h1>
           </div>
         </div>

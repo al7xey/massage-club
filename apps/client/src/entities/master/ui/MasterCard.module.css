@@ -1,7 +1,9 @@
 .card {
+  position: relative;
   display: flex;
+  height: 100%;
   flex-direction: column;
-  min-height: 336px;
+  min-height: 338px;
   overflow: hidden;
   min-width: 0;
   border: 1px solid var(--color-line);
@@ -17,27 +19,42 @@
   transform: translateY(-2px);
 }
 
+.card:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-hover);
+}
+
+.card:has(.cardLink:active) {
+  box-shadow: var(--shadow-card);
+  transform: translateY(0);
+}
+
 .cardLink {
   display: flex;
   flex: 1;
   flex-direction: column;
+  height: 100%;
   min-width: 0;
   min-height: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
+  color: inherit;
+  text-decoration: none;
 }
 
-.cardLink:hover,
-.cardLink:active {
-  transform: none;
-  box-shadow: none;
+.cardLink:focus-visible {
+  outline: none;
+}
+
+.cardLink:active .media::before {
+  transform: translateY(2px);
+}
+
+.cardLink:active .media::after {
+  transform: translateX(-50%) translateY(2px);
 }
 
 .media {
   position: relative;
-  flex: 1;
+  flex: 0 0 auto;
   overflow: hidden;
   min-height: 248px;
   background: var(--color-soft-strong);
@@ -52,6 +69,7 @@
   border-radius: 96px 96px 0 0;
   background: #ffffff;
   content: "";
+  transition: transform 0.18s ease;
 }
 
 .media::after {
@@ -64,6 +82,15 @@
   border-radius: var(--radius-round);
   content: "";
   transform: translateX(-50%);
+  transition: transform 0.18s ease;
+}
+
+.card:hover .media::before {
+  transform: translateY(-5px);
+}
+
+.card:hover .media::after {
+  transform: translateX(-50%) translateY(-5px);
 }
 
 .meta {
@@ -75,6 +102,13 @@
 .meta h3,
 .meta p {
   margin: 0;
+}
+
+.role {
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .meta h3 {
@@ -111,8 +145,97 @@
   flex: 1;
 }
 
+.detailsArrow {
+  display: none;
+}
+
 @media (max-width: 760px) {
   .card {
-    min-height: 320px;
+    min-height: 248px;
+    border-radius: var(--radius-card);
+  }
+
+  .media {
+    min-height: 118px;
+  }
+
+  .media::before {
+    right: 18px;
+    left: 18px;
+    height: 76px;
+  }
+
+  .media::after {
+    top: 30px;
+    width: 44px;
+    height: 44px;
+    border-width: 8px;
+  }
+
+  .meta {
+    gap: 3px;
+    padding: var(--mobile-tile-padding) var(--mobile-tile-padding) 0;
+  }
+
+  .role {
+    font-size: 10px;
+  }
+
+  .meta h3 {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-size: 14px;
+    min-height: 34px;
+  }
+
+  .meta p {
+    font-size: 12px;
+  }
+
+  .actions {
+    align-items: stretch;
+    flex-direction: row;
+    gap: 8px;
+    padding: 0 var(--mobile-tile-padding) var(--mobile-tile-padding);
+  }
+
+  .actions > * {
+    min-height: var(--mobile-listing-control-height);
+    border-radius: 12px;
+    padding-inline: 10px;
+    font-size: var(--mobile-listing-button-font);
+  }
+
+  .actions > :last-child {
+    flex: 1;
+  }
+
+  .detailsAction {
+    order: 2;
+    width: var(--mobile-icon-action-size);
+    min-width: var(--mobile-icon-action-size);
+    height: var(--mobile-icon-action-size);
+    min-height: var(--mobile-icon-action-size);
+    flex: 0 0 var(--mobile-icon-action-size);
+    align-self: auto;
+    border-radius: var(--radius-round);
+    padding: 0;
+  }
+
+  .detailsText {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .detailsArrow {
+    display: inline-block;
+    font-size: 18px;
+    line-height: 1;
   }
 }

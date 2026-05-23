@@ -37,15 +37,7 @@
 }
 
 .actionButton {
-  min-height: 40px;
-  font-weight: 800;
-}
-
-.actionButton:link,
-.actionButton:visited,
-.actionButton:hover,
-.actionButton:active {
-  color: var(--color-primary-hover);
+  min-width: 128px;
 }
 
 .actions {

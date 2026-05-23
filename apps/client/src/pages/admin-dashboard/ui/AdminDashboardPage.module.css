@@ -48,3 +48,19 @@
   box-shadow: var(--shadow-hover);
   transform: translateY(-1px);
 }
+
+@media (max-width: 760px) {
+  .metrics,
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metric,
+  .card {
+    padding: 14px;
+  }
+
+  .metric strong {
+    font-size: 20px;
+  }
+}

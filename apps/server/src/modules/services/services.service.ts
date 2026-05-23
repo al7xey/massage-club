@@ -139,12 +139,22 @@ export class ServicesService {
       title: dto.title,
       slug: dto.slug,
       description: dto.description,
+      shortDescription: dto.shortDescription,
       durationMinutes: dto.durationMinutes,
       durationLabel: dto.durationLabel,
       composition: dto.composition,
       externalSource: dto.externalSource,
       externalId: dto.externalId,
       priceRub: dto.priceRub,
+      subscriptionPriceRub: dto.subscriptionPriceRub,
+      imageUrl: dto.imageUrl,
+      galleryUrls: dto.galleryUrls ?? [],
+      contraindications: dto.contraindications,
+      benefits: dto.benefits,
+      rules: dto.rules,
+      seoTitle: dto.seoTitle,
+      seoDescription: dto.seoDescription,
+      isActive: dto.isActive ?? true,
     });
     if (dto.categoryId) {
       service.category = await this.categoriesRepository.findOneByOrFail({ id: dto.categoryId });
@@ -165,6 +175,18 @@ export class ServicesService {
     const service = await this.findOne(id);
     service.isActive = false;
     return this.servicesRepository.save(service);
+  }
+
+  async findAdminAll() {
+    return this.servicesRepository.find({ order: { title: 'ASC' } });
+  }
+
+  async findAdminOne(id: string) {
+    const service = await this.servicesRepository.findOne({ where: { id } });
+    if (!service) {
+      throw new NotFoundException('Service not found');
+    }
+    return service;
   }
 
   private async resolveVisibility(userId?: string) {

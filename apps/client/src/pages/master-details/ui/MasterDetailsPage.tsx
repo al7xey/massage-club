@@ -1,11 +1,11 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { mockReviews } from '@/entities/review';
-import { createServiceCardModel } from '@/entities/service';
-import { createStudioCardModel } from '@/entities/studio';
 import { useGetMasterQuery } from '@/entities/master';
+import { mockReviews } from '@/entities/review';
+import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
+import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { appRoutes } from '@/shared/routes';
-import { LinkButton, EmptyState } from '@/shared/ui';
+import { EmptyState, LinkButton } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import { ReviewsShowcase } from '@/widgets/reviews-showcase';
 import { ServiceShowcase } from '@/widgets/service-showcase';
@@ -15,25 +15,18 @@ import styles from './MasterDetailsPage.module.css';
 export function MasterDetailsPage() {
   const { id = '' } = useParams();
   const { data: master, isLoading } = useGetMasterQuery(id, { skip: !id });
+  const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
+  const { data: studios = [] } = useGetStudiosQuery();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }, [id]);
 
-  const services = master?.services ?? [];
   const fullName = master ? `${master.firstName} ${master.lastName}` : 'Мастер';
-  const studioCards = master?.studio ? [createStudioCardModel(master.studio)] : [];
-  const serviceCards = useMemo(
-    () => services.map((service) => createServiceCardModel(service)),
-    [services],
-  );
-  const primaryService = services[0] ?? null;
-  const totalServices = services.length;
-  const summary =
-    master?.bio?.trim() ||
-    (totalServices > 0
-      ? `Специалист работает с ${totalServices} направлениями RelaxUp и помогает подобрать комфортный формат восстановления.`
-      : 'Профиль мастера загружается.');
+  const summary = master?.bio?.trim() || 'Мастер массажа и SPA, который подбирает темп, давление и формат процедуры под состояние гостя.';
+  const stats = getMasterStats(id);
+  const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
+  const studioCards = studios.slice(0, 2).map(createStudioCardModel);
 
   if (isLoading) {
     return (
@@ -56,83 +49,60 @@ export function MasterDetailsPage() {
   }
 
   return (
-    <PageShell title={fullName} description={summary}>
-      <section className={styles.top}>
-        <div className={styles.profilePanel}>
-          <div className={styles.heroImage} aria-label={fullName} role="img">
-            <span>{master.studio?.name ?? 'RelaxUp'}</span>
-          </div>
-          <div className={styles.thumbs}>
-            {[`Услуг: ${totalServices}`, primaryService ? `${primaryService.durationMinutes} мин` : 'SPA и массаж', master.isActive ? 'Активен' : 'Неактивен', 'RelaxUp'].map(
-              (label, index) => (
-                <div className={styles.thumbItem} key={`${label}-${index}`} data-active={index === 0 ? 'true' : undefined}>
-                  <span>{label}</span>
-                </div>
-              ),
-            )}
-          </div>
+    <PageShell title={fullName}>
+      <section className={styles.hero}>
+        <div className={styles.portrait} aria-label={`Фото мастера ${fullName}`} role="img">
+          <span>{master.studio?.name ?? 'Massage Club'}</span>
         </div>
 
-        <aside className={styles.sideCard}>
+        <div className={styles.profile}>
           <span className={styles.roleLabel}>Мастер массажа и SPA</span>
-          <h2>{fullName}</h2>
-          <p className={styles.meta}>
-            <span>{master.studio?.name ?? 'Студия RelaxUp'}</span>
-            <span>{totalServices} услуг в профиле</span>
-          </p>
-          <div className={styles.facts}>
+          <p className={styles.lead}>{summary}</p>
+
+          <div className={styles.stats}>
             <div>
-              <span>Специализация</span>
-              <strong>{primaryService?.title ?? 'Персональный подбор ухода'}</strong>
+              <span>Стаж</span>
+              <strong>{stats.experience}</strong>
+            </div>
+            <div>
+              <span>Отзывы</span>
+              <strong>{stats.rating} · {stats.reviewsCount} отзывов</strong>
             </div>
             <div>
               <span>Студия</span>
-              <strong>{master.studio?.city ?? 'Астрахань'}</strong>
+              <strong>{master.studio?.name ?? 'Massage Club'}</strong>
             </div>
           </div>
-          <LinkButton className={styles.ctaButton} fullWidth to={appRoutes.booking()}>
-            Записаться к мастеру
-          </LinkButton>
-          <LinkButton className={styles.ctaButton} fullWidth to={appRoutes.masters()} variant="secondary">
-            Все мастера
-          </LinkButton>
-          <p className={styles.note}>Подберите услугу в каталоге или перейдите к записи, чтобы выбрать удобный слот и подтвердить визит.</p>
-        </aside>
-      </section>
 
-      <section className={styles.description}>
-        <div>
-          <h2>О мастере</h2>
-          <p>{summary}</p>
-          {services.length > 0 ? (
-            <>
-              <h3>Направления работы</h3>
-              <ul className={styles.benefits}>
-                {services.map((service) => (
-                  <li key={service.id}>
-                    <strong>{service.title}</strong>
-                    <span>
-                      {service.durationMinutes} мин · {service.priceRub.toLocaleString('ru-RU')} ₽
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : null}
+          <div className={styles.actions}>
+            <LinkButton fullWidth to={appRoutes.booking()}>
+              Записаться к мастеру
+            </LinkButton>
+            <LinkButton fullWidth to={appRoutes.masters()} variant="secondary">
+              Все мастера
+            </LinkButton>
+          </div>
         </div>
-        <aside className={styles.infoPanel}>
-          <h3>Как проходит запись</h3>
-          <ol>
-            <li>Выберите услугу, подходящую по цели и длительности.</li>
-            <li>Перейдите к записи и укажите удобные студию, дату и время.</li>
-            <li>На этапе выбора мастера можно подтвердить именно этого специалиста, если слот доступен.</li>
-          </ol>
-        </aside>
+
       </section>
 
-      {serviceCards.length > 0 ? <ServiceShowcase title="Услуги мастера" actionLabel="Смотреть каталог" services={serviceCards} /> : null}
-      {studioCards.length > 0 ? <StudioShowcase title="Где принимает мастер" actionLabel="Посмотреть студию" studios={studioCards} /> : null}
-      <ReviewsShowcase title="Отзывы гостей" subtitle="Впечатления клиентов клуба" actionLabel="Смотреть все" reviews={mockReviews} />
+      <ReviewsShowcase title="Отзывы гостей" actionLabel="Смотреть все" reviews={mockReviews} />
+
+      {popularServices.length > 0 ? <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={popularServices} /> : null}
+      <StudioShowcase title="Наши студии" actionLabel="Подробнее" studios={studioCards} />
     </PageShell>
   );
+}
+
+function getMasterStats(id: string) {
+  const seed = Array.from(id).reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const experience = 5 + (seed % 4);
+  const reviewsCount = 42 + (seed % 30);
+  const rating = seed % 3 === 0 ? '5.0' : '4.9';
+
+  return {
+    experience: `Стаж ${experience}+ лет`,
+    rating,
+    reviewsCount,
+  };
 }

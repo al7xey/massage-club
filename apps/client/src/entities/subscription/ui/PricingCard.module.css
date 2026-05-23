@@ -1,7 +1,7 @@
 .card {
   display: flex;
   height: 100%;
-  min-height: 320px;
+  min-height: 338px;
   flex-direction: column;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
@@ -113,15 +113,39 @@
 
 @media (max-width: 760px) {
   .card {
-    min-height: 330px;
+    min-height: 346px;
+    padding: 18px;
   }
 
   .title {
     min-height: 0;
-    font-size: 20px;
+    font-size: 19px;
+  }
+
+  .priceRow {
+    gap: 6px;
+    margin-top: 14px;
   }
 
   .priceRow strong {
-    font-size: 21px;
+    font-size: 28px;
+  }
+
+  .features {
+    gap: 9px;
+    margin: 18px 0 16px;
+    padding-top: 16px;
+  }
+
+  .features li {
+    padding-left: 18px;
+    font-size: 12px;
+    line-height: 1.42;
+  }
+
+  .card :global(.button) {
+    min-height: 42px;
+    font-size: 13px;
+    padding-inline: 14px;
   }
 }

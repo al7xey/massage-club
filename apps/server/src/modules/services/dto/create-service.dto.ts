@@ -1,5 +1,5 @@
 ﻿import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString, IsUUID, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, IsUUID, Min } from 'class-validator';
 
 export class CreateServiceDto {
   @ApiProperty()
@@ -13,6 +13,11 @@ export class CreateServiceDto {
   @ApiProperty()
   @IsString()
   description: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  shortDescription?: string;
 
   @ApiProperty({ example: 60 })
   @IsNumber()
@@ -43,6 +48,53 @@ export class CreateServiceDto {
   @IsNumber()
   @Min(0)
   priceRub: number;
+
+  @ApiPropertyOptional({ example: 3600 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  subscriptionPriceRub?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  galleryUrls?: string[];
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  contraindications?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  benefits?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  rules?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  seoTitle?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  seoDescription?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()

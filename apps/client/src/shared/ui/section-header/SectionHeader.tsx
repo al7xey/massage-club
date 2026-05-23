@@ -9,14 +9,17 @@ interface SectionHeaderProps {
 }
 
 export function SectionHeader({ title, subtitle, actionLabel, actionHref }: SectionHeaderProps) {
+  const actionClassName = actionLabel ? styles.compactAction : undefined;
   const action = actionLabel ? (
     actionHref ? (
-      <LinkButton size="sm" to={actionHref} variant="secondary">
-        {actionLabel}
+      <LinkButton className={actionClassName} size="sm" to={actionHref} variant="secondary">
+        <span className={styles.actionText}>{actionLabel}</span>
+        <span className={styles.actionArrow} aria-hidden="true">→</span>
       </LinkButton>
     ) : (
-      <Button size="sm" variant="secondary">
-        {actionLabel}
+      <Button className={actionClassName} size="sm" variant="secondary">
+        <span className={styles.actionText}>{actionLabel}</span>
+        <span className={styles.actionArrow} aria-hidden="true">→</span>
       </Button>
     )
   ) : null;

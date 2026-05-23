@@ -1,348 +1,468 @@
 .root {
   display: grid;
-  gap: 26px;
+  gap: 18px;
 }
 
-.controls {
+.layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 220px;
-  gap: 18px;
+  grid-template-columns: 180px minmax(0, 1fr) 280px;
+  align-items: start;
+  gap: 22px;
+}
+
+.stepper,
+.stage,
+.sideSummary,
+.successCard {
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
-  background: var(--gradient-surface);
-  box-shadow: var(--shadow-card);
-  padding: 22px;
-}
-
-.studioRow,
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.studioButton,
-.chip {
-  min-height: 40px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-control);
   background: #ffffff;
-  color: var(--color-text);
-  padding: 0 14px;
-  font-weight: 800;
-}
-
-.studioButtonActive,
-.chipActive {
-  border-color: var(--color-primary);
-  background: var(--color-soft);
-  color: var(--color-primary-hover);
+  box-shadow: var(--shadow-card);
 }
 
 .stepper {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.stepItem,
-.stage,
-.card,
-.summary,
-.subscriptionHint,
-.empty {
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-  background: var(--gradient-surface);
-  box-shadow: var(--shadow-card);
-}
-
-.stepItem {
+  position: sticky;
+  top: 92px;
   display: grid;
   gap: 8px;
-  padding: 16px;
+  padding: 12px;
 }
 
-.stepItem span {
-  display: inline-grid;
-  width: 28px;
-  height: 28px;
+.stepButton {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-card-small);
+  background: transparent;
+  color: var(--color-muted);
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.stepButton span {
+  display: grid;
+  width: 30px;
+  height: 30px;
   place-items: center;
   border-radius: var(--radius-round);
   background: var(--color-soft);
   color: var(--color-primary-hover);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 800;
 }
 
-.stepCurrent {
-  border-color: var(--color-primary);
+.stepButton strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.stepComplete {
-  background: linear-gradient(180deg, #fbfdf9 0%, var(--color-soft) 100%);
+.stepButton[aria-current="step"],
+.stepButton[data-complete="true"] {
+  border-color: var(--color-line);
+  background: var(--color-soft);
+  color: var(--color-text);
+}
+
+.stepButton[aria-current="step"] span,
+.stepButton[data-complete="true"] span {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
 .stage {
-  padding: 28px;
-}
-
-.stageHeader h3,
-.stageHeader p,
-.card strong,
-.card p,
-.summary strong,
-.summary span,
-.empty p {
-  margin: 0;
-}
-
-.stageHeader p,
-.card p,
-.hint,
-.subscriptionHint span,
-.empty p,
-.cardMeta,
-.field span,
-.fieldLabel {
-  color: var(--color-muted);
+  display: grid;
+  gap: 22px;
+  min-width: 0;
+  padding: 26px;
 }
 
 .stageHeader {
   display: grid;
-  gap: 10px;
-  margin-bottom: 24px;
-}
-
-.cards {
-  display: grid;
-  gap: 18px;
-}
-
-.card {
-  display: grid;
-  gap: 18px;
-  padding: 22px;
-}
-
-.cardTop {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 18px;
-}
-
-.cardTitle {
-  margin: 0;
-  color: var(--color-text);
-  font-size: 20px;
-  font-weight: 900;
-  line-height: 1.2;
-}
-
-.cardTopRight {
-  display: grid;
-  justify-items: end;
-  gap: 10px;
-}
-
-.inlineGroup {
-  display: grid;
-  gap: 10px;
-}
-
-.cardHeader {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.cardSide {
-  display: grid;
-  justify-items: end;
-  gap: 12px;
-}
-
-.cardMeta {
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.card em {
-  color: var(--color-primary);
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 900;
-}
-
-.studioGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.studioCard {
-  display: grid;
-  gap: 6px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card-small);
-  background: #ffffff;
-  padding: 18px;
-  text-align: left;
-}
-
-.studioCardSelected {
-  border-color: var(--color-primary);
-  background: var(--color-soft);
-}
-
-.field {
-  display: grid;
   gap: 8px;
 }
 
-.input {
-  min-height: var(--control-height);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-control);
-  background: #ffffff;
-  padding: 0 16px;
+.stageHeader h2,
+.stageHeader p,
+.serviceRow h3,
+.serviceRow p,
+.panelTitle h3,
+.panelTitle p,
+.confirmCard h3,
+.confirmCard p,
+.sideSummary p,
+.sideSummary dl,
+.successCard h2 {
+  margin: 0;
 }
 
-.slotGroup {
+.stageHeader h2,
+.successCard h2 {
+  font-size: var(--font-h2);
+  line-height: 1.15;
+}
+
+.stageHeader p,
+.serviceRow p,
+.panelTitle p,
+.confirmCard p,
+.emptyNote,
+.sideSummary p,
+.sideSummary dt {
+  color: var(--color-muted);
+}
+
+.serviceList,
+.choiceGroup,
+.selectionPanel,
+.confirmGrid,
+.successCard {
+  display: grid;
+  gap: 14px;
+}
+
+.serviceRow,
+.confirmCard,
+.totalCard {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card-small);
+  background: var(--gradient-surface);
+  padding: 18px;
+}
+
+.serviceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.serviceRow h3,
+.confirmCard h3 {
+  color: var(--color-text);
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.placeGrid {
+  display: grid;
+  gap: 24px;
+}
+
+.groupLabel,
+.panelTitle span,
+.kicker,
+.confirmCard span,
+.sideSummary span,
+.sideSummary dt,
+.totalCard span,
+.summaryGrid span {
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.studioGrid,
+.dateGrid {
   display: grid;
   gap: 10px;
 }
 
-.masterPanel {
+.studioGrid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.dateGrid {
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+}
+
+.choiceCard,
+.dateButton,
+.serviceTabs button,
+.slotButton,
+.masterButton {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card-small);
+  background: #ffffff;
+  color: var(--color-text);
+  text-align: left;
+  transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.choiceCard:hover,
+.dateButton:hover,
+.serviceTabs button:hover,
+.slotButton:hover,
+.masterButton:hover {
+  border-color: var(--color-line-strong);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+
+.choiceCard[aria-pressed="true"],
+.dateButton[aria-pressed="true"],
+.serviceTabs button[aria-pressed="true"],
+.slotButton[aria-pressed="true"],
+.masterButton[aria-pressed="true"] {
+  border-color: var(--color-primary);
+  background: var(--color-soft);
+  color: var(--color-primary-hover);
+  box-shadow: var(--shadow-card);
+}
+
+.choiceCard {
   display: grid;
+  gap: 7px;
+  min-height: 88px;
+  padding: 16px;
+}
+
+.choiceCard span,
+.masterButton span,
+.serviceTabs span {
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
+.dateButton {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  min-height: 74px;
+  padding: 12px;
+}
+
+.dateButton span {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.dateButton strong {
+  font-size: 16px;
+}
+
+.pickerLayout {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
   gap: 18px;
-  margin-top: 24px;
+}
+
+.serviceTabs {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.serviceTabs button {
+  display: grid;
+  gap: 6px;
+  min-height: 82px;
+  padding: 14px;
+}
+
+.serviceTabs button[data-complete="true"] span {
+  color: var(--color-primary-hover);
+}
+
+.selectionPanel {
+  min-width: 0;
+}
+
+.panelTitle {
+  display: grid;
+  gap: 4px;
+}
+
+.slotGrid,
+.masterGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.slotGrid {
+  grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+}
+
+.slotButton {
+  display: grid;
+  min-height: 44px;
+  place-items: center;
+  padding: 0 12px;
+  text-align: center;
 }
 
 .masterGrid {
-  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
 }
 
 .masterButton {
   display: grid;
   gap: 8px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card-small);
-  background: #ffffff;
-  padding: 18px;
-  text-align: left;
-  font-weight: 800;
+  min-height: 96px;
+  padding: 16px;
 }
 
-.masterButton span {
-  color: var(--color-muted);
+.confirmGrid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-.masterButtonSelected {
-  border-color: var(--color-primary);
-  background: var(--color-soft);
-}
-
-.slotGrid {
+.confirmCard {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
-.slotButton {
-  min-height: 40px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-control);
-  background: #ffffff;
-  font-weight: 800;
+.confirmCard strong {
+  margin-top: 6px;
+  color: var(--color-text);
+  font-size: 18px;
 }
 
-.slotSelected {
-  border-color: var(--color-primary);
-  background: var(--color-soft);
-  color: var(--color-primary-hover);
-}
-
-.creditToggle {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-.subscriptionHint,
-.summary,
-.empty {
-  padding: 20px 22px;
-}
-
-.subscriptionHint {
+.totalCard,
+.summaryGrid {
   display: grid;
-  gap: 6px;
-  margin-bottom: 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
-.summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 14px;
+.totalCard {
+  grid-column: 1 / -1;
 }
 
-.summary div {
+.totalCard div,
+.summaryGrid div {
   display: grid;
   gap: 6px;
 }
 
-.summary strong {
+.totalCard strong,
+.summaryGrid strong {
+  color: var(--color-text);
   font-size: 20px;
+  line-height: 1.2;
 }
 
-.footerActions {
+.stageActions,
+.actions {
   display: flex;
-  justify-content: space-between;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.errorBox,
-.state {
+.stageActions {
+  justify-content: space-between;
+  border-top: 1px solid var(--color-line);
+  padding-top: 20px;
+}
+
+.sideSummary {
+  position: sticky;
+  top: 92px;
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+}
+
+.sideSummary > strong {
+  color: var(--color-text);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.sideSummary dl {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid var(--color-line);
+  padding-top: 14px;
+}
+
+.sideSummary div {
+  display: grid;
+  gap: 4px;
+}
+
+.sideSummary dd {
+  margin: 0;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.successCard {
+  max-width: 760px;
+  padding: 28px;
+}
+
+.state,
+.emptyNote,
+.error {
   margin: 0;
 }
 
-.errorBox {
+.state {
+  color: var(--color-muted);
+}
+
+.emptyNote,
+.error {
   border-radius: var(--radius-card-small);
+  padding: 12px 14px;
+}
+
+.emptyNote {
+  background: var(--color-soft);
+}
+
+.error {
   background: var(--color-danger-bg);
   color: var(--color-danger);
-  padding: 12px 14px;
   font-weight: 800;
 }
 
-@media (max-width: 900px) {
-  .stepper,
-  .summary,
-  .studioGrid,
-  .controls {
+@media (max-width: 1080px) {
+  .layout {
     grid-template-columns: 1fr;
+  }
+
+  .stepper,
+  .sideSummary {
+    position: static;
+  }
+
+  .stepper {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .stepButton {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
   }
 }
 
-@media (max-width: 640px) {
-  .cardHeader,
-  .cardTop,
-  .footerActions {
+@media (max-width: 760px) {
+  .stage,
+  .successCard {
+    padding: 22px;
+  }
+
+  .stepper,
+  .pickerLayout,
+  .summaryGrid,
+  .totalCard {
+    grid-template-columns: 1fr;
+  }
+
+  .serviceRow,
+  .stageActions {
+    align-items: stretch;
     flex-direction: column;
   }
 
-  .footerActions > *:not(span) {
+  .stageActions > *,
+  .actions > * {
     width: 100%;
-  }
-
-  .cardSide {
-    justify-items: start;
-  }
-
-  .cardTopRight {
-    justify-items: start;
   }
 }

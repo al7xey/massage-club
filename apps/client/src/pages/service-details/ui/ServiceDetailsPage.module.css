@@ -1,284 +1,342 @@
-.top,
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(380px, 460px);
+  gap: 32px;
+  align-items: start;
+}
+
+.visual,
+.bookingCard,
 .description {
-  display: grid;
-  grid-template-columns: 1fr minmax(420px, 500px);
-  gap: 40px;
-}
-
-.gallery {
-  display: grid;
-  gap: 20px;
-}
-
-.heroImage {
-  position: relative;
-  min-height: 460px;
-  overflow: hidden;
-  border-radius: var(--radius-card);
-  background: var(--color-soft-strong);
   border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: #ffffff;
   box-shadow: var(--shadow-card);
 }
 
-.heroImage::before,
-.heroImage::after {
+.visual {
+  position: relative;
+  min-height: 520px;
+  overflow: hidden;
+  background: var(--color-soft);
+}
+
+.servicePhoto {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 75% 24%, rgba(255, 255, 255, 0.7), transparent 28%),
+    linear-gradient(135deg, #f7f4ec 0%, #eef3e9 100%);
+  background-position: center;
+  background-size: cover;
+}
+
+.servicePhoto[data-tone="1"] {
+  background:
+    radial-gradient(circle at 28% 28%, rgba(255, 255, 255, 0.74), transparent 30%),
+    linear-gradient(135deg, #edf3e9 0%, #f8efe4 100%);
+}
+
+.servicePhoto[data-tone="2"] {
+  background:
+    radial-gradient(circle at 70% 72%, rgba(255, 255, 255, 0.7), transparent 32%),
+    linear-gradient(135deg, #f6f1e8 0%, #e9f0e2 100%);
+}
+
+.servicePhoto::before,
+.servicePhoto::after {
   position: absolute;
   content: "";
+  pointer-events: none;
 }
 
-.heroImage::before {
-  right: 9%;
+.servicePhoto::before {
+  right: 10%;
   bottom: 0;
-  width: 42%;
-  height: 70%;
-  border-radius: 192px 192px 0 0;
-  background: #ffffff;
+  width: min(340px, 42%);
+  height: 78%;
+  border-radius: 220px 220px 0 0;
+  background: rgba(255, 255, 255, 0.66);
 }
 
-.heroImage::after {
-  right: 8%;
-  bottom: 15%;
-  width: 62%;
+.servicePhoto::after {
+  right: 4%;
+  bottom: 17%;
+  width: min(430px, 58%);
   height: 22%;
   border-radius: var(--radius-round);
-  background: rgba(255, 255, 255, 0.7);
-  transform: rotate(-5deg);
+  background: rgba(255, 255, 255, 0.58);
+  transform: rotate(-6deg);
 }
 
-.heroImage span,
-.heroImage button {
+.photoBadges {
   position: absolute;
+  top: 28px;
+  right: 28px;
   z-index: 1;
-  top: 14px;
-  border-radius: var(--radius-control);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
-.heroImage span {
-  left: 14px;
+.photoBadges span {
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--color-primary);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 900;
+  backdrop-filter: blur(10px);
+}
+
+.galleryControls {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--radius-control);
+  background: rgba(255, 255, 255, 0.82);
+  padding: 6px;
+  backdrop-filter: blur(10px);
+}
+
+.galleryControls button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-round);
   background: var(--color-primary);
   color: var(--color-on-primary);
-  padding: 7px 12px;
-  font-weight: 800;
-}
-
-.heroImage button {
-  right: 14px;
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--color-line);
-  background: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
   cursor: pointer;
 }
 
-.thumbs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+.galleryControls span {
+  min-width: 42px;
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
 }
 
-.thumbButton {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 100%;
-  min-height: 110px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-card-small);
-  background: var(--color-soft);
-  color: var(--color-primary);
-  font-size: 13px;
-  font-weight: 800;
-  transition: border-color 0.18s ease, transform 0.18s ease;
+.galleryDots {
+  position: absolute;
+  left: 24px;
+  bottom: 32px;
+  z-index: 1;
+  display: flex;
+  gap: 7px;
 }
 
-.thumbButton:hover {
-  transform: translateY(-1px);
+.galleryDots button {
+  width: 9px;
+  height: 9px;
+  border: 0;
+  border-radius: var(--radius-round);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 0;
+  cursor: pointer;
 }
 
-.thumbButton[data-active="true"] {
-  border-color: var(--color-primary);
+.galleryDots button[aria-pressed="true"] {
+  width: 24px;
+  background: var(--color-primary);
 }
 
-.sideCard,
-.infoPanel,
-.giftBanner {
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-  background: #ffffff;
-  box-shadow: var(--shadow-card);
-  padding: 22px;
+.bookingCard {
+  position: sticky;
+  top: 96px;
+  padding: 24px;
 }
 
-.sideCard h2 {
+.bookingCard h2,
+.description h2,
+.description h3,
+.description p {
   margin: 0;
+}
+
+.bookingCard h2,
+.description h2 {
   font-size: var(--font-h2);
   font-weight: 900;
   line-height: 1.12;
 }
 
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 12px 0 0;
-  color: var(--color-muted);
-}
-
-.prices {
-  margin-top: 18px;
+.priceList {
+  display: grid;
+  gap: 0;
+  margin-top: 22px;
   overflow: hidden;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card-small);
 }
 
-.prices > div {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+.priceRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  min-height: 78px;
+  padding: 16px 18px;
   border-bottom: 1px solid var(--color-line);
   background: #ffffff;
-  padding: 17px;
 }
 
-.prices > div[data-tone="club"] {
-  background: #f8faf5;
-}
-
-.prices > div[data-tone="super"] {
-  background: var(--color-surface-soft);
-}
-
-.prices > div:last-child {
+.priceRow:last-child {
   border-bottom: 0;
 }
 
-.prices span,
-.prices small {
+.priceRow[data-featured="true"] {
+  background: linear-gradient(135deg, #f7faf1 0%, #ffffff 68%);
+}
+
+.priceCopy {
+  min-width: 0;
+}
+
+.priceCopy span,
+.priceCopy small {
   display: block;
 }
 
-.prices span {
+.priceCopy span {
   color: var(--color-text);
-  font-weight: 800;
-}
-
-.prices em {
-  border-radius: var(--radius-control);
-  background: var(--color-soft);
-  color: var(--color-primary-hover);
-  padding: 2px 8px;
-  font-style: normal;
-  font-size: 11px;
-}
-
-.prices small {
-  margin-top: 3px;
-  color: var(--color-subtle);
-}
-
-.prices strong {
-  white-space: nowrap;
-  font-size: 24px;
   font-weight: 900;
 }
 
-.prices > div[data-tone="club"] strong,
-.prices > div[data-tone="club"] span {
+.priceCopy em {
+  display: inline-flex;
+  margin-left: 8px;
+  border-radius: var(--radius-control);
+  background: var(--color-soft);
+  color: var(--color-primary);
+  padding: 3px 8px;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  vertical-align: middle;
+}
+
+.priceCopy small {
+  margin-top: 4px;
+  color: var(--color-subtle);
+  line-height: 1.35;
+}
+
+.priceValue {
+  color: var(--color-text);
+  white-space: nowrap;
+  font-size: clamp(20px, 2.1vw, 26px);
+  font-weight: 900;
+}
+
+.priceRow[data-featured="true"] .priceValue,
+.priceRow[data-featured="true"] .priceCopy span {
   color: var(--color-primary);
 }
 
-.prices > div[data-tone="super"] strong,
-.prices > div[data-tone="super"] span {
-  color: var(--color-primary-hover);
-}
-
-.prices > div[data-tone="super"] strong {
-  font-size: 28px;
-}
-
-.sideCard > button {
-  margin-top: 12px;
+.actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
 }
 
 .note {
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   color: var(--color-subtle);
+  font-size: 13px;
+  line-height: 1.45;
   text-align: center;
 }
 
 .description {
-  margin-top: 44px;
+  margin-top: 32px;
+  padding: 28px;
 }
 
-.description h2,
-.infoPanel h3,
-.giftBanner h2,
 .description p {
-  margin: 0;
+  margin-top: 12px;
+  max-width: 860px;
+  color: var(--color-muted);
+  line-height: 1.68;
 }
 
-.description h2,
-.giftBanner h2 {
-  font-size: var(--font-h2);
+.description h3 {
+  margin-top: 26px;
+  color: var(--color-text);
+  font-size: 20px;
   font-weight: 900;
 }
 
-.description p {
-  margin-top: 10px;
-  color: var(--color-muted);
-  line-height: 1.62;
-}
-
-.benefits {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 16px;
-  margin: 20px 0 0;
+.composition {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0 0;
   padding: 0;
   list-style: none;
 }
 
-.benefits li {
+.composition li {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-soft);
   color: var(--color-text);
+  padding: 9px 12px;
+  font-weight: 700;
 }
 
-.infoPanel ol {
-  margin: 12px 0 0;
-  padding-left: 22px;
-  color: var(--color-muted);
-  line-height: 1.7;
-}
-
-.giftBanner {
-  margin-top: 56px;
-  background: var(--color-soft);
-  text-align: center;
-}
-
-.giftBanner p {
-  margin: 10px 0 16px;
-  color: var(--color-muted);
-}
-
-@media (max-width: 920px) {
-  .top,
-  .description {
+@media (max-width: 980px) {
+  .top {
     grid-template-columns: 1fr;
   }
+
+  .bookingCard {
+    position: static;
+  }
 }
 
-@media (max-width: 760px) {
-  .heroImage {
-    min-height: 320px;
+@media (max-width: 640px) {
+  .visual {
+    min-height: 380px;
   }
 
-  .thumbs {
-    grid-template-columns: repeat(2, 1fr);
+  .photoBadges {
+    top: 18px;
+    right: 18px;
   }
 
-  .prices > div {
-    display: grid;
+  .bookingCard,
+  .description {
+    padding: 18px;
+  }
+
+  .priceRow {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    min-height: 0;
+  }
+
+  .galleryControls button,
+  .galleryDots button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .galleryDots {
+    bottom: 22px;
+    gap: 4px;
+  }
+
+  .galleryDots button[aria-pressed="true"] {
+    width: 44px;
   }
 }

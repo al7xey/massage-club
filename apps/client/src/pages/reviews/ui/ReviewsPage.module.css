@@ -7,8 +7,9 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(var(--catalog-card-min-width), 1fr));
+  align-items: stretch;
+  gap: var(--catalog-card-gap-row) var(--catalog-card-gap-column);
 }
 
 .formCard {
@@ -51,6 +52,7 @@
   background: transparent;
   color: var(--color-line-strong);
   font-size: 26px;
+  font-weight: var(--button-font-weight);
   line-height: 1;
   padding: 0 2px;
 }
@@ -73,9 +75,12 @@
 }
 
 @media (max-width: 980px) {
-  .layout,
-  .grid {
+  .layout {
     grid-template-columns: 1fr;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .formCard {

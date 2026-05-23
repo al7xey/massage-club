@@ -75,3 +75,14 @@
   border-color: rgba(181, 75, 75, 0.42);
   background: var(--color-danger-bg);
 }
+
+@media (max-width: 760px) {
+  .control {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .textarea {
+    min-height: 132px;
+  }
+}

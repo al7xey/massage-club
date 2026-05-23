@@ -17,7 +17,7 @@
   padding: 0 22px;
   cursor: pointer;
   color: var(--color-muted);
-  font-weight: 700;
+  font-weight: var(--button-font-weight);
 }
 
 .segmentActive {

@@ -7,7 +7,10 @@
     "dev": "nest start --watch",
     "start": "node dist/main.js",
     "start:dev": "nest start --watch",
-    "seed": "npm run build --workspace @massage/shared && ts-node -r tsconfig-paths/register src/database/seed.ts"
+    "seed": "npm run build --workspace @massage/shared && ts-node -r tsconfig-paths/register src/database/seed.ts",
+    "migration:generate": "typeorm-ts-node-commonjs -d src/database/data-source.ts migration:generate src/database/migrations/AutoMigration",
+    "migration:run": "typeorm-ts-node-commonjs -d src/database/data-source.ts migration:run",
+    "migration:revert": "typeorm-ts-node-commonjs -d src/database/data-source.ts migration:revert"
   },
   "dependencies": {
     "@massage/shared": "file:../../packages/shared",

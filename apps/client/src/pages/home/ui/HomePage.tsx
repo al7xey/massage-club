@@ -1,7 +1,8 @@
-import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { mockReviews } from '@/entities/review';
-import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
+import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
+import { getSiteContentText, useGetPublicSiteContentQuery } from '@/entities/site-content';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
+import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { appRoutes } from '@/shared/routes';
 import { LinkButton } from '@/shared/ui';
 import { PlansCarousel } from '@/widgets/plans-carousel';
@@ -14,6 +15,7 @@ export function HomePage() {
   const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
   const { data: studios = [] } = useGetStudiosQuery();
+  const { data: siteContent = [] } = useGetPublicSiteContentQuery();
 
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
@@ -21,26 +23,25 @@ export function HomePage() {
   const builtTariffs = buildTariffs(plans);
   const preferredTariffs = builtTariffs.filter((plan) => homeTariffCodes.has(plan.code));
   const tariffs = (preferredTariffs.length > 0 ? preferredTariffs : builtTariffs).slice(0, 4);
+  const heroTitle = getSiteContentText(siteContent, 'home.hero.title', 'Время для себя каждый месяц');
+  const heroSubtitle = getSiteContentText(
+    siteContent,
+    'home.hero.subtitle',
+    'Позаботьтесь о своем теле и ментальном здоровье в атмосфере абсолютного спокойствия. Массаж, SPA и уход по единой подписке.',
+  );
+  const heroPrimaryButton = getSiteContentText(siteContent, 'home.hero.primaryButton', 'Выбрать тариф');
+  const heroSecondaryButton = getSiteContentText(siteContent, 'home.hero.secondaryButton', 'Записаться на услугу');
 
   return (
     <main className={styles.page}>
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <h1>
-            Время для себя
-            <br />
-            <span>каждый месяц</span>
-          </h1>
-          <p>
-            Позаботьтесь о своем теле и ментальном здоровье в атмосфере абсолютного спокойствия.
-            Массаж, SPA и уход по единой подписке.
-          </p>
+          <h1>{heroTitle}</h1>
+          <p>{heroSubtitle}</p>
           <div className={styles.heroActions}>
-            <LinkButton to={appRoutes.subscriptions()}>
-              Выбрать тариф
-            </LinkButton>
+            <LinkButton to={appRoutes.subscriptions()}>{heroPrimaryButton}</LinkButton>
             <LinkButton to={appRoutes.services()} variant="secondary">
-              Записаться на услугу
+              {heroSecondaryButton}
             </LinkButton>
           </div>
         </div>
@@ -57,7 +58,7 @@ export function HomePage() {
         items={tariffs}
         dotIdPrefix="home-plans-page"
         topAction={
-          <LinkButton to={appRoutes.subscriptions()} variant="secondary">
+          <LinkButton size="sm" to={appRoutes.subscriptions()} variant="secondary">
             Смотреть все
           </LinkButton>
         }
@@ -67,14 +68,12 @@ export function HomePage() {
         <div>
           <h2>Подарите время для себя своим близким</h2>
           <p>Электронные и бумажные сертификаты на любую сумму или конкретную услугу.</p>
-          <LinkButton to={appRoutes.certificates()}>
-            Оформить сертификат
-          </LinkButton>
+          <LinkButton to={appRoutes.certificates()}>Оформить сертификат</LinkButton>
         </div>
       </section>
 
       <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={popularServices} />
-      <StudioShowcase title="Наши студии" actionLabel="Посмотреть на карте" studios={popularStudios} />
+      <StudioShowcase title="Наши студии" actionLabel="Подробнее" studios={popularStudios} />
       <ReviewsShowcase
         title="Отзывы наших гостей"
         subtitle="Честные мнения тех, кто уже попробовал"

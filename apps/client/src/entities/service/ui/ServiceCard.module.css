@@ -1,5 +1,6 @@
 .card {
   display: flex;
+  height: 100%;
   flex-direction: column;
   min-height: 338px;
   overflow: hidden;
@@ -21,6 +22,7 @@
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-height: 0;
   height: 100%;
   width: 100%;
 }
@@ -129,10 +131,66 @@
 
 @media (max-width: 760px) {
   .card {
-    min-height: 322px;
+    min-height: 244px;
+    border-radius: var(--radius-card);
+  }
+
+  .media {
+    aspect-ratio: 1 / 1;
+  }
+
+  .timeBadge {
+    top: 8px;
+    left: 8px;
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .body {
+    gap: 5px;
+    padding: var(--mobile-tile-padding);
+  }
+
+  .category {
+    font-size: 10px;
+  }
+
+  .card h3 {
+    min-height: 32px;
+    font-size: 14px;
+  }
+
+  .actionWrap {
+    padding: 0 var(--mobile-tile-padding) var(--mobile-tile-padding);
+  }
+
+  .actionButtons {
+    grid-template-columns: var(--mobile-icon-action-size) minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .actionButtons > * {
+    min-height: var(--mobile-listing-control-height);
+    border-radius: 12px;
+    padding-inline: 10px;
+    font-size: var(--mobile-listing-button-font);
+  }
+
+  .actionButtons > :first-child {
+    width: var(--mobile-icon-action-size);
+    min-width: var(--mobile-icon-action-size);
+    padding: 0;
+    font-size: 0;
+  }
+
+  .actionButtons > :first-child::before {
+    content: "+";
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
   }
 
   .priceRow strong {
-    font-size: 21px;
+    font-size: 18px;
   }
 }

@@ -6,9 +6,16 @@ export interface MasterDto {
   firstName: string;
   lastName: string;
   bio?: string;
+  phone?: string | null;
+  specialization?: string | null;
+  experienceYears?: number;
+  photoUrl?: string | null;
   studio?: StudioDto;
+  studios?: StudioDto[];
   services: ServiceDto[];
   isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface MasterCardModel {

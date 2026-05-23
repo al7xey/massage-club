@@ -49,15 +49,12 @@ export function CartPage() {
       ),
     [activeSubscription?.plan.discountPercent, cartItems, remainingCredits],
   );
-  const previewByItemId = useMemo(
-    () => new Map(pricingPreview.items.map((item) => [item.id, item])),
-    [pricingPreview.items],
-  );
+  const previewByItemId = useMemo(() => new Map(pricingPreview.items.map((item) => [item.id, item])), [pricingPreview.items]);
   const baseAmountRub = cartItems.reduce((sum, item) => sum + item.service.priceRub, 0);
   const savedAmountRub = baseAmountRub - pricingPreview.totalAmountRub;
 
   return (
-    <PageShell title="Корзина услуг" description="Соберите несколько услуг, а мы автоматически применим визиты по подписке и скидки перед checkout.">
+    <PageShell title="Корзина услуг">
       <section className={styles.layout}>
         <div className={styles.list}>
           {isLoading || isAdding ? <p className={styles.state}>Загружаем корзину...</p> : null}
@@ -74,11 +71,15 @@ export function CartPage() {
 
             return (
               <article className={styles.card} key={item.id}>
-                <img className={styles.image} src={getServiceImageUrl(item.service.category?.slug)} alt="" loading="lazy" />
+                <div className={styles.imageWrap}>
+                  <img className={styles.image} src={getServiceImageUrl(item.service.category?.slug)} alt="" loading="lazy" />
+                </div>
+
                 <div className={styles.cardBody}>
                   <span className={styles.meta}>{item.service.durationMinutes} минут</span>
                   <h3>{item.service.title}</h3>
                   <p>{item.service.description}</p>
+
                   {preview ? (
                     <div className={styles.discountLine}>
                       {preview.paidBySubscriptionCredit ? (
@@ -93,6 +94,7 @@ export function CartPage() {
                     </div>
                   ) : null}
                 </div>
+
                 <div className={styles.cardSide}>
                   <strong>{preview?.paidBySubscriptionCredit ? 'Включено в подписку' : formatPrice(preview?.finalPriceRub ?? item.service.priceRub)}</strong>
                   <Button size="sm" variant="danger" disabled={isRemoving} onClick={() => void removeCartItem(item.id)}>
@@ -117,9 +119,7 @@ export function CartPage() {
             ) : (
               <p>На следующем шаге вы выберете студию, дату, время и мастеров для каждой услуги отдельно.</p>
             )}
-            <LinkButton to={appRoutes.booking()}>
-              Перейти к оформлению
-            </LinkButton>
+            <LinkButton to={appRoutes.booking()}>Перейти к оформлению</LinkButton>
           </aside>
         ) : null}
       </section>

@@ -1,5 +1,6 @@
+import { Link } from 'react-router-dom';
 import { appRoutes } from '@/shared/routes';
-import { Button, LinkButton } from '@/shared/ui';
+import { LinkButton } from '@/shared/ui';
 import type { MasterCardModel } from '../model/types';
 import styles from './MasterCard.module.css';
 
@@ -10,18 +11,21 @@ interface MasterCardProps {
 export function MasterCard({ master }: MasterCardProps) {
   return (
     <article className={styles.card}>
-      <LinkButton className={styles.cardLink} to={appRoutes.masterDetails(master.id)} variant="ghost">
+      <Link className={styles.cardLink} to={appRoutes.masterDetails(master.id)}>
         <div className={styles.media} aria-label={master.fullName} role="img" />
         <div className={styles.meta}>
+          <span className={styles.role}>{master.roleLabel}</span>
           <h3>{master.fullName}</h3>
+          <p>{master.experienceLabel}</p>
           <p>
             <span className={styles.stars}>★★★★★</span> <strong>{master.rating}</strong> ({master.reviewsCount} отзывов)
           </p>
         </div>
-      </LinkButton>
+      </Link>
       <div className={styles.actions}>
-        <LinkButton size="sm" variant="secondary" to={appRoutes.masterDetails(master.id)}>
-          Подробнее
+        <LinkButton className={styles.detailsAction} size="sm" variant="secondary" to={appRoutes.masterDetails(master.id)} aria-label={`Подробнее о мастере ${master.fullName}`}>
+          <span className={styles.detailsText}>Подробнее</span>
+          <span className={styles.detailsArrow} aria-hidden="true">→</span>
         </LinkButton>
         <LinkButton size="sm" to={appRoutes.booking()}>
           Записаться

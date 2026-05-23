@@ -15,7 +15,7 @@ export function StudioShowcase({ title, studios, actionLabel }: StudioShowcasePr
       <SectionHeader title={title} actionLabel={actionLabel} actionHref={actionLabel ? appRoutes.studios() : undefined} />
       <div className={styles.list}>
         {studios.map((studio) => (
-          <StudioCard key={studio.id} studio={studio} />
+          <StudioCard key={studio.id} studio={studio} variant="compact" />
         ))}
       </div>
     </section>

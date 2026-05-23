@@ -5,6 +5,8 @@ export interface StudioDto {
   city: string;
   phone?: string;
   photoUrl?: string;
+  photoUrls?: string[];
+  isActive?: boolean;
   coordinates?: {
     lat: number;
     lon: number;
@@ -19,6 +21,7 @@ export interface StudioCardModel {
   openLabel: string;
   cityChip: string;
   photoUrl?: string;
+  photoUrls: string[];
   coordinates: {
     lat: number;
     lon: number;

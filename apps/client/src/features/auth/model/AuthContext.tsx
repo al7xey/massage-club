@@ -26,7 +26,7 @@ interface AuthContextValue {
   userDisplayName: string;
   isAuthenticated: boolean;
   isAuthLoading: boolean;
-  login: (identifier: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<PublicUserDto>;
   register: (data: RegisterPayload) => Promise<void>;
   updateProfile: (data: UpdateProfilePayload) => Promise<void>;
   logout: () => Promise<void>;
@@ -117,6 +117,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       refreshToken: authResponse.refreshToken,
     });
     setUser(authResponse.user);
+    return authResponse.user;
   }, []);
 
   const register = useCallback(async (data: RegisterPayload) => {
@@ -133,15 +134,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, []);
 
   const updateProfile = useCallback(async (data: UpdateProfilePayload) => {
-    const accessToken = tokenStorage.getAccessToken();
-
-    if (!accessToken) {
-      throw new Error('Пользователь не авторизован');
-    }
-
-    const nextUser = await apiRequest<PublicUserDto>('/users/me', {
+    const nextUser = await authenticatedApiRequest<PublicUserDto>('/users/me', {
       method: 'PATCH',
-      accessToken,
       body: JSON.stringify(data),
     });
 
@@ -167,15 +161,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
   }, []);
 
   const refreshUser = useCallback(async () => {
-    const accessToken = tokenStorage.getAccessToken();
-
-    if (!accessToken) {
-      setUser(null);
-      return;
+    try {
+      const currentUser = await authenticatedApiRequest<PublicUserDto>('/users/me');
+      setUser(currentUser);
+    } catch (error) {
+      const status = typeof error === 'object' && error !== null && 'status' in error ? Number(error.status) : null;
+      if (status === 401) {
+        setUser(null);
+      }
+      throw error;
     }
-
-    const currentUser = await apiRequest<PublicUserDto>('/users/me', { accessToken });
-    setUser(currentUser);
   }, []);
 
   const value = useMemo<AuthContextValue>(
@@ -238,6 +233,46 @@ async function apiRequest<T = void>(path: string, init: ApiRequestInit = {}) {
   return (await readJsonBody(response)) as T;
 }
 
+async function authenticatedApiRequest<T = void>(path: string, init: RequestInit = {}) {
+  const tokens = tokenStorage.getTokens();
+
+  if (!tokens) {
+    throw createApiError('Пользователь не авторизован', 401);
+  }
+
+  try {
+    return await apiRequest<T>(path, { ...init, accessToken: tokens.accessToken });
+  } catch (error) {
+    const status = typeof error === 'object' && error !== null && 'status' in error ? Number(error.status) : null;
+
+    if (status !== 401) {
+      throw error;
+    }
+
+    const refreshed = await refreshTokens(tokens.refreshToken);
+    return apiRequest<T>(path, { ...init, accessToken: refreshed.accessToken });
+  }
+}
+
+async function refreshTokens(refreshToken: string) {
+  try {
+    const authResponse = await apiRequest<AuthResponseDto>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    tokenStorage.setTokens({
+      accessToken: authResponse.accessToken,
+      refreshToken: authResponse.refreshToken,
+    });
+
+    return authResponse;
+  } catch (error) {
+    tokenStorage.removeTokens();
+    throw error;
+  }
+}
+
 async function readJsonBody(response: Response) {
   const text = await response.text();
 
@@ -268,4 +303,10 @@ function extractMessage(payload: unknown) {
   }
 
   return typeof maybeMessage.message === 'string' ? maybeMessage.message : null;
+}
+
+function createApiError(message: string, status: number) {
+  const error = new Error(message) as Error & { status?: number };
+  error.status = status;
+  return error;
 }
