@@ -1,7 +1,7 @@
 import { mockReviews } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
-import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
+import { buildTariffs, type TariffItem, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { appRoutes } from '@/shared/routes';
 import { LinkButton } from '@/shared/ui';
 import { PlansCarousel } from '@/widgets/plans-carousel';
@@ -18,23 +18,20 @@ export function HomePage() {
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
   const tariffs = buildTariffs(plans);
-  const womenTariffs = tariffs.filter((tariff) => tariff.segment === 'women');
-  const menTariffs = tariffs.filter((tariff) => tariff.segment === 'men');
-  const heroTitle = 'Время для себя каждый месяц';
-  const heroSubtitle = 'Позаботьтесь о своем теле и ментальном здоровье в атмосфере абсолютного спокойствия. Массаж, SPA и уход по единой подписке.';
-  const heroPrimaryButton = 'Выбрать тариф';
-  const heroSecondaryButton = 'Посмотреть мастеров';
+  const homeTariffs = pickTariffs(tariffs, ['LADY', 'LADY_SUPER', 'FAMILY', 'FAMILY_SUPER']).map((tariff) =>
+    tariff.code === 'LADY_SUPER' ? renameTariff(tariff, 'Супер') : renameFamilyAsRussian(tariff),
+  );
 
   return (
     <main className={styles.page}>
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <h1>{heroTitle}</h1>
-          <p>{heroSubtitle}</p>
+          <h1>Время для себя каждый месяц</h1>
+          <p>Позаботьтесь о своем теле и ментальном здоровье в атмосфере спокойствия. Массаж, SPA и уход по единой подписке.</p>
           <div className={styles.heroActions}>
-            <LinkButton to={appRoutes.subscriptions()}>{heroPrimaryButton}</LinkButton>
+            <LinkButton to={appRoutes.subscriptions()}>Выбрать тариф</LinkButton>
             <LinkButton to={appRoutes.masters()} variant="secondary">
-              {heroSecondaryButton}
+              Посмотреть мастеров
             </LinkButton>
           </div>
         </div>
@@ -46,27 +43,14 @@ export function HomePage() {
         </div>
       </section>
 
-      {womenTariffs.length > 0 ? (
+      {homeTariffs.length > 0 ? (
         <PlansCarousel
-          title="Тарифы для женщин"
-          items={womenTariffs}
-          dotIdPrefix="home-plans-women"
+          title="Тарифы клуба"
+          items={homeTariffs}
+          dotIdPrefix="home-plans"
           topAction={
             <LinkButton size="sm" to={appRoutes.subscriptions()} variant="secondary">
-              Все тарифы
-            </LinkButton>
-          }
-        />
-      ) : null}
-
-      {menTariffs.length > 0 ? (
-        <PlansCarousel
-          title="Тарифы для мужчин"
-          items={menTariffs}
-          dotIdPrefix="home-plans-men"
-          topAction={
-            <LinkButton size="sm" to={appRoutes.subscriptions()} variant="secondary">
-              Все тарифы
+              Подробнее
             </LinkButton>
           }
         />
@@ -97,4 +81,19 @@ export function HomePage() {
       </section>
     </main>
   );
+}
+
+function pickTariffs(tariffs: TariffItem[], codes: string[]) {
+  const byCode = new Map(tariffs.map((tariff) => [tariff.code, tariff]));
+  return codes.map((code) => byCode.get(code)).filter((tariff): tariff is TariffItem => Boolean(tariff));
+}
+
+function renameTariff(tariff: TariffItem, title: string): TariffItem {
+  return { ...tariff, title, planMeta: { ...tariff.planMeta, title } };
+}
+
+function renameFamilyAsRussian(tariff: TariffItem): TariffItem {
+  if (tariff.code === 'FAMILY') return renameTariff(tariff, 'Семейный');
+  if (tariff.code === 'FAMILY_SUPER') return renameTariff(tariff, 'Семейный Супер');
+  return tariff;
 }

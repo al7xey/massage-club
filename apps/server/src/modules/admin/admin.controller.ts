@@ -164,7 +164,7 @@ export class AdminController {
   async getMaster(@Param('id') id: string, @CurrentUser() user: JwtUserPayload) {
     const master = await this.adminService.getMaster(id);
     if (user.role !== UserRole.SUPER_ADMIN) {
-      const allowed = await this.adminService.getMasters({ studioId: master.studio?.id }, user);
+      const allowed = await this.adminService.getMasters({}, user);
       if (!allowed.some((item) => item.id === master.id)) {
         return null;
       }
@@ -204,8 +204,8 @@ export class AdminController {
 
   @Get('masters/:id/weekly-schedule')
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  getWeeklySchedule(@Param('id') id: string) {
-    return this.adminService.getWeeklySchedule(id);
+  getWeeklySchedule(@Param('id') id: string, @CurrentUser() user: JwtUserPayload) {
+    return this.adminService.getWeeklySchedule(id, user);
   }
 
   @Put('masters/:id/weekly-schedule')

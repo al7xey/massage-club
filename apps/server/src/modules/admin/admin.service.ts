@@ -373,8 +373,9 @@ export class AdminService {
     return { deleted: true, id };
   }
 
-  async getWeeklySchedule(masterId: string) {
-    await this.findMaster(masterId);
+  async getWeeklySchedule(masterId: string, actor?: JwtUserPayload) {
+    const master = await this.findMaster(masterId);
+    await this.ensureActorCanAccessMaster(master, actor);
     const rows = await this.weeklySchedulesRepository.find({
       where: { master: { id: masterId } },
       order: { dayOfWeek: 'ASC', intervalIndex: 'ASC' },
@@ -384,7 +385,8 @@ export class AdminService {
 
   async updateWeeklySchedule(masterId: string, dto: PutWeeklyScheduleDto, actor?: JwtUserPayload) {
     const master = await this.findMaster(masterId);
-    const before = await this.getWeeklySchedule(masterId);
+    await this.ensureActorCanAccessMaster(master, actor);
+    const before = await this.getWeeklySchedule(masterId, actor);
     const rows: MasterWeeklySchedule[] = [];
 
     for (const day of dto.days) {
@@ -395,6 +397,7 @@ export class AdminService {
         if (!getMasterStudioIds(master).includes(studio.id)) {
           throw new BadRequestException('Master is not assigned to selected studio');
         }
+        await this.ensureActorCanAccessStudios([studio.id], actor);
         rows.push(
           this.weeklySchedulesRepository.create({
             master,
@@ -417,7 +420,7 @@ export class AdminService {
       .where('master_id = :masterId', { masterId })
       .execute();
     await this.weeklySchedulesRepository.save(rows);
-    const next = await this.getWeeklySchedule(masterId);
+    const next = await this.getWeeklySchedule(masterId, actor);
     const warnings = await this.findScheduleChangeWarnings(masterId);
     await this.audit(actor, 'UPDATE_WEEKLY_SCHEDULE', 'master', masterId, { days: before }, { days: next, warnings });
     return { days: next, warnings };
@@ -1375,7 +1378,17 @@ export class AdminService {
   }
 
   private async ensureActorCanAccessMaster(master: Master, actor?: JwtUserPayload) {
-    await this.ensureActorCanAccessStudios(getMasterStudioIds(master), actor);
+    const visibleStudioIds = await this.resolveVisibleStudioIds(actor);
+    if (!visibleStudioIds) {
+      return;
+    }
+
+    const masterStudioIds = getMasterStudioIds(master);
+    if (!masterStudioIds.length || masterStudioIds.some((studioId) => visibleStudioIds.includes(studioId))) {
+      return;
+    }
+
+    throw new ForbiddenException('You can manage only masters from your assigned studio');
   }
 
   private userMatchesSearch(user: User, search?: string) {

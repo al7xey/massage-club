@@ -54,7 +54,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
       const status = typeof error === 'object' && error !== null && 'status' in error ? Number(error.status) : null;
 
       if (status !== 401) {
-        throw error;
+        setUser(null);
+        return;
       }
 
       try {

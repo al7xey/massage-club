@@ -469,7 +469,7 @@
     position: relative;
     display: inline-flex;
     min-width: 0;
-    width: 43px;
+    width: 52px;
     min-height: 43px;
     align-items: center;
     justify-content: center;
@@ -479,17 +479,16 @@
     padding: 0;
     color: var(--color-muted);
     text-decoration: none;
-    transition: background-color 0.24s ease, color 0.24s ease, transform 0.24s ease, width 0.24s ease, box-shadow 0.24s ease;
+    transition: background-color 0.24s ease, color 0.24s ease, box-shadow 0.24s ease;
   }
 
   .bottomNavActive {
-    width: 58px;
+    width: 52px;
     border-radius: 999px;
     background:
       radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.36) 44%, rgba(225, 236, 212, 0.58) 100%),
       rgba(111, 141, 78, 0.16);
     color: var(--color-primary-hover);
-    transform: translateY(-1px);
     box-shadow:
       0 8px 20px rgba(82, 106, 56, 0.16),
       inset 0 1px 0 rgba(255, 255, 255, 0.96),

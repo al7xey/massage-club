@@ -564,7 +564,7 @@ export function SimpleScheduleWorkspace({ mode }: { mode: ScheduleMode }) {
     if (!selectedMaster) return;
     setMessage('');
     try {
-      await updateWeeklySchedule({ id: selectedMaster.id, days }).unwrap();
+      await updateWeeklySchedule({ id: selectedMaster.id, days: expandWeeklyScheduleForStudios(days, getScheduleStudioIds(selectedMaster, studios.data ?? [])) }).unwrap();
       setMessage('Расписание мастера сохранено');
     } catch (error) {
       setMessage(getErrorText(error, 'Не удалось сохранить расписание'));
@@ -621,6 +621,8 @@ export function SimpleScheduleWorkspace({ mode }: { mode: ScheduleMode }) {
                 masterId={selectedMaster.id}
                 studios={studios.data ?? []}
                 warnings={weeklySchedule.data?.warnings}
+                collapseStudios
+                hideStudioChoice
                 isSubmitting={updateState.isLoading}
                 onSubmit={submit}
               />
@@ -1252,6 +1254,8 @@ function WeeklyScheduleEditor({
   days,
   studios,
   warnings,
+  collapseStudios = false,
+  hideStudioChoice = false,
   isSubmitting,
   onSubmit,
 }: {
@@ -1259,16 +1263,18 @@ function WeeklyScheduleEditor({
   days: WeeklyScheduleDayDto[];
   studios: StudioDto[];
   warnings?: string[];
+  collapseStudios?: boolean;
+  hideStudioChoice?: boolean;
   isSubmitting?: boolean;
   onSubmit?: (days: WeeklyScheduleDayDto[]) => Promise<unknown>;
 }) {
-  const [values, setValues] = useState<WeeklyScheduleDayDto[]>(() => normalizeWeek(days, studios[0]?.id ?? ''));
+  const [values, setValues] = useState<WeeklyScheduleDayDto[]>(() => normalizeWeek(collapseStudios ? collapseWeeklyScheduleStudios(days) : days, studios[0]?.id ?? ''));
   const [message, setMessage] = useState('');
   const [updateWeeklySchedule, state] = useUpdateAdminWeeklyScheduleMutation();
 
   useEffect(() => {
-    setValues(normalizeWeek(days, studios[0]?.id ?? ''));
-  }, [days, studios]);
+    setValues(normalizeWeek(collapseStudios ? collapseWeeklyScheduleStudios(days) : days, studios[0]?.id ?? ''));
+  }, [collapseStudios, days, studios]);
 
   const updateDay = (dayOfWeek: number, recipe: (current: WeeklyScheduleDayDto) => WeeklyScheduleDayDto) => {
     setValues((current) => current.map((item) => (item.dayOfWeek === dayOfWeek ? recipe(item) : item)));
@@ -1362,24 +1368,26 @@ function WeeklyScheduleEditor({
                       </Button>
                     </div>
                     <div className={styles.intervalGrid}>
-                      <label>
-                        <span>Студия</span>
-                        <select
-                          value={interval.studioId}
-                          onChange={(event) =>
-                            updateDay(day.dayOfWeek, (item) => ({
-                              ...item,
-                              intervals: item.intervals.map((entry, entryIndex) => (entryIndex === index ? { ...entry, studioId: event.target.value } : entry)),
-                            }))
-                          }
-                        >
-                          {studios.map((studio) => (
-                            <option key={studio.id} value={studio.id}>
-                              {studio.name}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
+                      {!hideStudioChoice ? (
+                        <label>
+                          <span>Студия</span>
+                          <select
+                            value={interval.studioId}
+                            onChange={(event) =>
+                              updateDay(day.dayOfWeek, (item) => ({
+                                ...item,
+                                intervals: item.intervals.map((entry, entryIndex) => (entryIndex === index ? { ...entry, studioId: event.target.value } : entry)),
+                              }))
+                            }
+                          >
+                            {studios.map((studio) => (
+                              <option key={studio.id} value={studio.id}>
+                                {studio.name}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      ) : null}
                       <label>
                         <span>Перерыв</span>
                         <div className={styles.intervalGrid}>
@@ -1669,6 +1677,46 @@ function normalizeWeek(days: WeeklyScheduleDayDto[], fallbackStudioId: string) {
       intervalIndex: interval.intervalIndex ?? index,
       studioId: interval.studioId || fallbackStudioId,
     })),
+  }));
+}
+
+function collapseWeeklyScheduleStudios(days: WeeklyScheduleDayDto[]): WeeklyScheduleDayDto[] {
+  return days.map((day) => {
+    const seen = new Set<string>();
+    const intervals = day.intervals.filter((interval) => {
+      const key = [interval.startTime, interval.endTime, interval.breakStartTime ?? '', interval.breakEndTime ?? ''].join('|');
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    return { ...day, intervals };
+  });
+}
+
+function getScheduleStudioIds(master: MasterDto, fallbackStudios: StudioDto[]) {
+  const visibleStudioIds = new Set(fallbackStudios.map((studio) => studio.id).filter(Boolean));
+  const assignedIds = masterStudios(master).map((studio) => studio.id).filter(Boolean);
+  const scopedAssignedIds = assignedIds.filter((studioId) => !visibleStudioIds.size || visibleStudioIds.has(studioId));
+
+  if (scopedAssignedIds.length) return scopedAssignedIds;
+  return fallbackStudios.map((studio) => studio.id).filter(Boolean);
+}
+
+function expandWeeklyScheduleForStudios(days: WeeklyScheduleDayDto[], studioIds: string[]) {
+  if (!studioIds.length) {
+    return days;
+  }
+
+  const targetStudioIds = studioIds;
+  return days.map((day) => ({
+    ...day,
+    intervals: day.intervals.flatMap((interval, intervalIndex) =>
+      targetStudioIds.map((studioId, studioIndex) => ({
+        ...interval,
+        intervalIndex: intervalIndex * targetStudioIds.length + studioIndex,
+        studioId: studioId || interval.studioId,
+      })),
+    ),
   }));
 }
 

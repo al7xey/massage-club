@@ -150,17 +150,17 @@ export function AdminMasterDetailsPage() {
             <MasterForm
               isSubmitting={updateState.isLoading}
               master={master.data}
-              secondaryAction={
-                <Button type="button" variant="danger" onClick={() => setDeleteOpen(true)}>
-                  Удалить
-                </Button>
-              }
               services={services.data ?? []}
               studios={studios.data ?? []}
               submitLabel="Сохранить"
               onSubmit={(body) => updateMaster({ id, body }).unwrap()}
             />
           </AdminPanel>
+          <div className={styles.detailDangerActions}>
+            <Button type="button" variant="danger" onClick={() => setDeleteOpen(true)}>
+              Удалить
+            </Button>
+          </div>
           <AdminConfirmModal
             confirmLabel="Удалить"
             description="Если у мастера есть будущие записи, сервер не позволит физическое удаление."
@@ -427,7 +427,6 @@ function MastersWorkspace({ mode }: { mode: 'admin' | 'super-admin' }) {
   const studios = useGetAdminStudiosQuery();
   const services = useGetAdminServicesQuery();
   const [createMaster, createState] = useCreateAdminMasterMutation();
-  const [deleteMaster, deleteState] = useDeleteAdminMasterMutation();
   const basePath = mode === 'super-admin' ? '/super-admin/masters' : '/admin/masters';
 
   return (
@@ -459,9 +458,6 @@ function MastersWorkspace({ mode }: { mode: 'admin' | 'super-admin' }) {
                     <LinkButton size="sm" to={mode === 'super-admin' ? '/super-admin/schedule' : '/admin/schedule'} variant="secondary">
                       Расписание
                     </LinkButton>
-                    <Button size="sm" type="button" variant="ghost" isLoading={deleteState.isLoading} onClick={() => void deleteMaster(master.id).unwrap()}>
-                      Удалить
-                    </Button>
                   </>
                 }
                 description={master.bio || 'Описание пока не заполнено'}
