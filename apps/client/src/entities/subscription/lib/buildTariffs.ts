@@ -24,10 +24,11 @@ function getSegment(code: string): TariffItem['segment'] {
 
 function createPlanMeta(plan: SubscriptionPlanDto): PlanMeta {
   const includedDescription = normalizeIncludedDescription(plan.includedDescription?.trim());
+  const periodDays = getDisplayedPeriodDays(plan.periodDays);
 
   return {
     title: getSubscriptionPlanTitle(plan.code, plan.name),
-    subtitle: `${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽ / ${plan.periodDays} дней`,
+    subtitle: `${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽ / ${periodDays} дней`,
     features: [
       includedDescription || `${plan.includedCredits} включенных услуги`,
       `скидка ${plan.discountPercent}% на все услуги`,
@@ -48,11 +49,15 @@ export function buildTariffs(plans: SubscriptionPlanDto[]): TariffItem[] {
       code: plan.code,
       title: getSubscriptionPlanTitle(plan.code, plan.name),
       priceRub: plan.monthlyPriceRub,
-      periodDays: plan.periodDays,
+      periodDays: getDisplayedPeriodDays(plan.periodDays),
       isFeatured: plan.discountPercent >= 30,
       segment: getSegment(plan.code),
       planMeta: createPlanMeta(plan),
     }));
+}
+
+function getDisplayedPeriodDays(periodDays?: number) {
+  return periodDays && periodDays > 0 ? Math.min(periodDays, 30) : 30;
 }
 
 function normalizeIncludedDescription(description?: string) {

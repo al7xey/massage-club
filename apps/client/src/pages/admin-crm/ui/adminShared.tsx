@@ -1,5 +1,4 @@
 import type { ChangeEventHandler, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react';
-import { LinkButton } from '@/shared/ui';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { Button } from '@/shared/ui';
 import styles from './AdminCrmPages.module.css';
@@ -7,8 +6,6 @@ import styles from './AdminCrmPages.module.css';
 export function AdminPageShell({
   title,
   description,
-  backTo,
-  backLabel = 'Назад',
   actions,
   isLoading,
   error,
@@ -27,13 +24,6 @@ export function AdminPageShell({
     <div className={styles.page}>
       <header className={styles.pageHeader}>
         <div className={styles.pageIntro}>
-          {backTo ? (
-            <div className={styles.inlineActions}>
-              <LinkButton size="sm" to={backTo} variant="secondary">
-                {backLabel}
-              </LinkButton>
-            </div>
-          ) : null}
           <h2>{title}</h2>
           {description ? <p>{description}</p> : null}
         </div>

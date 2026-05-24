@@ -249,6 +249,33 @@
   margin-top: 18px;
 }
 
+.cartCounter {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-soft);
+  padding: 5px;
+}
+
+.cartCounter strong {
+  color: var(--color-text);
+  font-size: 18px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.cartCounter :global(button) {
+  min-width: 0;
+  min-height: 38px;
+  border-radius: 14px;
+  padding: 0;
+  font-size: 20px;
+}
+
 .note {
   margin: 12px 0 0;
   color: var(--color-subtle);

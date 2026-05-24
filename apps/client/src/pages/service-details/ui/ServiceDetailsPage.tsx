@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '@/features/auth';
-import { useAddCartItemMutation } from '@/entities/cart';
+import { useAddCartItemMutation, useGetCartQuery, useRemoveCartItemMutation } from '@/entities/cart';
 import { mockReviews } from '@/entities/review';
 import { createServiceCardModel, type ServiceDto, useGetServiceQuery, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
+import { useAuth } from '@/features/auth';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
@@ -23,7 +23,9 @@ export function ServiceDetailsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
-  const [addCartItem] = useAddCartItemMutation();
+  const { data: cartItems = [] } = useGetCartQuery(undefined, { skip: !user });
+  const [addCartItem, { isLoading: isAddingToCart }] = useAddCartItemMutation();
+  const [removeCartItem, { isLoading: isRemovingFromCart }] = useRemoveCartItemMutation();
   const { data: service } = useGetServiceQuery(id, { skip: !id });
   const { data: servicesPage } = useGetServicesQuery({ limit: 5, sort: 'popular' });
   const { data: studios = [] } = useGetStudiosQuery();
@@ -46,6 +48,11 @@ export function ServiceDetailsPage() {
   const activePhoto = photoItems[activePhotoIndex] ?? photoItems[0];
   const displayDuration = getDurationDisplay(selected?.durationMinutes, durationLabel);
   const categoryLabel = getServiceCategoryLabel(selected);
+  const cartItemsForService = useMemo(
+    () => cartItems.filter((item) => item.service.id === selected?.id),
+    [cartItems, selected?.id],
+  );
+  const selectedCountInCart = cartItemsForService.length;
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -60,7 +67,7 @@ export function ServiceDetailsPage() {
     setActivePhotoIndex((index) => (index + 1) % photoItems.length);
   };
 
-  const navigateToAuth = (action: 'book' | 'cart') => {
+  const navigateToAuth = (action: 'cart') => {
     navigate(appRoutes.login(), {
       state: {
         action,
@@ -79,18 +86,13 @@ export function ServiceDetailsPage() {
     }
 
     await addCartItem({ serviceId: selected.id }).unwrap();
-    navigate(appRoutes.cart());
   };
 
-  const handleBook = async () => {
-    if (!selected) return;
-    if (!user) {
-      navigateToAuth('book');
-      return;
-    }
+  const handleRemoveOneFromCart = async () => {
+    const lastItem = cartItemsForService.at(-1);
+    if (!lastItem) return;
 
-    await addCartItem({ serviceId: selected.id }).unwrap();
-    navigate(`${appRoutes.booking()}?serviceId=${selected.id}`);
+    await removeCartItem(lastItem.id).unwrap();
   };
 
   return (
@@ -140,12 +142,21 @@ export function ServiceDetailsPage() {
             <PriceRow title="SUPER-тариф" note="Максимальная выгода" price={superSubscriptionPrice} badge="-30%" featured />
           </div>
           <div className={styles.actions}>
-            <Button fullWidth onClick={() => void handleBook()}>
-              Записаться
-            </Button>
-            <Button fullWidth variant="secondary" onClick={() => void handleAddToCart()}>
-              В корзину
-            </Button>
+            {selectedCountInCart > 0 ? (
+              <div className={styles.cartCounter} aria-label={`В корзине: ${selectedCountInCart}`}>
+                <Button variant="secondary" disabled={isRemovingFromCart} onClick={() => void handleRemoveOneFromCart()}>
+                  -
+                </Button>
+                <strong>{selectedCountInCart}</strong>
+                <Button variant="secondary" disabled={isAddingToCart} onClick={() => void handleAddToCart()}>
+                  +
+                </Button>
+              </div>
+            ) : (
+              <Button fullWidth variant="secondary" isLoading={isAddingToCart} onClick={() => void handleAddToCart()}>
+                В корзину
+              </Button>
+            )}
           </div>
           <p className={styles.note}>Клубная цена применяется по активному тарифу.</p>
         </aside>
@@ -244,5 +255,5 @@ function getDurationDisplay(durationMinutes?: number, fallback = '') {
 }
 
 function getServiceCategoryLabel(service: ServiceDto | undefined) {
-  return service?.category?.name ?? 'Массаж для женщин';
+  return service?.category?.name ?? 'Массаж';
 }

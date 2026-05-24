@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useGetCartQuery } from '@/entities/cart';
 import { useAuth } from '@/features/auth';
 import { resolveMediaUrl } from '@/shared/lib/media';
@@ -7,7 +7,7 @@ import { appRoutes } from '@/shared/routes';
 import { BrandMark, LinkButton } from '@/shared/ui';
 import styles from './MainLayout.module.css';
 
-type MobileIconName = 'home' | 'cart' | 'calendar' | 'user' | 'menu' | 'login' | 'building' | 'gift' | 'star' | 'credit-card';
+type MobileIconName = 'bag' | 'cart' | 'credit-card' | 'gift' | 'login' | 'user' | 'user-circle';
 
 const links = [
   [appRoutes.services(), 'Услуги'],
@@ -17,17 +17,24 @@ const links = [
   [appRoutes.certificates(), 'Сертификаты'],
 ] as const;
 
-const bottomLinks = [
-  { icon: 'cart' as const, label: 'Услуги', to: appRoutes.services(), match: (path: string) => path.startsWith('/services') },
+const guestBottomLinks = [
+  { icon: 'bag' as const, label: 'Услуги', to: appRoutes.services(), match: (path: string) => path.startsWith('/services') },
   { icon: 'credit-card' as const, label: 'Тарифы', to: appRoutes.subscriptions(), match: (path: string) => path.startsWith('/subscriptions') },
-  { icon: 'building' as const, label: 'Студии', to: appRoutes.studios(), match: (path: string) => path.startsWith('/studios') },
   { icon: 'user' as const, label: 'Мастера', to: appRoutes.masters(), match: (path: string) => path.startsWith('/masters') },
   { icon: 'gift' as const, label: 'Сертификаты', to: appRoutes.certificates(), match: (path: string) => path.startsWith('/certificates') },
+  { icon: 'login' as const, label: 'Войти', to: appRoutes.login(), match: (path: string) => path.startsWith('/login') },
+] as const;
+
+const userBottomLinks = [
+  { icon: 'bag' as const, label: 'Услуги', to: appRoutes.services(), match: (path: string) => path.startsWith('/services') },
+  { icon: 'cart' as const, label: 'Корзина', to: appRoutes.cart(), match: (path: string) => path.startsWith('/cart') },
+  { icon: 'gift' as const, label: 'Сертификаты', to: appRoutes.certificates(), match: (path: string) => path.startsWith('/certificates') },
+  { icon: 'user' as const, label: 'Мастера', to: appRoutes.masters(), match: (path: string) => path.startsWith('/masters') },
+  { icon: 'user-circle' as const, label: 'Профиль', to: appRoutes.account(), match: (path: string) => path.startsWith('/account') },
 ] as const;
 
 export function MainLayout() {
   const location = useLocation();
-  const navigate = useNavigate();
   const mobileMenuId = useId();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isAuthLoading, user } = useAuth();
@@ -35,8 +42,7 @@ export function MainLayout() {
   const logoRoute = user ? appRoutes.account() : appRoutes.home();
   const accountInitial = (user?.fullName?.trim()?.[0] ?? 'Р').toUpperCase();
   const authState = { from: `${location.pathname}${location.search}` };
-  const profileRoute = user ? appRoutes.account() : appRoutes.login();
-  const showBackLink = location.pathname !== '/';
+  const bottomLinks = user ? userBottomLinks : guestBottomLinks;
   const footerText = 'Wellness-клуб с подпиской на массаж, SPA и уходовые процедуры.';
   const contactPhone = '8 (800) 555-35-35';
   const contactEmail = 'hello@relaxup.ru';
@@ -122,7 +128,7 @@ export function MainLayout() {
 
             <nav className={styles.mobileMenuNav} aria-label="Разделы сайта">
               {links.map(([to, label]) => (
-                <NavLink key={to} to={to} className={({ isActive }) => (isActive ? styles.mobileActiveLink : undefined)}>
+                <NavLink key={to} to={to} className={({ isActive }) => (isActive ? styles.mobileActiveLink : undefined)} onClick={() => setIsMobileMenuOpen(false)}>
                   {label}
                 </NavLink>
               ))}
@@ -130,29 +136,21 @@ export function MainLayout() {
 
             <div className={styles.mobileMenuActions}>
               {!user && !isAuthLoading ? (
-                <>
-                  <LinkButton state={authState} to={appRoutes.login()} variant="secondary" fullWidth>
-                    Войти
-                  </LinkButton>
-                  <LinkButton to={appRoutes.subscriptions()} fullWidth>
-                    Выбрать тариф
-                  </LinkButton>
-                </>
+                <LinkButton state={authState} to={appRoutes.login()} variant="secondary" fullWidth onClick={() => setIsMobileMenuOpen(false)}>
+                  Войти
+                </LinkButton>
               ) : null}
 
               {user ? (
                 <>
-                  <LinkButton to={appRoutes.cart()} variant="secondary" fullWidth>
+                  <LinkButton to={appRoutes.cart()} variant="secondary" fullWidth onClick={() => setIsMobileMenuOpen(false)}>
                     Корзина ({cartItems.length})
                   </LinkButton>
-                  <LinkButton to={appRoutes.account()} variant="secondary" fullWidth>
+                  <LinkButton to={appRoutes.account()} variant="secondary" fullWidth onClick={() => setIsMobileMenuOpen(false)}>
                     Профиль
                   </LinkButton>
-                  <LinkButton to={appRoutes.accountAppointments()} variant="secondary" fullWidth>
-                    Мои записи
-                  </LinkButton>
                   {user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' ? (
-                    <LinkButton to={user.role === 'SUPER_ADMIN' ? appRoutes.superAdmin() : appRoutes.admin()} variant="secondary" fullWidth>
+                    <LinkButton to={user.role === 'SUPER_ADMIN' ? appRoutes.superAdmin() : appRoutes.admin()} variant="secondary" fullWidth onClick={() => setIsMobileMenuOpen(false)}>
                       Админ-панель
                     </LinkButton>
                   ) : null}
@@ -163,34 +161,24 @@ export function MainLayout() {
         </div>
       ) : null}
 
-      {showBackLink ? (
-        <div className={styles.backRow}>
-          <button type="button" onClick={() => navigate(-1)}>
-            ← Назад
-          </button>
-        </div>
-      ) : null}
-
       <Outlet />
 
       <nav className={styles.bottomNav} aria-label="Быстрая навигация">
         {bottomLinks.map((item) => {
           const isActive = item.match(location.pathname);
           return (
-            <NavLink key={item.to} to={item.to} aria-label={item.label} className={isActive ? styles.bottomNavActive : styles.bottomNavLink}>
+            <NavLink
+              key={item.to}
+              to={item.to}
+              aria-label={item.label}
+              state={!user && item.to === appRoutes.login() ? authState : undefined}
+              className={isActive ? styles.bottomNavActive : styles.bottomNavLink}
+            >
               <MobileNavIcon name={item.icon} />
               {item.to === appRoutes.cart() && cartItems.length > 0 ? <strong className={styles.bottomBadge}>{cartItems.length}</strong> : null}
             </NavLink>
           );
         })}
-        <NavLink
-          aria-label={user ? 'Профиль' : 'Войти'}
-          className={location.pathname.startsWith('/account') || location.pathname.startsWith('/login') ? styles.bottomNavActive : styles.bottomNavLink}
-          state={user ? undefined : authState}
-          to={profileRoute}
-        >
-          <MobileNavIcon name={user ? 'user' : 'login'} />
-        </NavLink>
       </nav>
 
       <footer className={styles.footer}>
@@ -230,16 +218,13 @@ export function MainLayout() {
 
 function MobileNavIcon({ name }: { name: MobileIconName }) {
   const paths: Record<MobileIconName, string[]> = {
-    home: ['M4 10.5 12 4l8 6.5', 'M6 10v9h12v-9', 'M10 19v-5h4v5'],
+    bag: ['M7 8h10l1 12H6L7 8Z', 'M9 8a3 3 0 0 1 6 0', 'M9.5 12h5'],
     cart: ['M6 7h13l-1.4 7.5H8L6.8 4.5H4', 'M9 19a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM17 19a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z'],
-    calendar: ['M7 4v3M17 4v3', 'M5 8h14', 'M6.5 5.5h11A1.5 1.5 0 0 1 19 7v11a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 18V7a1.5 1.5 0 0 1 1.5-1.5Z'],
-    user: ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z', 'M5 20c1.3-3.3 3.6-5 7-5s5.7 1.7 7 5'],
-    menu: ['M5 7h14M5 12h14M5 17h14'],
-    login: ['M14 5h3.5A1.5 1.5 0 0 1 19 6.5v11a1.5 1.5 0 0 1-1.5 1.5H14', 'M5 12h9', 'M11 8.5 14.5 12 11 15.5'],
-    building: ['M5.5 20V5.5h8V20', 'M13.5 9.5h5V20', 'M8 8h2M8 11h2M16 13h1'],
-    gift: ['M5 10h14v10H5V10Z', 'M12 10v10M4 10h16', 'M8.5 7.5C6 7.5 6 4 8.5 4 11 4 12 8 12 8s1-4 3.5-4S18 7.5 15.5 7.5H8.5Z'],
-    star: ['M12 4.5 14.2 9l4.8.7-3.5 3.4.9 4.9-4.4-2.3L7.6 18l.9-4.9L5 9.7 9.8 9 12 4.5Z'],
     'credit-card': ['M4.5 7.5h15v10h-15v-10Z', 'M4.5 10.5h15', 'M7 15h4'],
+    gift: ['M5 10h14v10H5V10Z', 'M12 10v10M4 10h16', 'M8.5 7.5C6 7.5 6 4 8.5 4 11 4 12 8 12 8s1-4 3.5-4S18 7.5 15.5 7.5H8.5Z'],
+    login: ['M14 5h3.5A1.5 1.5 0 0 1 19 6.5v11a1.5 1.5 0 0 1-1.5 1.5H14', 'M5 12h9', 'M11 8.5 14.5 12 11 15.5'],
+    user: ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z', 'M5 20c1.3-3.3 3.6-5 7-5s5.7 1.7 7 5'],
+    'user-circle': ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z', 'M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', 'M6.8 18c1.2-2.6 3-4 5.2-4s4 1.4 5.2 4'],
   };
 
   return (

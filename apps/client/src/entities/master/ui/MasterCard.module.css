@@ -56,7 +56,7 @@
   position: relative;
   flex: 0 0 auto;
   overflow: hidden;
-  min-height: 248px;
+  min-height: 264px;
   background: var(--color-soft-strong);
 }
 
@@ -167,12 +167,12 @@
 
 @media (max-width: 760px) {
   .card {
-    min-height: 248px;
+    min-height: 224px;
     border-radius: var(--radius-card);
   }
 
   .media {
-    min-height: 118px;
+    min-height: 148px;
   }
 
   .media::before {
@@ -211,10 +211,7 @@
   }
 
   .actions {
-    align-items: stretch;
-    flex-direction: row;
-    gap: 8px;
-    padding: 0 var(--mobile-tile-padding) var(--mobile-tile-padding);
+    display: none;
   }
 
   .actions > * {

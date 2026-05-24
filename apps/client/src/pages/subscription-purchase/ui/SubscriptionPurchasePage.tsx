@@ -47,6 +47,7 @@ export function SubscriptionPurchasePage() {
   const purchaseMeta = purchaseModeMeta[purchaseMode];
   const remainingCredits = activeSubscription?.credits.reduce((sum, credit) => sum + credit.remainingCredits, 0) ?? 0;
   const planTitle = plan ? getSubscriptionPlanTitle(plan.code, plan.name) : '';
+  const displayedPeriodDays = plan ? getDisplayedPeriodDays(plan.periodDays) : 30;
 
   const features = useMemo(() => {
     if (!plan) {
@@ -164,15 +165,12 @@ export function SubscriptionPurchasePage() {
                     }
                   />
                   <InfoItem label="Осталось визитов" value={String(remainingCredits)} />
-                  <InfoItem label="Период нового тарифа" value={`${plan.periodDays} дней`} />
+                  <InfoItem label="Период нового тарифа" value={`${displayedPeriodDays} дней`} />
                   <InfoItem label="Скидка на услуги" value={`${plan.discountPercent}%`} />
                 </div>
               </article>
 
               <div className={styles.actions}>
-                <LinkButton to={appRoutes.subscriptions()} variant="secondary">
-                  Назад к тарифам
-                </LinkButton>
                 <Button isLoading={isSubmitting} loadingText="Оформляем..." onClick={handleConfirm}>
                   {purchaseMeta.submitLabel}
                 </Button>
@@ -182,7 +180,7 @@ export function SubscriptionPurchasePage() {
             <aside className={styles.sideSummary}>
               <span className={styles.kicker}>Итого</span>
               <strong>{formatPrice(plan.monthlyPriceRub)}</strong>
-              <p>{plan.periodDays} дней доступа и все преимущества тарифа активируются после покупки.</p>
+              <p>{displayedPeriodDays} дней доступа и все преимущества тарифа активируются после покупки.</p>
               <dl className={styles.summaryList}>
                 <InfoRow label="Тариф" value={planTitle} />
                 <InfoRow label="Формат" value={purchaseMeta.label} />
@@ -197,6 +195,10 @@ export function SubscriptionPurchasePage() {
       </section>
     </PageShell>
   );
+}
+
+function getDisplayedPeriodDays(periodDays?: number) {
+  return periodDays && periodDays > 0 ? Math.min(periodDays, 30) : 30;
 }
 
 function Metric({ label, value }: { label: string; value: string }) {

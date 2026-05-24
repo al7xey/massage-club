@@ -32,14 +32,6 @@ export class CartService {
   }
 
   async addItem(userId: string, dto: AddCartItemDto) {
-    const existingItem = await this.cartRepository.findOne({
-      where: { user: { id: userId }, service: { id: dto.serviceId } },
-    });
-
-    if (existingItem) {
-      return existingItem;
-    }
-
     const [user, service] = await Promise.all([
       this.usersRepository.findOneByOrFail({ id: userId }),
       this.servicesRepository.findOneByOrFail({ id: dto.serviceId }),
@@ -170,7 +162,7 @@ export class CartService {
           throw new BadRequestException('Master does not work in selected studio');
         }
 
-        if (!master.services.some((service) => service.id === cartItem.service.id)) {
+        if (master.services.length > 0 && !master.services.some((service) => service.id === cartItem.service.id)) {
           throw new BadRequestException('Master does not provide selected service');
         }
 

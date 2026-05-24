@@ -19,9 +19,8 @@ export function MasterCard({ master }: MasterCardProps) {
           {photoUrl ? <img src={photoUrl} alt="" loading="lazy" /> : null}
         </div>
         <div className={styles.meta}>
-          <span className={styles.role}>{master.roleLabel}</span>
+          <span className={styles.role}>Мастер</span>
           <h3>{master.fullName}</h3>
-          <p>{master.experienceLabel}</p>
           <p>
             <span className={styles.stars}>★★★★★</span> <strong>{master.rating}</strong> ({master.reviewsCount} отзывов)
           </p>
@@ -33,7 +32,7 @@ export function MasterCard({ master }: MasterCardProps) {
           <span className={styles.detailsArrow} aria-hidden="true">→</span>
         </LinkButton>
         <LinkButton size="sm" to={`${appRoutes.booking()}?masterId=${master.id}`}>
-          Записаться к мастеру
+          Записаться
         </LinkButton>
       </div>
     </article>

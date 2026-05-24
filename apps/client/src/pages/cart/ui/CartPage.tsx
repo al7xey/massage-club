@@ -2,6 +2,7 @@ import { applySubscriptionBenefits } from '@massage/shared/lib/subscription-bene
 import { useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAddCartItemMutation, useGetCartQuery, useRemoveCartItemMutation } from '@/entities/cart';
+import type { CartItemDto } from '@/entities/cart';
 import { getSubscriptionPlanTitle, useGetMySubscriptionQuery } from '@/entities/subscription';
 import { useAuth } from '@/features/auth';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
@@ -58,93 +59,120 @@ export function CartPage() {
     [activeSubscription?.plan.discountPercent, cartItems, remainingCredits],
   );
   const previewByItemId = useMemo(() => new Map(pricingPreview.items.map((item) => [item.id, item])), [pricingPreview.items]);
+  const groupedRows = useMemo(() => buildCartRows(cartItems, previewByItemId), [cartItems, previewByItemId]);
   const baseAmountRub = cartItems.reduce((sum, item) => sum + item.service.priceRub, 0);
   const savedAmountRub = baseAmountRub - pricingPreview.totalAmountRub;
+  const isMutating = isAdding || isRemoving;
+
+  const addSameService = (serviceId: string) => {
+    void addCartItem({ serviceId });
+  };
+
+  const removeOne = (items: CartItemDto[]) => {
+    const lastItem = items.at(-1);
+    if (lastItem) {
+      void removeCartItem(lastItem.id);
+    }
+  };
 
   return (
-    <PageShell title="Корзина услуг">
+    <PageShell title="Корзина">
       <section className={styles.layout}>
         <div className={styles.list}>
           {isLoading || isAdding ? <p className={styles.state}>Загружаем корзину...</p> : null}
           {!user ? (
             <EmptyState
-              title="Корзина пока пуста"
-              description="Войдите, чтобы сохранить выбранные услуги и оформить запись."
+              title="Корзина пока пустая"
+              description="Войдите, чтобы сохранять выбранные услуги."
               actions={<LinkButton state={{ from: appRoutes.cart() }} to={appRoutes.login()}>Войти</LinkButton>}
             />
           ) : null}
           {user && !isLoading && cartItems.length === 0 ? (
             <EmptyState
-              title="Корзина пока пуста"
-              description="Добавьте услуги из каталога или со страницы детали, а затем перейдите к оформлению записи."
+              title="Корзина пока пустая"
+              description="Откройте услугу и добавьте ее в корзину."
               actions={<LinkButton to={appRoutes.services()}>Перейти к услугам</LinkButton>}
             />
           ) : null}
 
-          {cartItems.map((item) => {
-            const preview = previewByItemId.get(item.id);
+          {groupedRows.map((row) => (
+            <article className={styles.card} key={row.service.id}>
+              <div className={styles.imageWrap}>
+                <img className={styles.image} src={getServiceImageUrl(row.service)} alt="" loading="lazy" />
+              </div>
 
-            return (
-              <article className={styles.card} key={item.id}>
-                <div className={styles.imageWrap}>
-                  <img className={styles.image} src={getServiceImageUrl(item.service)} alt="" loading="lazy" />
-                </div>
+              <div className={styles.cardBody}>
+                <span className={styles.meta}>{row.service.durationMinutes} минут</span>
+                <h3>{row.service.title}</h3>
+                <p>{row.service.description}</p>
+              </div>
 
-                <div className={styles.cardBody}>
-                  <span className={styles.meta}>{item.service.durationMinutes} минут</span>
-                  <h3>{item.service.title}</h3>
-                  <p>{item.service.description}</p>
-
-                  {preview ? (
-                    <div className={styles.discountLine}>
-                      {preview.paidBySubscriptionCredit ? (
-                        <span>Классический массаж включен в подписку</span>
-                      ) : preview.discountPercent > 0 ? (
-                        <span>
-                          Скидка {preview.discountPercent}%: {formatPrice(preview.basePriceRub)} → {formatPrice(preview.finalPriceRub)}
-                        </span>
-                      ) : (
-                        <span>Super: скидка 30% - {formatPrice(getSuperPrice(preview.basePriceRub))} вместо {formatPrice(preview.basePriceRub)}</span>
-                      )}
-                    </div>
-                  ) : null}
-                </div>
-
-                <div className={styles.cardSide}>
-                  <strong className={preview?.paidBySubscriptionCredit ? styles.includedPrice : undefined}>
-                    {preview?.paidBySubscriptionCredit ? 'В подписке' : formatPrice(preview?.finalPriceRub ?? item.service.priceRub)}
-                  </strong>
-                  <Button size="sm" variant="danger" disabled={isRemoving} onClick={() => void removeCartItem(item.id)}>
-                    Удалить
+              <div className={styles.cardSide}>
+                <strong className={row.hasIncludedCredit ? styles.includedPrice : undefined}>
+                  {row.hasIncludedCredit && row.totalRub === 0 ? 'В подписке' : formatPrice(row.totalRub)}
+                </strong>
+                <div className={styles.quantityControl} aria-label={`Количество: ${row.items.length}`}>
+                  <Button size="sm" variant="secondary" disabled={isMutating} onClick={() => removeOne(row.items)}>
+                    -
+                  </Button>
+                  <span>{row.items.length}</span>
+                  <Button size="sm" variant="secondary" disabled={isMutating} onClick={() => addSameService(row.service.id)}>
+                    +
                   </Button>
                 </div>
-              </article>
-            );
-          })}
+              </div>
+            </article>
+          ))}
         </div>
 
         {cartItems.length > 0 ? (
           <aside className={styles.summary}>
-            <p className={styles.summaryLabel}>В корзине</p>
-            <strong>{cartItems.length} услуг</strong>
-            <span>{formatPrice(pricingPreview.totalAmountRub)}</span>
+            <p className={styles.summaryLabel}>Итого</p>
+            <strong>{formatPrice(pricingPreview.totalAmountRub)}</strong>
+            <span>{cartItems.length} услуг</span>
             {activeSubscription ? (
               <p>
-                Подписка <strong>{getSubscriptionPlanTitle(activeSubscription.plan.code, activeSubscription.plan.name)}</strong>: автоматически спишем{' '}
-                {pricingPreview.subscriptionCreditsUsed} визита и сэкономим {formatPrice(savedAmountRub)}.
+                {getSubscriptionPlanTitle(activeSubscription.plan.code, activeSubscription.plan.name)}: {pricingPreview.subscriptionCreditsUsed} по подписке,
+                экономия {formatPrice(savedAmountRub)}.
               </p>
             ) : (
-              <div className={styles.superHint}>
-                <p>Подписка Super даст скидку 30%: итог будет {formatPrice(getSuperPrice(baseAmountRub))} вместо {formatPrice(baseAmountRub)}.</p>
-                <LinkButton to={appRoutes.subscriptions()} variant="secondary">Перейти к тарифам</LinkButton>
-              </div>
+              <p>С Super тарифом итог был бы {formatPrice(getSuperPrice(baseAmountRub))}.</p>
             )}
-            <LinkButton to={appRoutes.booking()}>Перейти к оформлению</LinkButton>
+            <LinkButton to={appRoutes.booking()}>Оформить</LinkButton>
           </aside>
         ) : null}
       </section>
     </PageShell>
   );
+}
+
+function buildCartRows(cartItems: CartItemDto[], previewByItemId: Map<string, { finalPriceRub: number; paidBySubscriptionCredit: boolean }>) {
+  const rows = new Map<
+    string,
+    {
+      hasIncludedCredit: boolean;
+      items: CartItemDto[];
+      service: CartItemDto['service'];
+      totalRub: number;
+    }
+  >();
+
+  for (const item of cartItems) {
+    const preview = previewByItemId.get(item.id);
+    const row = rows.get(item.service.id) ?? {
+      hasIncludedCredit: false,
+      items: [],
+      service: item.service,
+      totalRub: 0,
+    };
+
+    row.items.push(item);
+    row.totalRub += preview?.finalPriceRub ?? item.service.priceRub;
+    row.hasIncludedCredit = row.hasIncludedCredit || Boolean(preview?.paidBySubscriptionCredit);
+    rows.set(item.service.id, row);
+  }
+
+  return Array.from(rows.values());
 }
 
 function isClassicMassage(service: { category?: { slug?: string } | null; title: string }) {
