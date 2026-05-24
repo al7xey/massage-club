@@ -8,6 +8,7 @@ build
 coverage
 .vite
 .cache
+.codex-logs/
 .DS_Store
 *.log
 *.pid

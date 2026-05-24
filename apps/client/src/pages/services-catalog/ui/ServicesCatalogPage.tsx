@@ -286,7 +286,9 @@ export function ServicesCatalogPage() {
             </div>
 
             <div ref={sentinelRef} className={styles.sentinel} aria-hidden="true" />
-            {data?.hasMore || isFetching ? <p className={styles.state}>{isFetching ? 'Загружаем еще услуги...' : 'Прокрутите ниже, чтобы увидеть больше услуг.'}</p> : null}
+            {data?.hasMore || (isFetching && cards.length > 0) ? (
+              <p className={styles.state}>{isFetching ? 'Загружаем еще услуги...' : 'Прокрутите ниже, чтобы увидеть больше услуг.'}</p>
+            ) : null}
           </div>
         </div>
       </section>

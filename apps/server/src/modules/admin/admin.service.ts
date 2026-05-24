@@ -374,6 +374,10 @@ export class AdminService {
   }
 
   async getWeeklySchedule(masterId: string, actor?: JwtUserPayload) {
+    return { days: await this.getWeeklyScheduleDays(masterId, actor) };
+  }
+
+  private async getWeeklyScheduleDays(masterId: string, actor?: JwtUserPayload) {
     const master = await this.findMaster(masterId);
     await this.ensureActorCanAccessMaster(master, actor);
     const rows = await this.weeklySchedulesRepository.find({
@@ -386,7 +390,7 @@ export class AdminService {
   async updateWeeklySchedule(masterId: string, dto: PutWeeklyScheduleDto, actor?: JwtUserPayload) {
     const master = await this.findMaster(masterId);
     await this.ensureActorCanAccessMaster(master, actor);
-    const before = await this.getWeeklySchedule(masterId, actor);
+    const before = await this.getWeeklyScheduleDays(masterId, actor);
     const rows: MasterWeeklySchedule[] = [];
 
     for (const day of dto.days) {
@@ -420,7 +424,7 @@ export class AdminService {
       .where('master_id = :masterId', { masterId })
       .execute();
     await this.weeklySchedulesRepository.save(rows);
-    const next = await this.getWeeklySchedule(masterId, actor);
+    const next = await this.getWeeklyScheduleDays(masterId, actor);
     const warnings = await this.findScheduleChangeWarnings(masterId);
     await this.audit(actor, 'UPDATE_WEEKLY_SCHEDULE', 'master', masterId, { days: before }, { days: next, warnings });
     return { days: next, warnings };
