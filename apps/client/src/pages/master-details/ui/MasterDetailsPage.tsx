@@ -30,7 +30,7 @@ export function MasterDetailsPage() {
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const studioCards = studios.slice(0, 2).map(createStudioCardModel);
   const photos = useMemo(
-    () => ([...(master?.photoUrls ?? []), master?.photoUrl].filter(Boolean) as string[]).map(resolveMediaUrl),
+    () => uniqueUrls([master?.photoUrl, ...(master?.photoUrls ?? [])]).map(resolveMediaUrl),
     [master],
   );
 
@@ -133,4 +133,8 @@ function getMasterStats(id: string) {
     rating,
     reviewsCount,
   };
+}
+
+function uniqueUrls(values: Array<string | null | undefined>) {
+  return Array.from(new Set(values.map((url) => url?.trim()).filter(Boolean))) as string[];
 }

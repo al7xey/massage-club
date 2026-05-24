@@ -220,14 +220,18 @@ function PriceRow({
 }
 
 function getServiceGallery(service: ServiceDto | undefined) {
-  const urls = [...(service?.galleryUrls ?? []), service?.imageUrl].filter(Boolean) as string[];
-  const count = Math.max(3, urls.length);
+  const urls = uniqueUrls([service?.imageUrl, ...(service?.galleryUrls ?? [])]);
+  const count = urls.length > 0 ? urls.length : 3;
 
   return Array.from({ length: count }, (_, index) => ({
     label: `Фото ${index + 1}`,
     tone: index,
     url: resolveMediaUrl(urls[index]),
   }));
+}
+
+function uniqueUrls(values: Array<string | null | undefined>) {
+  return Array.from(new Set(values.map((url) => url?.trim()).filter(Boolean))) as string[];
 }
 
 function getDurationDisplay(durationMinutes?: number, fallback = '') {

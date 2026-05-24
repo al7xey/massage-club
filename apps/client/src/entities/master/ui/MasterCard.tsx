@@ -32,8 +32,8 @@ export function MasterCard({ master }: MasterCardProps) {
           <span className={styles.detailsText}>Подробнее</span>
           <span className={styles.detailsArrow} aria-hidden="true">→</span>
         </LinkButton>
-        <LinkButton size="sm" to={appRoutes.booking()}>
-          Записаться
+        <LinkButton size="sm" to={`${appRoutes.booking()}?masterId=${master.id}`}>
+          Записаться к мастеру
         </LinkButton>
       </div>
     </article>

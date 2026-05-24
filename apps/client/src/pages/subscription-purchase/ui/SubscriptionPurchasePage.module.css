@@ -1,0 +1,218 @@
+.root {
+  display: grid;
+  gap: 18px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  align-items: start;
+  gap: 22px;
+}
+
+.stage,
+.sideSummary,
+.heroCard,
+.panel,
+.successCard {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.stage {
+  display: grid;
+  gap: 18px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.heroCard,
+.panel,
+.sideSummary,
+.successCard {
+  padding: 24px;
+}
+
+.heroCard,
+.panel,
+.successCard {
+  display: grid;
+  gap: 14px;
+}
+
+.heroHeader,
+.actions,
+.metricGrid,
+.infoGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.heroHeader {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.heroHeader strong,
+.sideSummary > strong {
+  color: var(--color-text);
+  font-size: clamp(32px, 4vw, 46px);
+  line-height: 1;
+}
+
+.heroCard h2,
+.panelHeader h3,
+.successCard h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-h2);
+  line-height: 1.12;
+}
+
+.heroCard p,
+.successText,
+.sideSummary p,
+.state {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.kicker,
+.metricGrid span,
+.infoCard span,
+.summaryList dt {
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.panelHeader {
+  display: grid;
+  gap: 4px;
+}
+
+.featureList {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.featureList li,
+.infoCard,
+.summaryList div {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card-small);
+  background: var(--gradient-surface);
+}
+
+.featureList li {
+  padding: 14px 16px;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.infoGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.infoCard {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
+.infoCard strong,
+.metricGrid strong,
+.summaryList dd {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.actions {
+  grid-template-columns: repeat(2, minmax(0, max-content));
+  justify-content: start;
+}
+
+.sideSummary {
+  position: sticky;
+  top: 92px;
+  display: grid;
+  gap: 14px;
+}
+
+.summaryList {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-line);
+}
+
+.summaryList div {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+}
+
+.successCard {
+  max-width: 760px;
+}
+
+.metricGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metricGrid div {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card-small);
+  background: var(--gradient-surface);
+}
+
+.error {
+  margin: 0;
+  border-radius: var(--radius-card-small);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+  font-weight: 800;
+  padding: 12px 14px;
+}
+
+@media (max-width: 1080px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sideSummary {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .heroCard,
+  .panel,
+  .sideSummary,
+  .successCard {
+    padding: 20px;
+  }
+
+  .heroHeader,
+  .infoGrid,
+  .metricGrid,
+  .actions {
+    grid-template-columns: 1fr;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
+}

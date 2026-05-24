@@ -9,10 +9,15 @@ import { JwtUserPayload } from '../../common/types/authenticated-request.type';
 import { AppointmentStatus } from '../appointments/entities/appointment.entity';
 import { CreateMasterDto } from '../masters/dto/create-master.dto';
 import { UpdateMasterDto } from '../masters/dto/update-master.dto';
+import { PaymentStatus } from '../payments/entities/payment.entity';
 import { CreateServiceDto } from '../services/dto/create-service.dto';
 import { UpdateServiceDto } from '../services/dto/update-service.dto';
 import { CreateStudioDto } from '../studios/dto/create-studio.dto';
 import { UpdateStudioDto } from '../studios/dto/update-studio.dto';
+import { SupportTicketStatus } from '../support-tickets/entities/support-ticket.entity';
+import { CreateSubscriptionPlanDto } from '../subscription-plans/dto/create-subscription-plan.dto';
+import { UpdateSubscriptionPlanDto } from '../subscription-plans/dto/update-subscription-plan.dto';
+import { SubscriptionStatus } from '../subscriptions/entities/subscription.entity';
 import { AdminService } from './admin.service';
 import { CancelAdminAppointmentDto } from './dto/cancel-admin-appointment.dto';
 import { CreateAdminAppointmentDto } from './dto/create-admin-appointment.dto';
@@ -33,7 +38,7 @@ export class SuperAdminController {
   }
 
   @Get('masters')
-  getMasters(@Query() query: { search?: string; studioId?: string; isActive?: string }) {
+  getMasters(@Query() query: { search?: string; studioId?: string }) {
     return this.adminService.getMasters(query);
   }
 
@@ -133,8 +138,8 @@ export class SuperAdminController {
   }
 
   @Get('users')
-  getUsers(@Query() query: { search?: string; status?: string }) {
-    return this.adminService.getSuperAdminUsers(query);
+  getUsers(@Query() query: { search?: string; status?: string }, @CurrentUser() user: JwtUserPayload) {
+    return this.adminService.getSuperAdminUsers(query, user);
   }
 
   @Get('users/:id')
@@ -152,13 +157,18 @@ export class SuperAdminController {
     return this.adminService.unblockUser(id, user);
   }
 
+  @Patch('users/:id/role')
+  assignUserRole(@Param('id') id: string, @Body() dto: { role: UserRole; studioIds?: string[] }, @CurrentUser() user: JwtUserPayload) {
+    return this.adminService.assignUserRole(id, dto.role, user, dto.studioIds ?? []);
+  }
+
   @Delete('users/:id')
   deleteUser(@Param('id') id: string, @CurrentUser() user: JwtUserPayload) {
     return this.adminService.deleteUser(id, user);
   }
 
   @Get('appointments')
-  getAppointments(@Query() query: { date?: string; studioId?: string; masterId?: string; status?: AppointmentStatus }) {
+  getAppointments(@Query() query: { date?: string; studioId?: string; masterId?: string; serviceId?: string; status?: AppointmentStatus }) {
     return this.adminService.getSuperAdminAppointments(query);
   }
 
@@ -170,6 +180,81 @@ export class SuperAdminController {
   @Get('appointments/:id')
   getAppointment(@Param('id') id: string) {
     return this.adminService.getSuperAdminAppointment(id);
+  }
+
+  @Get('clients')
+  getClients(@Query() query: { search?: string }) {
+    return this.adminService.getClients(query);
+  }
+
+  @Get('tariffs')
+  getTariffs() {
+    return this.adminService.getSubscriptionPlans();
+  }
+
+  @Post('tariffs')
+  createTariff(@Body() dto: CreateSubscriptionPlanDto) {
+    return this.adminService.createSubscriptionPlan(dto);
+  }
+
+  @Patch('tariffs/:id')
+  updateTariff(@Param('id') id: string, @Body() dto: UpdateSubscriptionPlanDto) {
+    return this.adminService.updateSubscriptionPlan(id, dto);
+  }
+
+  @Delete('tariffs/:id')
+  removeTariff(@Param('id') id: string) {
+    return this.adminService.removeSubscriptionPlan(id);
+  }
+
+  @Get('subscriptions')
+  getSubscriptions() {
+    return this.adminService.getSubscriptions();
+  }
+
+  @Patch('subscriptions/:id/status')
+  updateSubscriptionStatus(@Param('id') id: string, @Body() dto: { status: SubscriptionStatus }, @CurrentUser() user: JwtUserPayload) {
+    return this.adminService.updateSubscriptionStatus(id, dto.status, user);
+  }
+
+  @Get('payments')
+  getPayments() {
+    return this.adminService.getPayments();
+  }
+
+  @Patch('payments/:id/status')
+  updatePaymentStatus(@Param('id') id: string, @Body() dto: { status: PaymentStatus }, @CurrentUser() user: JwtUserPayload) {
+    return this.adminService.updatePaymentStatus(id, dto.status, user);
+  }
+
+  @Get('certificates')
+  getCertificates() {
+    return this.adminService.getGiftCertificates();
+  }
+
+  @Get('requests')
+  getRequests(@Query() query: { status?: SupportTicketStatus; search?: string }) {
+    return this.adminService.getRequests(query);
+  }
+
+  @Patch('requests/:id')
+  updateRequest(@Param('id') id: string, @Body() dto: { status?: SupportTicketStatus }, @CurrentUser() user: JwtUserPayload) {
+    return this.adminService.updateRequest(id, dto, user);
+  }
+
+  @Get('analytics')
+  getAnalytics() {
+    return this.adminService.getAnalyticsSummary();
+  }
+
+  @Get('settings')
+  getNetworkSettings() {
+    return this.adminService.getNetworkSettings();
+  }
+
+  @Patch('settings')
+  updateNetworkSettings(@Body() dto: Record<string, unknown>, @CurrentUser() user: JwtUserPayload) {
+    return this.adminService.updateNetworkSettings(dto, user);
   }
 
   @Patch('appointments/:id')

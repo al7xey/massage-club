@@ -29,6 +29,7 @@ export function BookingDraftForm() {
   const [searchParams] = useSearchParams();
   const serviceIdFromQuery = searchParams.get('serviceId');
   const studioIdFromQuery = searchParams.get('studioId');
+  const masterIdFromQuery = searchParams.get('masterId');
   const { data: cartItems = [], isLoading: isLoadingCart } = useGetCartQuery();
   const { data: studios = [] } = useGetStudiosQuery();
   const { data: activeSubscription } = useGetMySubscriptionQuery();
@@ -73,6 +74,14 @@ export function BookingDraftForm() {
     setStudioId(studioIdFromQuery);
   }, [studioIdFromQuery, studios]);
 
+  useEffect(() => {
+    if (!masterIdFromQuery || !allMasters.some((master) => master.id === masterIdFromQuery)) {
+      return;
+    }
+
+    setSelectedMasterId(masterIdFromQuery);
+  }, [allMasters, masterIdFromQuery]);
+
   const selectedStudio = useMemo(() => studios.find((studio) => studio.id === studioId), [studioId, studios]);
   const selectedMaster = useMemo(() => allMasters.find((master) => master.id === selectedMasterId), [allMasters, selectedMasterId]);
   const remainingCredits = activeSubscription?.credits.reduce((sum, credit) => sum + credit.remainingCredits, 0) ?? 0;
@@ -101,9 +110,9 @@ export function BookingDraftForm() {
 
   const selectTime = useCallback((nextStartsAt: string) => {
     setStartsAt(nextStartsAt);
-    setSelectedMasterId('');
+    setSelectedMasterId(masterIdFromQuery ?? '');
     setError('');
-  }, []);
+  }, [masterIdFromQuery]);
 
   const selectStudio = (nextStudioId: string) => {
     setStudioId(nextStudioId);

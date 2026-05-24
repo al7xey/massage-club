@@ -21,7 +21,7 @@ export class CreateServiceDto {
 
   @ApiProperty({ example: 60 })
   @IsNumber()
-  @Min(15)
+  @Min(5)
   durationMinutes: number;
 
   @ApiPropertyOptional()

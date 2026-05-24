@@ -17,14 +17,13 @@ export function HomePage() {
 
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
-  const homeTariffCodes = new Set(['LADY', 'LADY_SUPER', 'FAMILY', 'FAMILY_SUPER']);
-  const builtTariffs = buildTariffs(plans);
-  const preferredTariffs = builtTariffs.filter((plan) => homeTariffCodes.has(plan.code));
-  const tariffs = (preferredTariffs.length > 0 ? preferredTariffs : builtTariffs).slice(0, 4);
+  const tariffs = buildTariffs(plans);
+  const womenTariffs = tariffs.filter((tariff) => tariff.segment === 'women');
+  const menTariffs = tariffs.filter((tariff) => tariff.segment === 'men');
   const heroTitle = 'Время для себя каждый месяц';
   const heroSubtitle = 'Позаботьтесь о своем теле и ментальном здоровье в атмосфере абсолютного спокойствия. Массаж, SPA и уход по единой подписке.';
   const heroPrimaryButton = 'Выбрать тариф';
-  const heroSecondaryButton = 'Записаться на услугу';
+  const heroSecondaryButton = 'Посмотреть мастеров';
 
   return (
     <main className={styles.page}>
@@ -34,7 +33,7 @@ export function HomePage() {
           <p>{heroSubtitle}</p>
           <div className={styles.heroActions}>
             <LinkButton to={appRoutes.subscriptions()}>{heroPrimaryButton}</LinkButton>
-            <LinkButton to={appRoutes.services()} variant="secondary">
+            <LinkButton to={appRoutes.masters()} variant="secondary">
               {heroSecondaryButton}
             </LinkButton>
           </div>
@@ -47,16 +46,31 @@ export function HomePage() {
         </div>
       </section>
 
-      <PlansCarousel
-        title="Стань членом клуба"
-        items={tariffs}
-        dotIdPrefix="home-plans-page"
-        topAction={
-          <LinkButton size="sm" to={appRoutes.subscriptions()} variant="secondary">
-            Смотреть все
-          </LinkButton>
-        }
-      />
+      {womenTariffs.length > 0 ? (
+        <PlansCarousel
+          title="Тарифы для женщин"
+          items={womenTariffs}
+          dotIdPrefix="home-plans-women"
+          topAction={
+            <LinkButton size="sm" to={appRoutes.subscriptions()} variant="secondary">
+              Все тарифы
+            </LinkButton>
+          }
+        />
+      ) : null}
+
+      {menTariffs.length > 0 ? (
+        <PlansCarousel
+          title="Тарифы для мужчин"
+          items={menTariffs}
+          dotIdPrefix="home-plans-men"
+          topAction={
+            <LinkButton size="sm" to={appRoutes.subscriptions()} variant="secondary">
+              Все тарифы
+            </LinkButton>
+          }
+        />
+      ) : null}
 
       <section className={styles.giftBanner}>
         <div>

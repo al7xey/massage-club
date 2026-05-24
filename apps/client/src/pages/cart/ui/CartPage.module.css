@@ -31,7 +31,7 @@
 
 .card {
   display: grid;
-  grid-template-columns: 164px minmax(0, 1fr) minmax(156px, auto);
+  grid-template-columns: 164px minmax(0, 1fr) minmax(136px, 180px);
   align-items: stretch;
   gap: 22px;
   border-radius: var(--radius-card-large);
@@ -81,9 +81,9 @@
 
 .card h3 {
   color: var(--color-text);
-  font-size: clamp(26px, 3vw, 32px);
-  line-height: 1.02;
-  letter-spacing: -0.04em;
+  font-size: clamp(24px, 2.4vw, 28px);
+  line-height: 1.08;
+  letter-spacing: 0;
 }
 
 .card p,
@@ -121,23 +121,36 @@
 
 .cardSide strong {
   color: var(--color-text);
-  font-size: clamp(24px, 2.8vw, 42px);
+  max-width: 100%;
+  font-size: clamp(22px, 2vw, 30px);
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: 0;
   text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.cardSide .includedPrice {
+  font-size: clamp(17px, 1.4vw, 21px);
+  line-height: 1.05;
+  letter-spacing: 0;
 }
 
 .cardSide :global(button) {
   min-width: 122px;
-  min-height: 52px;
+  min-height: 40px;
   border-radius: 28px;
-  padding-inline: 22px;
+  padding-inline: 16px;
   box-shadow: none;
 }
 
 .summary {
   position: sticky;
   top: 96px;
+  display: grid;
+  gap: 10px;
+}
+
+.superHint {
   display: grid;
   gap: 10px;
 }
@@ -170,6 +183,8 @@
   }
 
   .cardSide {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
     justify-items: start;
     padding-top: 0;
   }

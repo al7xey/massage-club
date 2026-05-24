@@ -20,7 +20,7 @@ export class MastersService {
   ) {}
 
   findAll() {
-    return this.mastersRepository.find({ where: { isActive: true }, order: { lastName: 'ASC' } });
+    return this.mastersRepository.find({ order: { lastName: 'ASC' } });
   }
 
   async findOne(id: string) {
@@ -42,7 +42,7 @@ export class MastersService {
       experienceYears: dto.experienceYears ?? 0,
       photoUrl: dto.photoUrl,
       photoUrls: normalizePhotoUrls(dto.photoUrls, dto.photoUrl),
-      isActive: dto.isActive ?? true,
+      isActive: true,
     });
     const studioIds = dto.studioIds ?? (dto.studioId ? [dto.studioId] : []);
     if (studioIds.length) {
@@ -70,7 +70,6 @@ export class MastersService {
     if (dto.photoUrls !== undefined || dto.photoUrl !== undefined) {
       master.photoUrls = normalizePhotoUrls(dto.photoUrls ?? master.photoUrls, dto.photoUrl ?? master.photoUrl);
     }
-    if (dto.isActive !== undefined) master.isActive = dto.isActive;
     const studioIds = dto.studioIds ?? (dto.studioId ? [dto.studioId] : undefined);
     if (studioIds) {
       master.studios = await this.studiosRepository.findBy({ id: In(studioIds) });
@@ -83,9 +82,9 @@ export class MastersService {
   }
 
   async remove(id: string) {
-    const master = await this.findOne(id);
-    master.isActive = false;
-    return this.mastersRepository.save(master);
+    await this.findOne(id);
+    await this.mastersRepository.softDelete(id);
+    return { deleted: true, id };
   }
 
   findShifts() {
@@ -151,12 +150,16 @@ function resolveShiftDates(dto: CreateMasterShiftDto) {
 }
 
 function normalizePhotoUrls(photoUrls?: string[], photoUrl?: string | null) {
-  const urls = (photoUrls ?? [])
-    .map((url) => url.trim())
-    .filter(Boolean);
+  const urls = Array.from(
+    new Set(
+      (photoUrls ?? [])
+        .map((url) => url.trim())
+        .filter(Boolean),
+    ),
+  );
   const primary = photoUrl?.trim();
-  if (primary && !urls.includes(primary)) {
-    return [primary, ...urls];
+  if (primary) {
+    return [primary, ...urls.filter((url) => url !== primary)];
   }
   return urls;
 }

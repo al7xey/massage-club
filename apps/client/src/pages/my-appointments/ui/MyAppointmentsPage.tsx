@@ -1,21 +1,34 @@
+import { useState } from 'react';
 import { useCancelAppointmentMutation, useGetMyAppointmentsQuery } from '@/entities/appointment';
 import { formatUserDisplayName } from '@/shared/lib/auth/formatUserDisplayName';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
-import { Button, EmptyState, StatusBadge, type StatusBadgeTone } from '@/shared/ui';
+import { Button, ConfirmModal, EmptyState, StatusBadge, type StatusBadgeTone } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import styles from './MyAppointmentsPage.module.css';
 
 export function MyAppointmentsPage() {
   const { data: appointments = [], isLoading, error } = useGetMyAppointmentsQuery();
   const [cancelAppointment, { isLoading: isCancelling }] = useCancelAppointmentMutation();
+  const [message, setMessage] = useState('');
+  const [pendingCancelAppointmentId, setPendingCancelAppointmentId] = useState<string | null>(null);
 
-  const handleCancel = async (appointmentId: string) => {
-    if (!window.confirm('Отменить запись?')) {
+  const requestCancel = (appointmentId: string) => {
+    setMessage('');
+    setPendingCancelAppointmentId(appointmentId);
+  };
+
+  const confirmCancel = async () => {
+    if (!pendingCancelAppointmentId) {
       return;
     }
 
-    await cancelAppointment(appointmentId).unwrap();
+    try {
+      await cancelAppointment(pendingCancelAppointmentId).unwrap();
+      setPendingCancelAppointmentId(null);
+    } catch (cancelError) {
+      setMessage(getApiErrorMessage(cancelError, 'Не удалось отменить запись'));
+    }
   };
 
   return (
@@ -23,6 +36,7 @@ export function MyAppointmentsPage() {
       <div className={styles.card}>
         {isLoading ? <p className={styles.empty}>Загружаем записи...</p> : null}
         {error ? <p className={styles.error}>{getApiErrorMessage(error, 'Не удалось загрузить записи')}</p> : null}
+        {message ? <p className={styles.error}>{message}</p> : null}
         {!isLoading && !error && appointments.length === 0 ? (
           <EmptyState title="Записей пока нет" description="Выберите услугу и удобное время, чтобы первая запись появилась здесь." />
         ) : null}
@@ -41,7 +55,7 @@ export function MyAppointmentsPage() {
                 </StatusBadge>
                 <strong>{appointment.paidBySubscriptionCredit ? 'По подписке' : formatPrice(appointment.priceRub)}</strong>
                 {appointment.status === 'SCHEDULED' ? (
-                  <Button size="sm" variant="danger" onClick={() => void handleCancel(appointment.id)} disabled={isCancelling}>
+                  <Button size="sm" variant="danger" onClick={() => requestCancel(appointment.id)} disabled={isCancelling}>
                     Отменить
                   </Button>
                 ) : null}
@@ -50,6 +64,15 @@ export function MyAppointmentsPage() {
           ))}
         </div>
       </div>
+      <ConfirmModal
+        confirmLabel="Отменить запись"
+        description="Мы отменим запись и освободим время в расписании."
+        isLoading={isCancelling}
+        isOpen={Boolean(pendingCancelAppointmentId)}
+        title="Отменить запись?"
+        onClose={() => setPendingCancelAppointmentId(null)}
+        onConfirm={() => void confirmCancel()}
+      />
     </PageShell>
   );
 }

@@ -1,5 +1,15 @@
 import { UserGender, UserRole } from '@massage/shared';
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Studio } from '../../studios/entities/studio.entity';
 
 @Entity('users')
 export class User {
@@ -29,6 +39,14 @@ export class User {
 
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
+
+  @ManyToMany(() => Studio, { eager: true })
+  @JoinTable({
+    name: 'admin_studios',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'studio_id', referencedColumnName: 'id' },
+  })
+  adminStudios: Studio[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

@@ -1,5 +1,7 @@
 export * from './auth-form';
+export * from './brand-mark';
 export * from './button';
+export * from './confirm-modal';
 export * from './empty-state';
 export * from './form';
 export * from './page-shell';

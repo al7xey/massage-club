@@ -1,8 +1,10 @@
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUploadAdminImageMutation } from '@/features/admin';
 import { useAuth } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { formatUserDisplayName } from '@/shared/lib/auth/formatUserDisplayName';
+import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
 import { Button, LinkButton, TextField } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
@@ -18,6 +20,7 @@ export function AccountSettingsPage() {
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl ?? '');
   const [message, setMessage] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [uploadImage, uploadState] = useUploadAdminImageMutation();
 
   useEffect(() => {
     setFullName(user?.fullName ?? '');
@@ -30,17 +33,32 @@ export function AccountSettingsPage() {
     return null;
   }
 
-  const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setAvatarUrl(typeof reader.result === 'string' ? reader.result : '');
-    };
-    reader.readAsDataURL(file);
+    if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+      setMessage('Поддерживаются только JPG, PNG, WebP или GIF');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage('Файл должен быть меньше 5 МБ');
+      return;
+    }
+
+    try {
+      setMessage('Загружаем фото...');
+      const result = await uploadImage(file).unwrap();
+      setAvatarUrl(result.url);
+      setMessage('Фото загружено');
+    } catch (error) {
+      setMessage(getApiErrorMessage(error, 'Не удалось загрузить фото'));
+    } finally {
+      event.target.value = '';
+    }
   };
 
   const handleSave = async (event: FormEvent<HTMLFormElement>) => {
@@ -85,7 +103,7 @@ export function AccountSettingsPage() {
     >
       <section className={styles.card}>
         <button className={styles.avatarButton} type="button" onClick={() => fileInputRef.current?.click()}>
-          {avatarUrl ? <img src={avatarUrl} alt={formatUserDisplayName(user)} /> : <span>{(user.fullName?.trim()?.[0] ?? 'Р').toUpperCase()}</span>}
+          {avatarUrl ? <img src={resolveMediaUrl(avatarUrl)} alt={formatUserDisplayName(user)} /> : <span>{(user.fullName?.trim()?.[0] ?? 'Р').toUpperCase()}</span>}
         </button>
         <input ref={fileInputRef} className={styles.fileInput} type="file" accept="image/*" onChange={handleAvatarChange} />
 
@@ -97,7 +115,7 @@ export function AccountSettingsPage() {
           {message ? <p className={styles.message}>{message}</p> : null}
 
           <div className={styles.actions}>
-            <Button isLoading={isSaving} loadingText="Сохраняем..." type="submit">
+            <Button isLoading={isSaving || uploadState.isLoading} loadingText="Сохраняем..." type="submit">
               Сохранить
             </Button>
             <Button variant="secondary" onClick={handleLogout}>

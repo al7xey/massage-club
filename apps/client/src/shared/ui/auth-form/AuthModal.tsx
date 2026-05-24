@@ -1,7 +1,7 @@
 import { type MouseEvent, PropsWithChildren, useCallback, useEffect, useRef } from 'react';
 import { type Location, useLocation, useNavigate } from 'react-router-dom';
-import brandLogo from '@/shared/assets/brand-logo.jpg';
 import { appRoutes } from '@/shared/routes';
+import { BrandMark } from '@/shared/ui';
 import styles from './AuthForm.module.css';
 
 interface AuthModalProps extends PropsWithChildren {
@@ -64,7 +64,7 @@ export function AuthModal({ title, children }: AuthModalProps) {
         <header className={styles.modalHeader}>
           <div className={styles.modalBrand}>
             <span className={styles.brandMark} aria-hidden="true">
-              <img src={brandLogo} alt="" />
+              <BrandMark />
             </span>
             RelaxUp
           </div>

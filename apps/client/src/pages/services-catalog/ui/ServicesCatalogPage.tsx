@@ -13,9 +13,9 @@ import styles from './ServicesCatalogPage.module.css';
 const priceMin = 0;
 const priceMax = 10000;
 const priceStep = 500;
-const durationMin = 15;
+const durationMin = 5;
 const durationMax = 150;
-const durationStep = 15;
+const durationStep = 5;
 const pageLimit = 12;
 
 const sortOptions = [
@@ -141,12 +141,6 @@ export function ServicesCatalogPage() {
 
   const updateMaxDuration = (value: number) => {
     setMaxDuration(Math.max(value, minDuration + durationStep));
-  };
-
-  const loadMore = () => {
-    if (!isFetching && data?.hasMore) {
-      setPage((current) => current + 1);
-    }
   };
 
   return (
@@ -292,13 +286,7 @@ export function ServicesCatalogPage() {
             </div>
 
             <div ref={sentinelRef} className={styles.sentinel} aria-hidden="true" />
-            {data?.hasMore ? (
-              <div className={styles.moreWrap}>
-                <Button variant="secondary" isLoading={isFetching} loadingText="Загружаем..." onClick={loadMore}>
-                  Показать еще
-                </Button>
-              </div>
-            ) : null}
+            {data?.hasMore || isFetching ? <p className={styles.state}>{isFetching ? 'Загружаем еще услуги...' : 'Прокрутите ниже, чтобы увидеть больше услуг.'}</p> : null}
           </div>
         </div>
       </section>

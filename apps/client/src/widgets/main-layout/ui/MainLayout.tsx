@@ -1,45 +1,45 @@
 import { useEffect, useId, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '@/features/auth';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useGetCartQuery } from '@/entities/cart';
-import brandLogo from '@/shared/assets/brand-logo.jpg';
+import { useAuth } from '@/features/auth';
+import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
-import { LinkButton } from '@/shared/ui';
+import { BrandMark, LinkButton } from '@/shared/ui';
 import styles from './MainLayout.module.css';
+
+type MobileIconName = 'home' | 'cart' | 'calendar' | 'user' | 'menu' | 'login' | 'building' | 'gift' | 'star' | 'credit-card';
 
 const links = [
   [appRoutes.services(), 'Услуги'],
-  [appRoutes.subscriptions(), 'Членство'],
+  [appRoutes.subscriptions(), 'Тарифы'],
   [appRoutes.studios(), 'Студии'],
   [appRoutes.masters(), 'Мастера'],
   [appRoutes.certificates(), 'Сертификаты'],
 ] as const;
 
-const secondaryLinks = [
-  [appRoutes.reviews(), 'Отзывы'],
-  [appRoutes.contacts(), 'Контакты'],
-  [appRoutes.legal(), 'Документы'],
-] as const;
-
 const bottomLinks = [
-  [appRoutes.services(), 'Услуги', 'services'],
-  [appRoutes.subscriptions(), 'Клуб', 'club'],
-  [appRoutes.studios(), 'Студии', 'studios'],
-  [appRoutes.masters(), 'Мастера', 'masters'],
+  { icon: 'cart' as const, label: 'Услуги', to: appRoutes.services(), match: (path: string) => path.startsWith('/services') },
+  { icon: 'credit-card' as const, label: 'Тарифы', to: appRoutes.subscriptions(), match: (path: string) => path.startsWith('/subscriptions') },
+  { icon: 'building' as const, label: 'Студии', to: appRoutes.studios(), match: (path: string) => path.startsWith('/studios') },
+  { icon: 'user' as const, label: 'Мастера', to: appRoutes.masters(), match: (path: string) => path.startsWith('/masters') },
+  { icon: 'gift' as const, label: 'Сертификаты', to: appRoutes.certificates(), match: (path: string) => path.startsWith('/certificates') },
 ] as const;
 
 export function MainLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const mobileMenuId = useId();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isAuthLoading, user } = useAuth();
   const { data: cartItems = [] } = useGetCartQuery(undefined, { skip: !user });
   const logoRoute = user ? appRoutes.account() : appRoutes.home();
   const accountInitial = (user?.fullName?.trim()?.[0] ?? 'Р').toUpperCase();
-  const authState = { backgroundLocation: location, from: location.pathname };
+  const authState = { from: `${location.pathname}${location.search}` };
+  const profileRoute = user ? appRoutes.account() : appRoutes.login();
+  const showBackLink = location.pathname !== '/';
   const footerText = 'Wellness-клуб с подпиской на массаж, SPA и уходовые процедуры.';
   const contactPhone = '8 (800) 555-35-35';
-  const contactEmail = 'hello@dlyasebya.ru';
+  const contactEmail = 'hello@relaxup.ru';
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
@@ -51,7 +51,7 @@ export function MainLayout() {
         <div className={styles.headerInner}>
           <NavLink to={logoRoute} className={styles.logo}>
             <span className={styles.brandMark} aria-hidden="true">
-              <img src={brandLogo} alt="" />
+              <BrandMark />
             </span>
             RelaxUp
           </NavLink>
@@ -67,47 +67,29 @@ export function MainLayout() {
           <div className={styles.actions}>
             {!user && !isAuthLoading ? (
               <>
-                <LinkButton state={authState} to={appRoutes.login()} variant="secondary" size="sm">
+                <LinkButton className={styles.headerGuestButton} state={authState} to={appRoutes.login()} variant="secondary" size="sm">
                   Войти
                 </LinkButton>
-                <LinkButton to={appRoutes.subscriptions()} size="sm">
-                  Стать частью клуба
+                <LinkButton className={styles.headerGuestButton} to={appRoutes.subscriptions()} size="sm">
+                  Выбрать тариф
                 </LinkButton>
               </>
             ) : null}
 
             {user ? (
               <>
-                <LinkButton
-                  aria-label={`Корзина, товаров: ${cartItems.length}`}
-                  className={styles.iconButton}
-                  to={appRoutes.cart()}
-                  variant="secondary"
-                  size="sm"
-                >
-                  <svg className={styles.cartIcon} width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10.5 15.5L9.5 12" stroke="currentColor" strokeLinecap="round" />
-                    <path d="M8.5 6.5L6.5 9.5M15.5 6.5L17.5 9.5" stroke="currentColor" strokeLinecap="round" />
-                    <path d="M13.5 15.5L14.5 12" stroke="currentColor" strokeLinecap="round" />
-                    <path d="M4.5 9.5C5.08429 9.5 5.59018 9.90581 5.71693 10.4762L6.80394 15.3677C7.13763 16.8694 7.30448 17.6202 7.85289 18.0601C8.4013 18.5 9.17043 18.5 10.7087 18.5H13.2913C14.8296 18.5 15.5987 18.5 16.1471 18.0601C16.6955 17.6202 16.8624 16.8694 17.1961 15.3677L18.2831 10.4762C18.4098 9.90581 18.9157 9.5 19.5 9.5" stroke="currentColor" strokeLinecap="round" />
-                    <path d="M3.5 9.5H20.5" stroke="currentColor" strokeLinecap="round" />
-                  </svg>
-                  <strong className={styles.cartBadge}>{cartItems.length}</strong>
+                <LinkButton aria-label={`Корзина, товаров: ${cartItems.length}`} className={styles.iconButton} to={appRoutes.cart()} variant="secondary" size="sm">
+                  <MobileNavIcon name="cart" />
+                  {cartItems.length > 0 ? <strong className={styles.cartBadge}>{cartItems.length}</strong> : null}
                 </LinkButton>
                 {user.role === 'ADMIN' || user.role === 'SUPER_ADMIN' ? (
                   <LinkButton to={user.role === 'SUPER_ADMIN' ? appRoutes.superAdmin() : appRoutes.admin()} variant="secondary" size="sm">
                     Админ-панель
                   </LinkButton>
                 ) : null}
-                <LinkButton
-                  aria-label="Личный кабинет"
-                  className={styles.iconButton}
-                  to={appRoutes.account()}
-                  variant="secondary"
-                  size="sm"
-                >
+                <LinkButton aria-label="Профиль" className={styles.iconButton} to={appRoutes.account()} variant="secondary" size="sm">
                   <span className={styles.avatar} aria-hidden="true">
-                    {user.avatarUrl ? <img src={user.avatarUrl} alt="" /> : accountInitial}
+                    {user.avatarUrl ? <img src={resolveMediaUrl(user.avatarUrl)} alt="" /> : accountInitial}
                   </span>
                 </LinkButton>
               </>
@@ -139,7 +121,7 @@ export function MainLayout() {
             </div>
 
             <nav className={styles.mobileMenuNav} aria-label="Разделы сайта">
-              {[...links, ...secondaryLinks].map(([to, label]) => (
+              {links.map(([to, label]) => (
                 <NavLink key={to} to={to} className={({ isActive }) => (isActive ? styles.mobileActiveLink : undefined)}>
                   {label}
                 </NavLink>
@@ -153,7 +135,7 @@ export function MainLayout() {
                     Войти
                   </LinkButton>
                   <LinkButton to={appRoutes.subscriptions()} fullWidth>
-                    Стать частью клуба
+                    Выбрать тариф
                   </LinkButton>
                 </>
               ) : null}
@@ -164,7 +146,7 @@ export function MainLayout() {
                     Корзина ({cartItems.length})
                   </LinkButton>
                   <LinkButton to={appRoutes.account()} variant="secondary" fullWidth>
-                    Личный кабинет
+                    Профиль
                   </LinkButton>
                   <LinkButton to={appRoutes.accountAppointments()} variant="secondary" fullWidth>
                     Мои записи
@@ -181,43 +163,34 @@ export function MainLayout() {
         </div>
       ) : null}
 
+      {showBackLink ? (
+        <div className={styles.backRow}>
+          <button type="button" onClick={() => navigate(-1)}>
+            ← Назад
+          </button>
+        </div>
+      ) : null}
+
       <Outlet />
 
       <nav className={styles.bottomNav} aria-label="Быстрая навигация">
-        {bottomLinks.map(([to, label, icon]) => (
-          <NavLink
-            key={to}
-            to={to}
-            aria-label={label}
-            className={({ isActive }) => (isActive ? styles.bottomNavActive : styles.bottomNavLink)}
-          >
-            <MobileNavIcon name={icon} />
-            <span>{label}</span>
-          </NavLink>
-        ))}
-        {!user && !isAuthLoading ? (
-          <NavLink
-            aria-label="Войти"
-            className={({ isActive }) => (isActive ? styles.bottomNavActive : styles.bottomNavLink)}
-            state={authState}
-            to={appRoutes.login()}
-          >
-            <MobileNavIcon name="login" />
-            <span>Войти</span>
-          </NavLink>
-        ) : (
-          <button
-            className={styles.bottomNavMenuButton}
-            type="button"
-            aria-label="Открыть меню"
-            aria-expanded={isMobileMenuOpen}
-            aria-controls={mobileMenuId}
-            onClick={() => setIsMobileMenuOpen(true)}
-          >
-            <MobileNavIcon name="menu" />
-            <span>Ещё</span>
-          </button>
-        )}
+        {bottomLinks.map((item) => {
+          const isActive = item.match(location.pathname);
+          return (
+            <NavLink key={item.to} to={item.to} aria-label={item.label} className={isActive ? styles.bottomNavActive : styles.bottomNavLink}>
+              <MobileNavIcon name={item.icon} />
+              {item.to === appRoutes.cart() && cartItems.length > 0 ? <strong className={styles.bottomBadge}>{cartItems.length}</strong> : null}
+            </NavLink>
+          );
+        })}
+        <NavLink
+          aria-label={user ? 'Профиль' : 'Войти'}
+          className={location.pathname.startsWith('/account') || location.pathname.startsWith('/login') ? styles.bottomNavActive : styles.bottomNavLink}
+          state={user ? undefined : authState}
+          to={profileRoute}
+        >
+          <MobileNavIcon name={user ? 'user' : 'login'} />
+        </NavLink>
       </nav>
 
       <footer className={styles.footer}>
@@ -225,7 +198,7 @@ export function MainLayout() {
           <div>
             <p className={styles.footerBrand}>
               <span className={styles.brandMark} aria-hidden="true">
-                <img src={brandLogo} alt="" />
+                <BrandMark />
               </span>
               RelaxUp
             </p>
@@ -234,7 +207,7 @@ export function MainLayout() {
           <div>
             <h4>Клуб</h4>
             <Link to={appRoutes.studios()}>Студии</Link>
-            <Link to={appRoutes.subscriptions()}>Членство</Link>
+            <Link to={appRoutes.subscriptions()}>Тарифы</Link>
             <Link to={appRoutes.contacts()}>Контакты</Link>
           </div>
           <div>
@@ -255,56 +228,25 @@ export function MainLayout() {
   );
 }
 
-function MobileNavIcon({ name }: { name: (typeof bottomLinks)[number][2] | 'login' | 'menu' }) {
-  if (name === 'services') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 3.5L13.8 8l4.7 1.7-4.7 1.8L12 16l-1.8-4.5-4.7-1.8L10.2 8 12 3.5Z" />
-        <path d="M18 15l.9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9L18 15Z" />
-      </svg>
-    );
-  }
-
-  if (name === 'club') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M5 7.5A2.5 2.5 0 0 1 7.5 5h9A2.5 2.5 0 0 1 19 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 5 16.5v-9Z" />
-        <path d="M8 9h8M8 13h5" />
-      </svg>
-    );
-  }
-
-  if (name === 'studios') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 21s6-5.2 6-11a6 6 0 0 0-12 0c0 5.8 6 11 6 11Z" />
-        <path d="M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
-      </svg>
-    );
-  }
-
-  if (name === 'masters') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 5.5 14 9l3.8.6-2.7 2.6.6 3.8-3.7-2-3.7 2 .6-3.8L6.2 9.6 10 9l2-3.5Z" />
-        <path d="M7 19h10" />
-      </svg>
-    );
-  }
-
-  if (name === 'login') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M14 5h3.5A1.5 1.5 0 0 1 19 6.5v11a1.5 1.5 0 0 1-1.5 1.5H14" />
-        <path d="M5 12h9" />
-        <path d="M11 8.5 14.5 12 11 15.5" />
-      </svg>
-    );
-  }
+function MobileNavIcon({ name }: { name: MobileIconName }) {
+  const paths: Record<MobileIconName, string[]> = {
+    home: ['M4 10.5 12 4l8 6.5', 'M6 10v9h12v-9', 'M10 19v-5h4v5'],
+    cart: ['M6 7h13l-1.4 7.5H8L6.8 4.5H4', 'M9 19a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM17 19a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z'],
+    calendar: ['M7 4v3M17 4v3', 'M5 8h14', 'M6.5 5.5h11A1.5 1.5 0 0 1 19 7v11a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 18V7a1.5 1.5 0 0 1 1.5-1.5Z'],
+    user: ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z', 'M5 20c1.3-3.3 3.6-5 7-5s5.7 1.7 7 5'],
+    menu: ['M5 7h14M5 12h14M5 17h14'],
+    login: ['M14 5h3.5A1.5 1.5 0 0 1 19 6.5v11a1.5 1.5 0 0 1-1.5 1.5H14', 'M5 12h9', 'M11 8.5 14.5 12 11 15.5'],
+    building: ['M5.5 20V5.5h8V20', 'M13.5 9.5h5V20', 'M8 8h2M8 11h2M16 13h1'],
+    gift: ['M5 10h14v10H5V10Z', 'M12 10v10M4 10h16', 'M8.5 7.5C6 7.5 6 4 8.5 4 11 4 12 8 12 8s1-4 3.5-4S18 7.5 15.5 7.5H8.5Z'],
+    star: ['M12 4.5 14.2 9l4.8.7-3.5 3.4.9 4.9-4.4-2.3L7.6 18l.9-4.9L5 9.7 9.8 9 12 4.5Z'],
+    'credit-card': ['M4.5 7.5h15v10h-15v-10Z', 'M4.5 10.5h15', 'M7 15h4'],
+  };
 
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M5 7h14M5 12h14M5 17h14" />
+      {paths[name].map((path) => (
+        <path d={path} key={path} />
+      ))}
     </svg>
   );
 }

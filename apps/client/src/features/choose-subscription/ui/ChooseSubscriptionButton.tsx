@@ -1,13 +1,8 @@
-import { resolveSubscriptionPurchaseMode } from '@massage/shared/lib/subscription-benefits';
-import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
-import { getSubscriptionPlanTitle, useGetMySubscriptionQuery, useGetSubscriptionPlansQuery } from '@/entities/subscription';
-import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { reachGoal } from '@/shared/lib/analytics/yandexMetrika';
 import { appRoutes } from '@/shared/routes';
 import { Button } from '@/shared/ui';
-import { useCreateSubscriptionMutation } from '../api/chooseSubscriptionApi';
 import styles from './ChooseSubscriptionButton.module.css';
 
 interface ChooseSubscriptionButtonProps {
@@ -18,62 +13,30 @@ export function ChooseSubscriptionButton({ planId }: ChooseSubscriptionButtonPro
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: plans = [] } = useGetSubscriptionPlansQuery();
-  const { data: activeSubscription } = useGetMySubscriptionQuery(undefined, { skip: !user });
-  const [createSubscription, { isLoading }] = useCreateSubscriptionMutation();
-  const [message, setMessage] = useState('');
 
-  const handleClick = async () => {
+  const handleClick = () => {
+    reachGoal('tariff_select', { planId });
+
     if (!user) {
       navigate(appRoutes.login(), {
         state: {
           action: 'subscription',
           backgroundLocation: location,
-          from: `${appRoutes.subscriptions()}?purchasePlanId=${encodeURIComponent(planId)}`,
+          from: appRoutes.subscriptionPurchase(planId),
           planId,
         },
       });
       return;
     }
 
-    const plan = plans.find((item) => item.id === planId);
-    if (!plan) {
-      setMessage('Тариф не найден');
-      return;
-    }
-
-    const planTitle = getSubscriptionPlanTitle(plan.code, plan.name);
-    const purchaseMode = resolveSubscriptionPurchaseMode(activeSubscription?.plan.id, planId);
-    const confirmText =
-      purchaseMode === 'EXTEND'
-        ? `Покупка тарифа\n\nПродлить тариф ${planTitle} еще на ${plan.periodDays} дней за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
-        : purchaseMode === 'SWITCH'
-          ? `Покупка тарифа\n\nЗаменить текущую подписку тарифом ${planTitle} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`
-          : `Покупка тарифа\n\nПодтвердить покупку тарифа ${planTitle} за ${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽?`;
-
-    if (!window.confirm(confirmText)) {
-      return;
-    }
-
-    try {
-      reachGoal('tariff_select', { planId, planCode: plan.code });
-      reachGoal('payment_start', { planId, amountRub: plan.monthlyPriceRub });
-      const subscription = await createSubscription({ planId }).unwrap();
-      const remainingCredits = subscription.credits.reduce((sum, credit) => sum + credit.remainingCredits, 0);
-      reachGoal('payment_success', { planId, subscriptionId: subscription.id });
-      setMessage(`Тариф ${getSubscriptionPlanTitle(subscription.plan.code, subscription.plan.name)} активен. Доступных визитов: ${remainingCredits}.`);
-    } catch (error) {
-      reachGoal('payment_error', { planId });
-      setMessage(getApiErrorMessage(error, 'Не удалось купить тариф'));
-    }
+    navigate(appRoutes.subscriptionPurchase(planId));
   };
 
   return (
     <div className={styles.root}>
-      <Button data-plan-id={planId} fullWidth isLoading={isLoading} loadingText="Оформляем..." onClick={handleClick}>
+      <Button data-plan-id={planId} fullWidth onClick={handleClick}>
         Выбрать тариф
       </Button>
-      {message ? <span className={styles.message}>{message}</span> : null}
     </div>
   );
 }

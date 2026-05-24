@@ -10,7 +10,7 @@
 
 .segmentItem,
 .segmentActive {
-  min-height: 42px;
+  min-height: 40px;
   border: 0;
   border-radius: var(--radius-card-small);
   background: transparent;

@@ -78,6 +78,7 @@
   color: var(--color-on-primary);
   font-size: 18px;
   font-weight: 900;
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -350,15 +351,33 @@
 
 @media (max-width: 720px) {
   .studioSection {
+    gap: 12px;
+    border-radius: 24px;
     padding: 12px;
   }
 
   .gallery {
-    min-height: 220px;
+    min-height: 190px;
+    border-radius: 18px;
   }
 
   .studioInfo {
-    padding: 22px;
+    border-radius: 18px;
+    padding: 18px;
+  }
+
+  .studioInfo h2 {
+    font-size: 22px;
+    letter-spacing: 0;
+  }
+
+  .studioInfo dl {
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .bookButton {
+    width: 100%;
   }
 
   .relatedGrid {
@@ -387,17 +406,17 @@
 
   .galleryControls button,
   .galleryDots button {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 40px;
+    min-height: 40px;
   }
 
   .galleryDots {
-    bottom: 18px;
+    bottom: 14px;
     gap: 4px;
   }
 
   .galleryDots button[aria-pressed="true"] {
-    width: 44px;
+    width: 40px;
   }
 
   .mapLink,

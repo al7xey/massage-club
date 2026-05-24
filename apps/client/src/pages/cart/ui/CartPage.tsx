@@ -3,7 +3,9 @@ import { useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAddCartItemMutation, useGetCartQuery, useRemoveCartItemMutation } from '@/entities/cart';
 import { getSubscriptionPlanTitle, useGetMySubscriptionQuery } from '@/entities/subscription';
+import { useAuth } from '@/features/auth';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
+import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
 import { Button, EmptyState, LinkButton } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
@@ -12,9 +14,10 @@ import styles from './CartPage.module.css';
 export function CartPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const addServiceId = searchParams.get('addServiceId');
-  const { data: cartItems = [], isLoading } = useGetCartQuery();
-  const { data: activeSubscription } = useGetMySubscriptionQuery();
+  const { data: cartItems = [], isLoading } = useGetCartQuery(undefined, { skip: !user });
+  const { data: activeSubscription } = useGetMySubscriptionQuery(undefined, { skip: !user });
   const [addCartItem, { isLoading: isAdding }] = useAddCartItemMutation();
   const [removeCartItem, { isLoading: isRemoving }] = useRemoveCartItemMutation();
 
@@ -23,12 +26,17 @@ export function CartPage() {
       return;
     }
 
+    if (!user) {
+      navigate(appRoutes.login(), { replace: true, state: { from: `${appRoutes.cart()}?addServiceId=${addServiceId}` } });
+      return;
+    }
+
     void addCartItem({ serviceId: addServiceId })
       .unwrap()
       .finally(() => {
         navigate(appRoutes.cart(), { replace: true });
       });
-  }, [addCartItem, addServiceId, navigate]);
+  }, [addCartItem, addServiceId, navigate, user]);
 
   const remainingCredits = useMemo(
     () => activeSubscription?.credits.reduce((sum, credit) => sum + credit.remainingCredits, 0) ?? 0,
@@ -58,7 +66,14 @@ export function CartPage() {
       <section className={styles.layout}>
         <div className={styles.list}>
           {isLoading || isAdding ? <p className={styles.state}>Загружаем корзину...</p> : null}
-          {!isLoading && cartItems.length === 0 ? (
+          {!user ? (
+            <EmptyState
+              title="Корзина пока пуста"
+              description="Войдите, чтобы сохранить выбранные услуги и оформить запись."
+              actions={<LinkButton state={{ from: appRoutes.cart() }} to={appRoutes.login()}>Войти</LinkButton>}
+            />
+          ) : null}
+          {user && !isLoading && cartItems.length === 0 ? (
             <EmptyState
               title="Корзина пока пуста"
               description="Добавьте услуги из каталога или со страницы детали, а затем перейдите к оформлению записи."
@@ -72,7 +87,7 @@ export function CartPage() {
             return (
               <article className={styles.card} key={item.id}>
                 <div className={styles.imageWrap}>
-                  <img className={styles.image} src={getServiceImageUrl(item.service.category?.slug)} alt="" loading="lazy" />
+                  <img className={styles.image} src={getServiceImageUrl(item.service)} alt="" loading="lazy" />
                 </div>
 
                 <div className={styles.cardBody}>
@@ -89,14 +104,16 @@ export function CartPage() {
                           Скидка {preview.discountPercent}%: {formatPrice(preview.basePriceRub)} → {formatPrice(preview.finalPriceRub)}
                         </span>
                       ) : (
-                        <span>Стоимость без скидки: {formatPrice(preview.basePriceRub)}</span>
+                        <span>Super: скидка 30% - {formatPrice(getSuperPrice(preview.basePriceRub))} вместо {formatPrice(preview.basePriceRub)}</span>
                       )}
                     </div>
                   ) : null}
                 </div>
 
                 <div className={styles.cardSide}>
-                  <strong>{preview?.paidBySubscriptionCredit ? 'Включено в подписку' : formatPrice(preview?.finalPriceRub ?? item.service.priceRub)}</strong>
+                  <strong className={preview?.paidBySubscriptionCredit ? styles.includedPrice : undefined}>
+                    {preview?.paidBySubscriptionCredit ? 'В подписке' : formatPrice(preview?.finalPriceRub ?? item.service.priceRub)}
+                  </strong>
                   <Button size="sm" variant="danger" disabled={isRemoving} onClick={() => void removeCartItem(item.id)}>
                     Удалить
                   </Button>
@@ -117,7 +134,10 @@ export function CartPage() {
                 {pricingPreview.subscriptionCreditsUsed} визита и сэкономим {formatPrice(savedAmountRub)}.
               </p>
             ) : (
-              <p>На следующем шаге вы выберете студию, дату, время и мастеров для каждой услуги отдельно.</p>
+              <div className={styles.superHint}>
+                <p>Подписка Super даст скидку 30%: итог будет {formatPrice(getSuperPrice(baseAmountRub))} вместо {formatPrice(baseAmountRub)}.</p>
+                <LinkButton to={appRoutes.subscriptions()} variant="secondary">Перейти к тарифам</LinkButton>
+              </div>
             )}
             <LinkButton to={appRoutes.booking()}>Перейти к оформлению</LinkButton>
           </aside>
@@ -133,7 +153,17 @@ function isClassicMassage(service: { category?: { slug?: string } | null; title:
   return categorySlug.includes('massage') && title.includes('классический');
 }
 
-function getServiceImageUrl(categorySlug?: string) {
+function getSuperPrice(priceRub: number) {
+  return Math.round(Math.max(0, priceRub) * 0.7);
+}
+
+function getServiceImageUrl(service: { category?: { slug?: string } | null; galleryUrls?: string[] | null; imageUrl?: string | null }) {
+  const uploadedUrl = resolveMediaUrl(service.imageUrl ?? service.galleryUrls?.[0]);
+  if (uploadedUrl) {
+    return uploadedUrl;
+  }
+
+  const categorySlug = service.category?.slug;
   if (categorySlug === 'face-care') {
     return 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=420&q=80';
   }

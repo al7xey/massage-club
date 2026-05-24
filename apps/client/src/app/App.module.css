@@ -22,6 +22,7 @@
   --color-primary-hover: #5f7b41;
   --color-on-primary: #ffffff;
   --color-accent: #d8a441;
+  --color-danger: #b54b4b;
   --color-danger-bg: #fff3f3;
   --container-max: 1240px;
   --container-page: min(var(--container-max), calc(100% - 56px));
@@ -137,9 +138,9 @@
     --font-h2: 24px;
     --font-h3: 18px;
     --control-height: 48px;
-    --radius-card-small: 16px;
-    --radius-card: 16px;
-    --radius-card-large: 22px;
+    --radius-card-small: 22px;
+    --radius-card: 26px;
+    --radius-card-large: 32px;
     --catalog-card-min-width: 148px;
     --catalog-card-gap-row: 12px;
     --catalog-card-gap-column: 10px;

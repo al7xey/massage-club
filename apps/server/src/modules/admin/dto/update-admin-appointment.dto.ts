@@ -47,6 +47,12 @@ export class UpdateAdminAppointmentDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
+  @Min(5)
+  durationMinutes?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
   @Min(0)
   priceRub?: number;
 

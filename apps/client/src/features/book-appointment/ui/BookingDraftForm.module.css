@@ -443,9 +443,14 @@
 }
 
 @media (max-width: 760px) {
+  .root {
+    gap: 14px;
+  }
+
   .stage,
   .successCard {
-    padding: 22px;
+    border-radius: 26px;
+    padding: 20px;
   }
 
   .stepper,
@@ -455,10 +460,57 @@
     grid-template-columns: 1fr;
   }
 
+  .stepper {
+    display: flex;
+    overflow-x: auto;
+    border-radius: 24px;
+    padding: 10px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .stepButton {
+    min-width: 86px;
+    scroll-snap-align: start;
+  }
+
   .serviceRow,
   .stageActions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .serviceRow,
+  .choiceCard,
+  .dateButton,
+  .slotButton,
+  .masterButton,
+  .confirmCard,
+  .totalCard,
+  .sideSummary {
+    border-radius: 24px;
+  }
+
+  .slotGrid,
+  .dateGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .slotButton,
+  .dateButton,
+  .masterButton,
+  .choiceCard {
+    min-height: 52px;
+  }
+
+  .stageActions {
+    position: sticky;
+    z-index: 2;
+    bottom: 82px;
+    border: 1px solid rgba(214, 222, 210, 0.72);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 10px;
+    backdrop-filter: blur(16px);
   }
 
   .stageActions > *,

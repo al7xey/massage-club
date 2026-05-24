@@ -5,6 +5,7 @@ import path from 'node:path';
 import { UploadedFile } from '../../common/types/uploaded-file.type';
 
 const allowedMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+const maxFileSizeBytes = 5 * 1024 * 1024;
 
 @Injectable()
 export class UploadsService {
@@ -15,6 +16,10 @@ export class UploadsService {
 
     if (!allowedMimeTypes.has(file.mimetype)) {
       throw new BadRequestException('Only image uploads are allowed');
+    }
+
+    if (file.size > maxFileSizeBytes) {
+      throw new BadRequestException('Image must be smaller than 5 MB');
     }
 
     const extension = resolveExtension(file.originalname, file.mimetype);

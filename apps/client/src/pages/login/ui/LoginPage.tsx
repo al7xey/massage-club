@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { appRoutes } from '@/shared/routes';
-import { AuthModal, Button, TextField } from '@/shared/ui';
+import { Button, TextField } from '@/shared/ui';
 import styles from '@/shared/ui/auth-form/AuthForm.module.css';
 
 interface AuthLocationState {
@@ -28,6 +28,7 @@ export function LoginPage() {
     state?.denied ? 'Нет доступа к выбранному разделу. Войдите под аккаунтом с нужной ролью.' : '',
   );
   const [isLoading, setIsLoading] = useState(false);
+
   const submitLogin = async (nextIdentifier: string, nextPassword: string) => {
     setIsLoading(true);
 
@@ -55,48 +56,56 @@ export function LoginPage() {
   };
 
   return (
-    <AuthModal title="Вход">
-      <form className={styles.form} onSubmit={handleSubmit} noValidate>
-        <TextField
-          autoComplete="username"
-          label="Почта или телефон"
-          placeholder="Введите почту или телефон"
-          type="text"
-          value={identifier}
-          onChange={(event) => {
-            setIdentifier(event.target.value);
-            setError('');
-          }}
-        />
-        <TextField
-          autoComplete="current-password"
-          label="Пароль"
-          placeholder="Введите пароль"
-          type={isPasswordVisible ? 'text' : 'password'}
-          value={password}
-          endAdornment={
-            <PasswordToggle
-              isVisible={isPasswordVisible}
-              onClick={() => setIsPasswordVisible((value) => !value)}
-            />
-          }
-          onChange={(event) => {
-            setPassword(event.target.value);
-            setError('');
-          }}
-        />
+    <main className={styles.pageRoot}>
+      <section className={styles.pageCard} aria-labelledby="login-title">
+        <div className={styles.modalIntro}>
+          <h1 id="login-title">Вход</h1>
+        </div>
+        <form className={styles.form} onSubmit={handleSubmit} noValidate>
+          <TextField
+            autoComplete="username"
+            label="Почта или телефон"
+            placeholder="Введите почту или телефон"
+            type="text"
+            value={identifier}
+            onChange={(event) => {
+              setIdentifier(event.target.value);
+              setError('');
+            }}
+          />
+          <TextField
+            autoComplete="current-password"
+            label="Пароль"
+            placeholder="Введите пароль"
+            type={isPasswordVisible ? 'text' : 'password'}
+            value={password}
+            endAdornment={
+              <PasswordToggle
+                isVisible={isPasswordVisible}
+                onClick={() => setIsPasswordVisible((value) => !value)}
+              />
+            }
+            onChange={(event) => {
+              setPassword(event.target.value);
+              setError('');
+            }}
+          />
 
-        {error ? <p className={styles.error}>{error}</p> : null}
+          {error ? <p className={styles.error}>{error}</p> : null}
 
-        <Button className={styles.primarySubmit} fullWidth isLoading={isLoading} loadingText="Входим..." type="submit">
-          Войти
-        </Button>
+          <Button className={styles.primarySubmit} fullWidth isLoading={isLoading} loadingText="Входим..." type="submit">
+            Войти
+          </Button>
 
-        <p className={styles.note}>
-          Нет аккаунта? <Link state={state} to={appRoutes.register()}>Зарегистрироваться</Link>
-        </p>
-      </form>
-    </AuthModal>
+          <p className={styles.note}>
+            Нет аккаунта?{' '}
+            <Link state={state} to={appRoutes.register()}>
+              Зарегистрироваться
+            </Link>
+          </p>
+        </form>
+      </section>
+    </main>
   );
 }
 
@@ -108,12 +117,29 @@ function PasswordToggle({ isVisible, onClick }: { isVisible: boolean; onClick: (
           <>
             <path d="M4 4l16 16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
             <path d="M10.7 10.7a2 2 0 0 0 2.6 2.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            <path d="M7.5 7.8C5.8 8.8 4.4 10.2 3.5 12c1.7 3.2 4.8 5.5 8.5 5.5 1.4 0 2.7-.3 3.9-.9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M10.2 6.7c.6-.1 1.2-.2 1.8-.2 3.7 0 6.8 2.3 8.5 5.5-.4.8-1 1.6-1.6 2.3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M7.5 7.8C5.8 8.8 4.4 10.2 3.5 12c1.7 3.2 4.8 5.5 8.5 5.5 1.4 0 2.7-.3 3.9-.9"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M10.2 6.7c.6-.1 1.2-.2 1.8-.2 3.7 0 6.8 2.3 8.5 5.5-.4.8-1 1.6-1.6 2.3"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </>
         ) : (
           <>
-            <path d="M3.5 12c1.7-3.2 4.8-5.5 8.5-5.5s6.8 2.3 8.5 5.5c-1.7 3.2-4.8 5.5-8.5 5.5S5.2 15.2 3.5 12Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+            <path
+              d="M3.5 12c1.7-3.2 4.8-5.5 8.5-5.5s6.8 2.3 8.5 5.5c-1.7 3.2-4.8 5.5-8.5 5.5S5.2 15.2 3.5 12Z"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinejoin="round"
+            />
             <path d="M12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" strokeWidth="1.8" />
           </>
         )}
@@ -195,8 +221,8 @@ function resolvePostAuthPath(state: AuthLocationState | null, role: PublicUserDt
     return `${appRoutes.booking()}?serviceId=${encodeURIComponent(state.serviceId)}`;
   }
 
-  if (state.from && !state.from.startsWith('/admin') && !state.from.startsWith('/super-admin')) {
-    return state.from;
+  if (state.action === 'subscription') {
+    return state.planId ? appRoutes.subscriptionPurchase(state.planId) : state.from ?? appRoutes.subscriptions();
   }
 
   return appRoutes.account();

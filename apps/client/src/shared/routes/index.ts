@@ -1,10 +1,11 @@
-﻿export const appRoutes = {
+export const appRoutes = {
   home: () => '/',
   services: () => '/services',
   serviceDetails: (id: string) => `/services/${id}`,
   masters: () => '/masters',
   masterDetails: (id: string) => `/masters/${id}`,
   subscriptions: () => '/subscriptions',
+  subscriptionPurchase: (planId: string) => `/subscriptions/${planId}/purchase`,
   studios: () => '/studios',
   cart: () => '/cart',
   booking: () => '/booking',

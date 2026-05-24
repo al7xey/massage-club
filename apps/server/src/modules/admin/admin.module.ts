@@ -10,12 +10,15 @@ import { MasterDateAvailability } from '../masters/entities/master-date-availabi
 import { MasterWeeklySchedule } from '../masters/entities/master-weekly-schedule.entity';
 import { Master } from '../masters/entities/master.entity';
 import { MastersModule } from '../masters/masters.module';
+import { Payment } from '../payments/entities/payment.entity';
 import { PaymentsModule } from '../payments/payments.module';
 import { Service } from '../services/entities/service.entity';
 import { ServicesModule } from '../services/services.module';
 import { Studio } from '../studios/entities/studio.entity';
 import { StudiosModule } from '../studios/studios.module';
+import { SupportTicket } from '../support-tickets/entities/support-ticket.entity';
 import { SubscriptionPlansModule } from '../subscription-plans/subscription-plans.module';
+import { Subscription } from '../subscriptions/entities/subscription.entity';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { User } from '../users/entities/user.entity';
 import { UsersModule } from '../users/users.module';
@@ -27,7 +30,20 @@ import { SuperAdminController } from './super-admin.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([SystemSetting, User, Master, MasterShift, MasterWeeklySchedule, MasterDateAvailability, Studio, Service, Appointment]),
+    TypeOrmModule.forFeature([
+      SystemSetting,
+      User,
+      Master,
+      MasterShift,
+      MasterWeeklySchedule,
+      MasterDateAvailability,
+      Studio,
+      Service,
+      Appointment,
+      Payment,
+      Subscription,
+      SupportTicket,
+    ]),
     AppointmentsModule,
     UsersModule,
     AnalyticsModule,

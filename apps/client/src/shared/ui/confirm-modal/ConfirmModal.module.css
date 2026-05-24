@@ -1,0 +1,57 @@
+.overlay {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(23, 28, 18, 0.32);
+  padding: 18px;
+}
+
+.modal {
+  display: grid;
+  width: min(440px, 100%);
+  gap: 14px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: #ffffff;
+  box-shadow: var(--shadow-hover);
+  padding: 24px;
+}
+
+.modal h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 24px;
+  line-height: 1.12;
+}
+
+.modal p {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+@media (max-width: 560px) {
+  .overlay {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .modal {
+    border-radius: 26px;
+    padding: 20px;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+}

@@ -21,6 +21,7 @@ import { MasterShift } from '../masters/entities/master-shift.entity';
 import { MasterWeeklySchedule } from '../masters/entities/master-weekly-schedule.entity';
 import { Master } from '../masters/entities/master.entity';
 import { MastersService } from '../masters/masters.service';
+import { Payment, PaymentStatus } from '../payments/entities/payment.entity';
 import { PaymentsService } from '../payments/payments.service';
 import { CreateServiceDto } from '../services/dto/create-service.dto';
 import { UpdateServiceDto } from '../services/dto/update-service.dto';
@@ -30,9 +31,11 @@ import { CreateStudioDto } from '../studios/dto/create-studio.dto';
 import { UpdateStudioDto } from '../studios/dto/update-studio.dto';
 import { Studio } from '../studios/entities/studio.entity';
 import { StudiosService } from '../studios/studios.service';
+import { SupportTicket, SupportTicketStatus } from '../support-tickets/entities/support-ticket.entity';
 import { CreateSubscriptionPlanDto } from '../subscription-plans/dto/create-subscription-plan.dto';
 import { UpdateSubscriptionPlanDto } from '../subscription-plans/dto/update-subscription-plan.dto';
 import { SubscriptionPlansService } from '../subscription-plans/subscription-plans.service';
+import { Subscription, SubscriptionStatus } from '../subscriptions/entities/subscription.entity';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
@@ -48,6 +51,22 @@ const defaultMembershipEntryFee: MembershipEntryFeeSettingDto = {
   entryFeeRub: 1200,
   entryFeeEnabled: false,
 };
+const networkSettingsKey = 'networkSettings';
+const defaultNetworkSettings = {
+  networkName: 'RelaxUp',
+  primaryColor: '#6f8d4e',
+  contactEmail: 'hello@relaxup.local',
+  supportPhone: '+7 999 000-00-00',
+  defaultWorkingHours: '10:00-22:00',
+  scheduleStepMinutes: 30,
+  defaultAppointmentDurationMinutes: 60,
+  minAppointmentDurationMinutes: 5,
+  maxAppointmentDurationMinutes: 180,
+  allowCustomAppointmentDuration: true,
+  cancellationRules: 'Отмена без штрафа за 12 часов до визита.',
+  certificateValidityDays: 365,
+  defaultAppointmentStatus: AppointmentStatus.SCHEDULED,
+};
 
 @Injectable()
 export class AdminService {
@@ -61,6 +80,9 @@ export class AdminService {
     @InjectRepository(Studio) private readonly studiosRepository: Repository<Studio>,
     @InjectRepository(Service) private readonly servicesRepository: Repository<Service>,
     @InjectRepository(Appointment) private readonly appointmentsRepository: Repository<Appointment>,
+    @InjectRepository(Payment) private readonly paymentsRepository: Repository<Payment>,
+    @InjectRepository(Subscription) private readonly subscriptionsRepository: Repository<Subscription>,
+    @InjectRepository(SupportTicket) private readonly ticketsRepository: Repository<SupportTicket>,
     private readonly usersService: UsersService,
     private readonly analyticsService: AnalyticsService,
     private readonly servicesService: ServicesService,
@@ -73,24 +95,77 @@ export class AdminService {
     private readonly auditLogService: AuditLogService,
   ) {}
 
-  async getDashboard() {
+  async getDashboard(actor?: JwtUserPayload) {
     const todayStart = startOfMoscowDay(new Date());
     const tomorrowStart = new Date(todayStart);
     tomorrowStart.setUTCDate(tomorrowStart.getUTCDate() + 1);
-    const [masters, activeStudios, todayAppointments, conflicts] = await Promise.all([
-      this.mastersRepository.count({ where: { isActive: true } }),
-      this.studiosRepository.count({ where: { isActive: true } }),
-      this.appointmentsRepository.count({
-        where: {
-          status: In(activeAppointmentStatuses),
-          startsAt: MoreThan(todayStart),
-          endsAt: LessThan(tomorrowStart),
-        },
-      }),
-      this.countScheduleConflicts(),
-    ]);
+    const visibleStudioIds = await this.resolveVisibleStudioIds(actor);
+    const appointmentStudioWhere = visibleStudioIds ? { studio: { id: In(visibleStudioIds) } } : {};
+    const scopedMasters = await this.getMasters({}, actor);
+    const [activeStudios, todayAppointments, cancelledToday, shiftsToday, conflicts, openRequests, certificates, paidPayments, activeSubscriptions] =
+      await Promise.all([
+        this.safeDashboardValue(
+          visibleStudioIds
+            ? this.studiosRepository.count({ where: { id: In(visibleStudioIds), isActive: true } })
+            : this.studiosRepository.count({ where: { isActive: true } }),
+          0,
+        ),
+        this.safeDashboardValue(
+          this.appointmentsRepository.count({
+            where: {
+              ...appointmentStudioWhere,
+              status: In(activeAppointmentStatuses),
+              startsAt: MoreThan(todayStart),
+              endsAt: LessThan(tomorrowStart),
+            },
+          }),
+          0,
+        ),
+        this.safeDashboardValue(
+          this.appointmentsRepository.count({
+            where: {
+              ...appointmentStudioWhere,
+              status: AppointmentStatus.CANCELLED,
+              startsAt: MoreThan(todayStart),
+              endsAt: LessThan(tomorrowStart),
+            },
+          }),
+          0,
+        ),
+        this.safeDashboardValue(
+          this.shiftsRepository.count({
+            where: {
+              ...(visibleStudioIds ? { studio: { id: In(visibleStudioIds) } } : {}),
+              isAvailable: true,
+              startsAt: LessThan(tomorrowStart),
+              endsAt: MoreThan(todayStart),
+            },
+          }),
+          0,
+        ),
+        this.safeDashboardValue(this.countScheduleConflicts(visibleStudioIds), 0),
+        this.safeDashboardValue(this.ticketsRepository.count({ where: { status: In([SupportTicketStatus.OPEN, SupportTicketStatus.IN_PROGRESS]) } }), 0),
+        this.safeDashboardValue(this.getGiftCertificates(actor), []),
+        this.safeDashboardValue(this.paymentsRepository.find({ where: { status: PaymentStatus.PAID }, order: { createdAt: 'DESC' } }), []),
+        this.safeDashboardValue(this.subscriptionsRepository.count({ where: { status: SubscriptionStatus.ACTIVE } }), 0),
+      ]);
 
-    return { masters, activeStudios, todayAppointments, scheduleConflicts: conflicts };
+    const revenueRub = paidPayments.reduce((sum, payment) => sum + payment.amountRub, 0);
+    const expiringCertificates = certificates.filter((certificate) => certificate.status === 'ACTIVE' && new Date(certificate.expiresAt) < addDays(new Date(), 14));
+
+    return {
+      masters: scopedMasters.length,
+      activeMasters: scopedMasters.filter((master) => master.isActive).length,
+      activeStudios,
+      todayAppointments,
+      scheduleConflicts: conflicts,
+      freeWindowsToday: Math.max(shiftsToday * 4 - todayAppointments, 0),
+      cancellationsToday: cancelledToday,
+      pendingRequests: openRequests,
+      certificatesToReview: expiringCertificates.length,
+      revenueRub,
+      activeSubscriptions,
+    };
   }
 
   getAppointments() {
@@ -179,8 +254,15 @@ export class AdminService {
     return saved;
   }
 
-  getStudios() {
-    return this.studiosService.findAll();
+  async getStudios(actor?: JwtUserPayload) {
+    const visibleStudioIds = await this.resolveVisibleStudioIds(actor);
+    if (!visibleStudioIds) {
+      return this.studiosService.findAll();
+    }
+    if (visibleStudioIds.length === 0) {
+      return [];
+    }
+    return this.studiosRepository.find({ where: { id: In(visibleStudioIds) }, order: { name: 'ASC' } });
   }
 
   createStudio(dto: CreateStudioDto) {
@@ -195,17 +277,18 @@ export class AdminService {
     return this.studiosService.remove(id);
   }
 
-  async getMasters(filters: { search?: string; studioId?: string; isActive?: string } = {}) {
+  async getMasters(filters: { search?: string; studioId?: string } = {}, actor?: JwtUserPayload) {
     const masters = await this.mastersRepository.find({ order: { lastName: 'ASC', firstName: 'ASC' } });
     const search = filters.search?.trim().toLowerCase();
+    const visibleStudioIds = await this.resolveVisibleStudioIds(actor);
 
     return masters.filter((master) => {
       const fullName = `${master.firstName} ${master.lastName}`.toLowerCase();
       const studioIds = getMasterStudioIds(master);
       const matchesSearch = !search || fullName.includes(search) || master.phone?.toLowerCase().includes(search);
       const matchesStudio = !filters.studioId || studioIds.includes(filters.studioId);
-      const matchesActive = filters.isActive === undefined || String(master.isActive) === filters.isActive;
-      return matchesSearch && matchesStudio && matchesActive;
+      const matchesScope = !visibleStudioIds || studioIds.some((studioId) => visibleStudioIds.includes(studioId));
+      return matchesSearch && matchesStudio && matchesScope;
     });
   }
 
@@ -214,6 +297,7 @@ export class AdminService {
   }
 
   async createMaster(dto: CreateMasterDto, actor?: JwtUserPayload) {
+    await this.ensureActorCanAccessStudios(dto.studioIds ?? (dto.studioId ? [dto.studioId] : []), actor);
     const master = this.mastersRepository.create();
     await this.applyMasterDto(master, dto, true);
     const saved = await this.mastersRepository.save(master);
@@ -223,6 +307,8 @@ export class AdminService {
 
   async updateMaster(id: string, dto: UpdateMasterDto, actor?: JwtUserPayload) {
     const master = await this.findMaster(id);
+    await this.ensureActorCanAccessMaster(master, actor);
+    await this.ensureActorCanAccessStudios(dto.studioIds ?? (dto.studioId ? [dto.studioId] : []), actor);
     const before = snapshotMaster(master);
     await this.applyMasterDto(master, dto, false);
     const saved = await this.mastersRepository.save(master);
@@ -236,6 +322,8 @@ export class AdminService {
     }
 
     const master = await this.findMaster(id);
+    await this.ensureActorCanAccessMaster(master, actor);
+    await this.ensureActorCanAccessStudios(studioIds, actor);
     const before = snapshotMaster(master);
     const nextStudios = await this.findStudiosByIds(studioIds);
     const nextStudioIdSet = new Set(nextStudios.map((studio) => studio.id));
@@ -257,6 +345,7 @@ export class AdminService {
 
   async updateMasterServices(id: string, serviceIds: string[], actor?: JwtUserPayload) {
     const master = await this.findMaster(id);
+    await this.ensureActorCanAccessMaster(master, actor);
     const before = snapshotMaster(master);
     master.services = serviceIds.length > 0 ? await this.findServicesByIds(serviceIds) : [];
     const saved = await this.mastersRepository.save(master);
@@ -266,6 +355,7 @@ export class AdminService {
 
   async updateMasterPhoto(id: string, photoUrl: string, actor?: JwtUserPayload) {
     const master = await this.findMaster(id);
+    await this.ensureActorCanAccessMaster(master, actor);
     const before = snapshotMaster(master);
     master.photoUrl = photoUrl.trim() || null;
     master.photoUrls = normalizePhotoUrls(master.photoUrls, master.photoUrl);
@@ -276,9 +366,8 @@ export class AdminService {
 
   async removeMaster(id: string, actor?: JwtUserPayload) {
     const master = await this.findMaster(id);
+    await this.ensureActorCanAccessMaster(master, actor);
     const before = snapshotMaster(master);
-    master.isActive = false;
-    await this.mastersRepository.save(master);
     await this.mastersRepository.softDelete(id);
     await this.audit(actor, 'DELETE_MASTER', 'master', id, before, null);
     return { deleted: true, id };
@@ -406,18 +495,25 @@ export class AdminService {
     return { deleted: true };
   }
 
-  async getScheduleOverview(filters: { from?: string; to?: string; studioId?: string; masterId?: string; serviceId?: string } = {}) {
+  async getScheduleOverview(
+    filters: { from?: string; to?: string; studioId?: string; masterId?: string; serviceId?: string } = {},
+    actor?: JwtUserPayload,
+  ) {
     const from = filters.from ? parseMoscowDateTime(filters.from.slice(0, 10), '00:00') : startOfMoscowDay(new Date());
     const to = filters.to ? parseMoscowDateTime(filters.to.slice(0, 10), '23:59') : addDays(from, 7);
-    const masterWhere: Record<string, unknown> = { isActive: true };
+    const visibleStudioIds = await this.resolveVisibleStudioIds(actor);
+    const scopedStudioIds = this.applyStudioFilter(visibleStudioIds, filters.studioId);
+    const masterWhere: Record<string, unknown> = {};
     if (filters.masterId) masterWhere.id = filters.masterId;
     const masters = await this.mastersRepository.find({ where: masterWhere, order: { lastName: 'ASC', firstName: 'ASC' } });
-    const masterIds = masters.map((master) => master.id);
+    const masterIds = masters
+      .filter((master) => !scopedStudioIds || getMasterStudioIds(master).some((studioId) => scopedStudioIds.includes(studioId)))
+      .map((master) => master.id);
     const shifts = masterIds.length
       ? await this.shiftsRepository.find({
           where: {
             master: { id: In(masterIds) },
-            ...(filters.studioId ? { studio: { id: filters.studioId } } : {}),
+            ...(scopedStudioIds ? { studio: { id: In(scopedStudioIds) } } : {}),
             startsAt: LessThan(to),
             endsAt: MoreThan(from),
           },
@@ -428,7 +524,7 @@ export class AdminService {
       ? await this.appointmentsRepository.find({
           where: {
             master: { id: In(masterIds) },
-            ...(filters.studioId ? { studio: { id: filters.studioId } } : {}),
+            ...(scopedStudioIds ? { studio: { id: In(scopedStudioIds) } } : {}),
             ...(filters.serviceId ? { service: { id: filters.serviceId } } : {}),
             startsAt: LessThan(to),
             endsAt: MoreThan(from),
@@ -440,36 +536,38 @@ export class AdminService {
     return {
       from: from.toISOString(),
       to: to.toISOString(),
-      masters,
+      masters: masters.filter((master) => masterIds.includes(master.id)),
       shifts,
       appointments,
     };
   }
 
-  getScheduleDay(filters: { date?: string; studioId?: string; masterId?: string; serviceId?: string } = {}) {
+  getScheduleDay(filters: { date?: string; studioId?: string; masterId?: string; serviceId?: string } = {}, actor?: JwtUserPayload) {
     const date = filters.date ?? new Date().toISOString().slice(0, 10);
-    return this.getScheduleOverview({ ...filters, from: date, to: date });
+    return this.getScheduleOverview({ ...filters, from: date, to: date }, actor);
   }
 
-  getScheduleWeek(filters: { startDate?: string; studioId?: string; masterId?: string; serviceId?: string } = {}) {
+  getScheduleWeek(filters: { startDate?: string; studioId?: string; masterId?: string; serviceId?: string } = {}, actor?: JwtUserPayload) {
     const from = filters.startDate ?? new Date().toISOString().slice(0, 10);
     const to = addDays(parseMoscowDateTime(from, '00:00'), 7).toISOString().slice(0, 10);
-    return this.getScheduleOverview({ ...filters, from, to });
+    return this.getScheduleOverview({ ...filters, from, to }, actor);
   }
 
-  getScheduleMonth(filters: { month?: string; studioId?: string; masterId?: string; serviceId?: string } = {}) {
+  getScheduleMonth(filters: { month?: string; studioId?: string; masterId?: string; serviceId?: string } = {}, actor?: JwtUserPayload) {
     const month = filters.month ?? new Date().toISOString().slice(0, 7);
     const from = `${month}-01`;
     const start = parseMoscowDateTime(from, '00:00');
     const end = new Date(start);
     end.setUTCMonth(end.getUTCMonth() + 1);
-    return this.getScheduleOverview({ ...filters, from, to: end.toISOString().slice(0, 10) });
+    return this.getScheduleOverview({ ...filters, from, to: end.toISOString().slice(0, 10) }, actor);
   }
 
-  getMasterShifts(filters: { masterId?: string; studioId?: string; date?: string } = {}) {
+  async getMasterShifts(filters: { masterId?: string; studioId?: string; date?: string } = {}, actor?: JwtUserPayload) {
     const where: Record<string, unknown> = {};
+    const visibleStudioIds = await this.resolveVisibleStudioIds(actor);
+    const scopedStudioIds = this.applyStudioFilter(visibleStudioIds, filters.studioId);
     if (filters.masterId) where.master = { id: filters.masterId };
-    if (filters.studioId) where.studio = { id: filters.studioId };
+    if (scopedStudioIds) where.studio = { id: In(scopedStudioIds) };
 
     if (filters.date) {
       const dayStart = parseMoscowDateTime(filters.date, '00:00');
@@ -491,6 +589,8 @@ export class AdminService {
   async createMasterShift(dto: CreateMasterShiftDto, actor?: JwtUserPayload) {
     const { startsAt, endsAt } = resolveShiftDates(dto);
     const [master, studio] = await Promise.all([this.findMaster(dto.masterId), this.findStudio(dto.studioId)]);
+    await this.ensureActorCanAccessMaster(master, actor);
+    await this.ensureActorCanAccessStudios([studio.id], actor);
     await this.ensureShiftCanBeSaved({ master, studio, startsAt, endsAt, isAvailable: dto.isAvailable ?? true });
     const shift = await this.shiftsRepository.save(
       this.shiftsRepository.create({
@@ -514,6 +614,9 @@ export class AdminService {
     const before = snapshotShift(shift);
     const nextMaster = dto.masterId ? await this.findMaster(dto.masterId) : shift.master;
     const nextStudio = dto.studioId ? await this.findStudio(dto.studioId) : shift.studio;
+    await this.ensureActorCanAccessMaster(shift.master, actor);
+    await this.ensureActorCanAccessMaster(nextMaster, actor);
+    await this.ensureActorCanAccessStudios([nextStudio.id], actor);
     const nextDates = resolveShiftDates(dto, shift);
     const nextIsAvailable = dto.isAvailable ?? shift.isAvailable;
     await this.ensureShiftCanBeSaved({
@@ -543,6 +646,7 @@ export class AdminService {
       throw new NotFoundException('Shift not found');
     }
 
+    await this.ensureActorCanAccessMaster(shift.master, actor);
     await this.ensureShiftHasNoActiveAppointments(shift);
     const before = snapshotShift(shift);
     shift.isAvailable = false;
@@ -555,8 +659,15 @@ export class AdminService {
     return this.subscriptionPlansService.findAll();
   }
 
-  getSubscriptions() {
-    return this.subscriptionsService.findAll();
+  async getSubscriptions(actor?: JwtUserPayload) {
+    const visibleStudioIds = await this.resolveVisibleStudioIds(actor);
+    if (!visibleStudioIds) {
+      return this.subscriptionsService.findAll();
+    }
+    const userIds = await this.findClientIdsForStudios(visibleStudioIds);
+    return userIds.length
+      ? this.subscriptionsRepository.find({ where: { user: { id: In(userIds) } }, order: { createdAt: 'DESC' } })
+      : [];
   }
 
   createSubscriptionPlan(dto: CreateSubscriptionPlanDto) {
@@ -571,12 +682,23 @@ export class AdminService {
     return this.subscriptionPlansService.remove(id);
   }
 
-  getGiftCertificates() {
-    return this.giftCertificatesService.findAll();
+  async getGiftCertificates(actor?: JwtUserPayload) {
+    const visibleStudioIds = await this.resolveVisibleStudioIds(actor);
+    const certificates = await this.giftCertificatesService.findAll();
+    if (!visibleStudioIds) {
+      return certificates;
+    }
+    const userIds = new Set(await this.findClientIdsForStudios(visibleStudioIds));
+    return certificates.filter((certificate) => certificate.buyer?.id && userIds.has(certificate.buyer.id));
   }
 
-  getPayments() {
-    return this.paymentsService.findAll();
+  async getPayments(actor?: JwtUserPayload) {
+    const visibleStudioIds = await this.resolveVisibleStudioIds(actor);
+    if (!visibleStudioIds) {
+      return this.paymentsService.findAll();
+    }
+    const userIds = await this.findClientIdsForStudios(visibleStudioIds);
+    return userIds.length ? this.paymentsRepository.find({ where: { user: { id: In(userIds) } }, order: { createdAt: 'DESC' } }) : [];
   }
 
   createGiftCertificate(dto: CreateGiftCertificateDto) {
@@ -644,9 +766,40 @@ export class AdminService {
     return this.toAdminUser(await this.findUser(id));
   }
 
-  async getSuperAdminUsers(filters: { search?: string; status?: string } = {}) {
-    const users = await this.usersRepository.find({ order: { createdAt: 'DESC' } });
+  async getSuperAdminUsers(filters: { search?: string; status?: string } = {}, actor?: JwtUserPayload) {
+    const visibleStudioIds = await this.resolveVisibleStudioIds(actor);
+    const allUsers = await this.usersRepository.find({ order: { createdAt: 'DESC' } });
+    const activeSubscriptions = await this.subscriptionsRepository.find({
+      where: { status: SubscriptionStatus.ACTIVE },
+      order: { endsAt: 'DESC' },
+    });
+    let users = allUsers;
     const search = filters.search?.trim().toLowerCase();
+
+    if (visibleStudioIds) {
+      const appointments = await this.appointmentsRepository.find({
+        where: { studio: { id: In(visibleStudioIds) } },
+        order: { startsAt: 'DESC' },
+      });
+      const clientIds = new Set(
+        appointments
+          .map((appointment) => appointment.user?.id)
+          .filter((userId): userId is string => Boolean(userId)),
+      );
+      users = users.filter((user) => {
+        if (user.role === UserRole.SUPER_ADMIN) return false;
+        if (user.role === UserRole.CLIENT) return clientIds.has(user.id);
+        return (user.adminStudios ?? []).some((studio) => visibleStudioIds.includes(studio.id));
+      });
+    }
+
+    const subscriptionByUserId = new Map<string, Subscription>();
+    for (const subscription of activeSubscriptions) {
+      const userId = subscription.user?.id;
+      if (userId && !subscriptionByUserId.has(userId)) {
+        subscriptionByUserId.set(userId, subscription);
+      }
+    }
 
     return users
       .filter((user) => {
@@ -655,13 +808,19 @@ export class AdminService {
         const haystack = `${user.fullName} ${user.email ?? ''} ${user.phone ?? ''}`.toLowerCase();
         return matchesStatus && (!search || haystack.includes(search));
       })
-      .map((user) => this.toAdminUser(user));
+      .map((user) => this.toAdminUser(user, subscriptionByUserId.get(user.id)));
   }
 
-  getSuperAdminAppointments(filters: { date?: string; studioId?: string; masterId?: string; status?: AppointmentStatus }) {
+  async getSuperAdminAppointments(
+    filters: { date?: string; studioId?: string; masterId?: string; serviceId?: string; status?: AppointmentStatus },
+    actor?: JwtUserPayload,
+  ) {
+    const visibleStudioIds = await this.resolveVisibleStudioIds(actor);
+    const scopedStudioIds = this.applyStudioFilter(visibleStudioIds, filters.studioId);
     const where: Record<string, unknown> = {};
-    if (filters.studioId) where.studio = { id: filters.studioId };
+    if (scopedStudioIds) where.studio = { id: In(scopedStudioIds) };
     if (filters.masterId) where.master = { id: filters.masterId };
+    if (filters.serviceId) where.service = { id: filters.serviceId };
     if (filters.status) where.status = filters.status;
 
     if (filters.date) {
@@ -681,8 +840,10 @@ export class AdminService {
     return this.appointmentsRepository.find({ where, order: { startsAt: 'DESC' } });
   }
 
-  async getSuperAdminAppointment(id: string) {
-    return this.findAppointment(id);
+  async getSuperAdminAppointment(id: string, actor?: JwtUserPayload) {
+    const appointment = await this.findAppointment(id);
+    await this.ensureActorCanAccessStudios([appointment.studio.id], actor);
+    return appointment;
   }
 
   async createAdminAppointment(dto: CreateAdminAppointmentDto, actor: JwtUserPayload) {
@@ -693,12 +854,15 @@ export class AdminService {
       this.findStudio(dto.studioId),
     ]);
     const startsAt = resolveAppointmentStart(dto, new Date());
-    const endsAt = new Date(startsAt.getTime() + service.durationMinutes * 60_000);
+    const durationMinutes = dto.durationMinutes ?? service.durationMinutes;
+    const endsAt = new Date(startsAt.getTime() + durationMinutes * 60_000);
 
     if (!user.isActive) {
       throw new BadRequestException('Blocked users cannot have new active appointments');
     }
 
+    await this.ensureActorCanAccessStudios([studio.id], actor);
+    await this.ensureActorCanAccessMaster(master, actor);
     await this.ensureMasterCanPerform(master, studio, service);
     await this.ensureAppointmentSlotAvailable(master.id, startsAt, endsAt);
 
@@ -724,18 +888,23 @@ export class AdminService {
 
   async updateSuperAdminAppointment(id: string, dto: UpdateAdminAppointmentDto, actor: JwtUserPayload) {
     const appointment = await this.findAppointment(id);
+    await this.ensureActorCanAccessStudios([appointment.studio.id], actor);
     const before = snapshotAppointment(appointment);
     const user = dto.clientId ? await this.findUser(dto.clientId) : appointment.user;
     const service = dto.serviceId ? await this.findService(dto.serviceId) : appointment.service;
     const master = dto.masterId ? await this.findMaster(dto.masterId) : appointment.master;
     const studio = dto.studioId ? await this.findStudio(dto.studioId) : appointment.studio;
     const startsAt = resolveAppointmentStart(dto, appointment.startsAt);
-    const endsAt = new Date(startsAt.getTime() + service.durationMinutes * 60_000);
+    const currentDurationMinutes = Math.max(5, Math.round((appointment.endsAt.getTime() - appointment.startsAt.getTime()) / 60_000));
+    const durationMinutes = dto.durationMinutes ?? currentDurationMinutes ?? service.durationMinutes;
+    const endsAt = new Date(startsAt.getTime() + durationMinutes * 60_000);
 
     if (!user.isActive) {
       throw new BadRequestException('Blocked users cannot have new active appointments');
     }
 
+    await this.ensureActorCanAccessStudios([studio.id], actor);
+    await this.ensureActorCanAccessMaster(master, actor);
     await this.ensureMasterCanPerform(master, studio, service);
     await this.ensureAppointmentSlotAvailable(master.id, startsAt, endsAt, id);
 
@@ -757,12 +926,131 @@ export class AdminService {
 
   async cancelSuperAdminAppointment(id: string, dto: CancelAdminAppointmentDto, actor: JwtUserPayload) {
     const appointment = await this.findAppointment(id);
+    await this.ensureActorCanAccessStudios([appointment.studio.id], actor);
     const before = snapshotAppointment(appointment);
     appointment.status = AppointmentStatus.CANCELLED;
     appointment.note = dto.reason ? `${appointment.note ? `${appointment.note}\n` : ''}Cancel reason: ${dto.reason}` : appointment.note;
     const saved = await this.appointmentsRepository.save(appointment);
     await this.audit(actor, 'CANCEL_APPOINTMENT', 'appointment', saved.id, before, snapshotAppointment(saved));
     return saved;
+  }
+
+  async getClients(filters: { search?: string } = {}, actor?: JwtUserPayload) {
+    const visibleStudioIds = await this.resolveVisibleStudioIds(actor);
+    const users = await this.usersRepository.find({ where: { role: UserRole.CLIENT }, order: { createdAt: 'DESC' } });
+    const search = filters.search?.trim().toLowerCase();
+
+    if (!visibleStudioIds) {
+      const subscriptions = await this.getActiveSubscriptionMap(users.map((user) => user.id));
+      return users.filter((user) => this.userMatchesSearch(user, search)).map((user) => this.toAdminUser(user, subscriptions.get(user.id)));
+    }
+
+    const appointments = await this.appointmentsRepository.find({
+      where: { studio: { id: In(visibleStudioIds) } },
+      order: { startsAt: 'DESC' },
+    });
+    const userIds = new Set(appointments.map((appointment) => appointment.user.id));
+    const filteredUsers = users.filter((user) => userIds.has(user.id) && this.userMatchesSearch(user, search));
+    const subscriptions = await this.getActiveSubscriptionMap(filteredUsers.map((user) => user.id));
+    return filteredUsers.map((user) => this.toAdminUser(user, subscriptions.get(user.id)));
+  }
+
+  async getRequests(filters: { status?: SupportTicketStatus; search?: string } = {}) {
+    const tickets = await this.ticketsRepository.find({ order: { createdAt: 'DESC' } });
+    const search = filters.search?.trim().toLowerCase();
+    return tickets.filter((ticket) => {
+      const matchesStatus = !filters.status || ticket.status === filters.status;
+      const haystack = `${ticket.subject} ${ticket.message} ${ticket.user.fullName} ${ticket.user.email ?? ''} ${ticket.user.phone ?? ''}`.toLowerCase();
+      return matchesStatus && (!search || haystack.includes(search));
+    });
+  }
+
+  async updateRequest(id: string, dto: { status?: SupportTicketStatus }, actor?: JwtUserPayload) {
+    const ticket = await this.ticketsRepository.findOne({ where: { id } });
+    if (!ticket) {
+      throw new NotFoundException('Support ticket not found');
+    }
+
+    const before = snapshotTicket(ticket);
+    if (dto.status) ticket.status = dto.status;
+    const saved = await this.ticketsRepository.save(ticket);
+    await this.audit(actor, 'UPDATE_SUPPORT_TICKET', 'support_ticket', saved.id, before, snapshotTicket(saved));
+    return saved;
+  }
+
+  async updateSubscriptionStatus(id: string, status: SubscriptionStatus, actor?: JwtUserPayload) {
+    const subscription = await this.subscriptionsRepository.findOne({ where: { id } });
+    if (!subscription) {
+      throw new NotFoundException('Subscription not found');
+    }
+
+    const before = snapshotSubscription(subscription);
+    subscription.status = status;
+    if (status === SubscriptionStatus.FROZEN && !subscription.frozenUntil) {
+      subscription.frozenUntil = addDays(new Date(), subscription.plan.freezeDays || 30);
+    }
+    if (status === SubscriptionStatus.CANCELLED) {
+      subscription.autoRenewalEnabled = false;
+    }
+    const saved = await this.subscriptionsRepository.save(subscription);
+    await this.audit(actor, 'UPDATE_SUBSCRIPTION_STATUS', 'subscription', saved.id, before, snapshotSubscription(saved));
+    return saved;
+  }
+
+  async updatePaymentStatus(id: string, status: PaymentStatus, actor?: JwtUserPayload) {
+    const payment = await this.paymentsRepository.findOne({ where: { id } });
+    if (!payment) {
+      throw new NotFoundException('Payment not found');
+    }
+
+    const before = snapshotPayment(payment);
+    payment.status = status;
+    const saved = await this.paymentsRepository.save(payment);
+    await this.audit(actor, 'UPDATE_PAYMENT_STATUS', 'payment', saved.id, before, snapshotPayment(saved));
+    return saved;
+  }
+
+  async assignUserRole(id: string, role: UserRole, actor: JwtUserPayload, studioIds: string[] = []) {
+    if (id === actor.sub && role === UserRole.SUPER_ADMIN) {
+      throw new ForbiddenException('You cannot elevate yourself to super administrator');
+    }
+
+    const user = await this.findUser(id);
+    const before = snapshotUser(user);
+    if (user.role === UserRole.SUPER_ADMIN && role !== UserRole.SUPER_ADMIN) {
+      const superAdmins = await this.usersRepository.count({ where: { role: UserRole.SUPER_ADMIN, isActive: true } });
+      if (superAdmins <= 1) {
+        throw new ForbiddenException('Cannot remove the last super administrator');
+      }
+    }
+
+    user.role = role;
+    user.adminStudios = role === UserRole.ADMIN && studioIds.length ? await this.findStudiosByIds(studioIds) : [];
+    const saved = await this.usersRepository.save(user);
+    await this.audit(actor, 'UPDATE_USER_ROLE', 'user', saved.id, before, snapshotUser(saved));
+    return this.toAdminUser(saved);
+  }
+
+  async getNetworkSettings() {
+    const setting = await this.settingsRepository.findOne({ where: { key: networkSettingsKey } });
+    if (!setting || typeof setting.value !== 'object' || setting.value === null) {
+      return defaultNetworkSettings;
+    }
+    return { ...defaultNetworkSettings, ...(setting.value as Record<string, unknown>) };
+  }
+
+  async updateNetworkSettings(dto: Record<string, unknown>, actor?: JwtUserPayload) {
+    const before = await this.getNetworkSettings();
+    const next = { ...before, ...dto };
+    const setting = await this.settingsRepository.findOne({ where: { key: networkSettingsKey } });
+    if (setting) {
+      setting.value = next;
+      await this.settingsRepository.save(setting);
+    } else {
+      await this.settingsRepository.save(this.settingsRepository.create({ key: networkSettingsKey, value: next }));
+    }
+    await this.audit(actor, 'UPDATE_NETWORK_SETTINGS', 'settings', networkSettingsKey, before, next);
+    return next;
   }
 
   getAuditLog() {
@@ -786,7 +1074,6 @@ export class AdminService {
     if (dto.photoUrls !== undefined || dto.photoUrl !== undefined) {
       master.photoUrls = normalizePhotoUrls(dto.photoUrls ?? master.photoUrls, dto.photoUrl ?? master.photoUrl);
     }
-    if (dto.isActive !== undefined) master.isActive = dto.isActive;
     if (isCreate && master.isActive === undefined) master.isActive = true;
 
     if (dto.studioIds !== undefined || dto.studioId !== undefined) {
@@ -886,13 +1173,10 @@ export class AdminService {
   }
 
   private async ensureMasterCanPerform(master: Master, studio: Studio, service: Service) {
-    if (!master.isActive) {
-      throw new BadRequestException('Master is inactive');
-    }
     if (!getMasterStudioIds(master).includes(studio.id)) {
       throw new BadRequestException('Master is not assigned to selected studio');
     }
-    if (!master.services?.some((masterService) => masterService.id === service.id)) {
+    if (master.services?.length && !master.services.some((masterService) => masterService.id === service.id)) {
       throw new BadRequestException('Master does not provide selected service');
     }
   }
@@ -1047,8 +1331,82 @@ export class AdminService {
     return services;
   }
 
-  private async countScheduleConflicts() {
-    const shifts = await this.shiftsRepository.find({ where: { isAvailable: true }, order: { startsAt: 'ASC' } });
+  private async resolveVisibleStudioIds(actor?: JwtUserPayload) {
+    if (!actor || actor.role === UserRole.SUPER_ADMIN) {
+      return undefined;
+    }
+
+    const user = await this.usersRepository.findOne({ where: { id: actor.sub } });
+    const assignedIds = user?.adminStudios?.map((studio) => studio.id).filter(Boolean) ?? [];
+    if (assignedIds.length > 0) {
+      return assignedIds;
+    }
+
+    const fallbackStudio = await this.studiosRepository.findOne({ where: { isActive: true }, order: { createdAt: 'ASC' } });
+    return fallbackStudio ? [fallbackStudio.id] : [];
+  }
+
+  private applyStudioFilter(visibleStudioIds: string[] | undefined, requestedStudioId?: string) {
+    if (!visibleStudioIds) {
+      return requestedStudioId ? [requestedStudioId] : undefined;
+    }
+
+    if (!requestedStudioId) {
+      return visibleStudioIds;
+    }
+
+    return visibleStudioIds.includes(requestedStudioId) ? [requestedStudioId] : [];
+  }
+
+  private async ensureActorCanAccessStudios(studioIds: string[], actor?: JwtUserPayload) {
+    if (!studioIds.length) {
+      return;
+    }
+
+    const visibleStudioIds = await this.resolveVisibleStudioIds(actor);
+    if (!visibleStudioIds) {
+      return;
+    }
+
+    const forbiddenStudioId = studioIds.find((studioId) => !visibleStudioIds.includes(studioId));
+    if (forbiddenStudioId) {
+      throw new ForbiddenException('You can manage only your assigned studio');
+    }
+  }
+
+  private async ensureActorCanAccessMaster(master: Master, actor?: JwtUserPayload) {
+    await this.ensureActorCanAccessStudios(getMasterStudioIds(master), actor);
+  }
+
+  private userMatchesSearch(user: User, search?: string) {
+    if (!search) {
+      return true;
+    }
+    return `${user.fullName} ${user.email ?? ''} ${user.phone ?? ''}`.toLowerCase().includes(search);
+  }
+
+  private async safeDashboardValue<T>(promise: Promise<T>, fallback: T) {
+    try {
+      return await promise;
+    } catch {
+      return fallback;
+    }
+  }
+
+  private async findClientIdsForStudios(studioIds: string[]) {
+    if (!studioIds.length) {
+      return [];
+    }
+
+    const appointments = await this.appointmentsRepository.find({ where: { studio: { id: In(studioIds) } } });
+    return [...new Set(appointments.map((appointment) => appointment.user.id))];
+  }
+
+  private async countScheduleConflicts(visibleStudioIds?: string[]) {
+    const shifts = await this.shiftsRepository.find({
+      where: { isAvailable: true, ...(visibleStudioIds ? { studio: { id: In(visibleStudioIds) } } : {}) },
+      order: { startsAt: 'ASC' },
+    });
     let conflicts = 0;
     for (let index = 0; index < shifts.length; index += 1) {
       for (let nextIndex = index + 1; nextIndex < shifts.length; nextIndex += 1) {
@@ -1062,7 +1420,28 @@ export class AdminService {
     return conflicts;
   }
 
-  private toAdminUser(user: User) {
+  private async getActiveSubscriptionMap(userIds: string[]) {
+    if (!userIds.length) {
+      return new Map<string, Subscription>();
+    }
+    const subscriptions = await this.subscriptionsRepository.find({
+      where: {
+        user: { id: In(userIds) },
+        status: SubscriptionStatus.ACTIVE,
+      },
+      order: { endsAt: 'DESC' },
+    });
+    const map = new Map<string, Subscription>();
+    for (const subscription of subscriptions) {
+      const userId = subscription.user?.id;
+      if (userId && !map.has(userId)) {
+        map.set(userId, subscription);
+      }
+    }
+    return map;
+  }
+
+  private toAdminUser(user: User, subscription?: Subscription) {
     return {
       id: user.id,
       fullName: user.fullName,
@@ -1071,6 +1450,11 @@ export class AdminService {
       role: user.role,
       status: user.isActive ? 'active' : 'blocked',
       isActive: user.isActive,
+      adminStudios: user.adminStudios ?? [],
+      hasActiveSubscription: Boolean(subscription),
+      subscriptionStatus: subscription?.status ?? null,
+      subscriptionPlanName: subscription?.plan?.name ?? null,
+      subscriptionEndsAt: subscription?.endsAt ?? null,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -1159,12 +1543,16 @@ function getMasterStudioIds(master: Master) {
 }
 
 function normalizePhotoUrls(photoUrls?: string[], photoUrl?: string | null) {
-  const urls = (photoUrls ?? [])
-    .map((url) => url.trim())
-    .filter(Boolean);
+  const urls = Array.from(
+    new Set(
+      (photoUrls ?? [])
+        .map((url) => url.trim())
+        .filter(Boolean),
+    ),
+  );
   const primary = photoUrl?.trim();
-  if (primary && !urls.includes(primary)) {
-    return [primary, ...urls];
+  if (primary) {
+    return [primary, ...urls.filter((url) => url !== primary)];
   }
   return urls;
 }
@@ -1218,6 +1606,41 @@ function snapshotUser(user: User) {
     phone: user.phone ?? null,
     role: user.role,
     status: user.isActive ? 'active' : 'blocked',
+    adminStudioIds: user.adminStudios?.map((studio) => studio.id) ?? [],
+  };
+}
+
+function snapshotTicket(ticket: SupportTicket) {
+  return {
+    id: ticket.id,
+    userId: ticket.user.id,
+    subject: ticket.subject,
+    status: ticket.status,
+  };
+}
+
+function snapshotSubscription(subscription: Subscription) {
+  return {
+    id: subscription.id,
+    userId: subscription.user.id,
+    planId: subscription.plan.id,
+    status: subscription.status,
+    startsAt: subscription.startsAt,
+    endsAt: subscription.endsAt,
+    frozenUntil: subscription.frozenUntil ?? null,
+    autoRenewalEnabled: subscription.autoRenewalEnabled,
+  };
+}
+
+function snapshotPayment(payment: Payment) {
+  return {
+    id: payment.id,
+    userId: payment.user.id,
+    amountRub: payment.amountRub,
+    status: payment.status,
+    provider: payment.provider,
+    purpose: payment.purpose,
+    relatedEntityId: payment.relatedEntityId ?? null,
   };
 }
 

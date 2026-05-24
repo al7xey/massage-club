@@ -47,12 +47,16 @@ export class StudiosService {
 }
 
 function normalizePhotoUrls(photoUrls?: string[], photoUrl?: string | null) {
-  const urls = (photoUrls ?? [])
-    .map((url) => url.trim())
-    .filter(Boolean);
+  const urls = Array.from(
+    new Set(
+      (photoUrls ?? [])
+        .map((url) => url.trim())
+        .filter(Boolean),
+    ),
+  );
   const primary = photoUrl?.trim();
-  if (primary && !urls.includes(primary)) {
-    return [primary, ...urls];
+  if (primary) {
+    return [primary, ...urls.filter((url) => url !== primary)];
   }
   return urls;
 }

@@ -133,13 +133,18 @@ function getMapCenter(studios: Array<ReturnType<typeof createStudioCardModel>>) 
 
 function getStudioGallery(studio: ReturnType<typeof createStudioCardModel>, index: number) {
   const labels = ['Фото 1', 'Фото 2', 'Фото 3'];
-  const photos = studio.photoUrls.length > 0 ? studio.photoUrls : [studio.photoUrl].filter(Boolean);
+  const photos = uniqueUrls(studio.photoUrls.length > 0 ? studio.photoUrls : [studio.photoUrl]);
+  const items = photos.length > 0 ? photos : labels;
 
-  return labels.map((label, photoIndex) => ({
-    label,
-    url: resolveMediaUrl(photos[photoIndex]),
+  return items.map((item, photoIndex) => ({
+    label: photos.length > 0 ? `Фото ${photoIndex + 1}` : item,
+    url: photos.length > 0 ? resolveMediaUrl(item) : undefined,
     tone: (index + photoIndex) % 3,
   }));
+}
+
+function uniqueUrls(values: Array<string | null | undefined>) {
+  return Array.from(new Set(values.map((url) => url?.trim()).filter(Boolean))) as string[];
 }
 
 function StudioGallery({

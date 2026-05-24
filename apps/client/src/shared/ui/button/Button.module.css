@@ -80,13 +80,13 @@
 }
 
 .sm {
-  min-height: 36px;
+  min-height: 40px;
   padding: 0 14px;
   font-size: 13px;
 }
 
 .md {
-  min-height: var(--control-height);
+  min-height: 40px;
 }
 
 .fullWidth {
@@ -106,6 +106,10 @@
   .sm {
     min-height: 44px;
     padding-inline: 14px;
+  }
+
+  .md {
+    min-height: 44px;
   }
 }
 

@@ -5,6 +5,7 @@ export enum GiftCertificateStatus {
   ACTIVE = 'ACTIVE',
   REDEEMED = 'REDEEMED',
   EXPIRED = 'EXPIRED',
+  CANCELLED = 'CANCELLED',
 }
 
 export enum GiftCertificateFormat {

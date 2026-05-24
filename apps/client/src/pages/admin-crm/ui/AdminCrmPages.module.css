@@ -1,67 +1,142 @@
 .page {
   display: grid;
-  gap: 22px;
+  gap: 20px;
+  min-width: 0;
 }
 
 .pageHeader {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
+  min-width: 0;
+}
+
+.pageIntro,
+.pageActions {
+  min-width: 0;
 }
 
 .pageHeader h2,
 .panelHeader h3,
-.card h3,
-.userCard h3 {
+.entityTitle,
+.formSectionTitle,
+.emptyState h3,
+.userTableTitle {
   margin: 0;
   color: #20232a;
 }
 
 .pageHeader h2 {
   font-size: 30px;
-  line-height: 1.15;
+  line-height: 1.1;
 }
 
 .pageHeader p,
-.card p,
-.userCard p,
-.state,
-.stateError {
-  margin: 6px 0 0;
+.entityDescription,
+.entitySubtitle,
+.panelHeader p,
+.emptyState p,
+.stateText,
+.tableCellSecondary,
+.uploadText,
+.userMeta {
+  margin: 0;
   color: #66706a;
   line-height: 1.55;
+}
+
+.pageActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.stack {
+  display: grid;
+  gap: 16px;
+}
+
+.twoColumn {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.mainColumn,
+.sideColumn {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.panel,
+.entityCard,
+.statCard,
+.emptyState,
+.tableCard {
+  min-width: 0;
+  border: 1px solid #dfe5da;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 14px 40px rgba(32, 35, 42, 0.05);
+}
+
+.panel {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.panelHeaderContent {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.panelHeaderActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .statsGrid,
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 16px;
-}
-
-.statCard,
-.panel,
-.card,
-.userCard {
-  border: 1px solid #dfe5da;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 14px 40px rgba(32, 35, 42, 0.05);
 }
 
 .statCard {
   padding: 20px;
 }
 
-.statCard span,
-.metaList dt {
+.statLabel,
+.entityMeta dt,
+.fieldHint,
+.uploadLabel,
+.galleryCaption,
+.userStatus,
+.sectionTag {
   color: #7a827d;
   font-size: 12px;
   font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0;
 }
 
-.statCard strong {
+.statValue {
   display: block;
   margin-top: 8px;
   color: #20232a;
@@ -69,145 +144,143 @@
   line-height: 1;
 }
 
-.panel {
-  padding: 20px;
-}
-
-.panelHeader {
-  margin-bottom: 16px;
-}
-
-.formGrid,
-.filters {
+.entityCard {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.filters {
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-}
-
-.formGrid label,
-.filters label {
-  display: grid;
-  gap: 7px;
-  color: #4d5650;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.formGrid input,
-.formGrid select,
-.formGrid textarea,
-.filters input,
-.filters select {
-  min-height: 42px;
-  width: 100%;
-  border: 1px solid #d7dfd1;
-  border-radius: 12px;
-  background: #ffffff;
-  color: #20232a;
-  font: inherit;
-  padding: 9px 11px;
-}
-
-.formGrid textarea {
-  resize: vertical;
-}
-
-.fullRow,
-.uploadBox,
-.pricePreview {
-  grid-column: 1 / -1;
-}
-
-.checkGroup {
-  display: grid;
-  max-height: 220px;
-  align-content: start;
-  gap: 8px;
-  overflow: auto;
-  border: 1px solid #d7dfd1;
-  border-radius: 14px;
-  padding: 12px;
-}
-
-.checkGroup legend {
-  padding: 0 6px;
-  color: #4d5650;
-  font-weight: 900;
-}
-
-.checkGroup label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #20232a;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.checkGroup input {
-  width: auto;
-  min-height: auto;
-}
-
-.formActions,
-.cardActions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  grid-column: 1 / -1;
-}
-
-.formActions span,
-.uploadControls span {
-  color: #5f7b41;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.card {
-  display: grid;
+  grid-template-rows: 196px 1fr;
   overflow: hidden;
 }
 
-.media {
+.entityMedia {
   display: grid;
-  min-height: 190px;
+  min-height: 196px;
   place-items: center;
   background: #edf2e8;
   color: #6f8d4e;
-  font-size: 34px;
-  font-weight: 900;
 }
 
-.media img,
-.uploadPreview img {
+.entityMedia img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.cardBody {
+.entityMedia img[data-fit="portrait"] {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: top center;
+  background: #f6f8f3;
+}
+
+.entityFallback {
+  font-size: 34px;
+  font-weight: 900;
+}
+
+.entityBody {
   display: grid;
+  grid-template-rows: auto auto auto 1fr auto;
   gap: 12px;
   padding: 18px;
+  min-width: 0;
 }
 
-.cardTitleRow {
+.entityTitleRow {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
 }
 
-.statusActive,
-.statusMuted {
+.entityTitle {
+  font-size: 20px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.entitySubtitle,
+.entityDescription,
+.entityMeta dd,
+.userName,
+.userMeta,
+.tableCellPrimary,
+.tableCellSecondary {
+  overflow-wrap: anywhere;
+}
+
+.tableCellStack {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tableCellStack span:not(.adminStatusBadge) {
+  color: #7a827d;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.entityDescription {
+  display: -webkit-box;
+  min-height: 48px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.entityMeta {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.entityMetaRow {
+  display: grid;
+  gap: 2px;
+}
+
+.entityMeta dd {
+  margin: 0;
+  color: #20232a;
+  font-weight: 700;
+}
+
+.entityActions,
+.formActions,
+.inlineActions,
+.panelActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.entityActions,
+.formActions {
+  padding-top: 4px;
+}
+
+.statusPill {
   display: inline-flex;
-  min-height: 26px;
+  min-height: 24px;
+  align-items: center;
+  border-radius: 999px;
+  background: #edf6e8;
+  color: #4f7134;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.dangerPill {
+  background: #fff3f3;
+  color: #b54b4b;
+}
+
+.adminStatusBadge {
+  display: inline-flex;
+  min-height: 24px;
   align-items: center;
   border-radius: 999px;
   padding: 0 10px;
@@ -215,69 +288,158 @@
   font-weight: 900;
 }
 
-.statusActive {
+.statusToneNeutral {
+  background: #eef2eb;
+  color: #566257;
+}
+
+.statusToneSuccess {
   background: #edf6e8;
   color: #4f7134;
 }
 
-.statusMuted {
-  background: #f1f1ef;
+.statusToneWarning {
+  background: #fff8e7;
+  color: #8a6520;
+}
+
+.statusToneDanger {
+  background: #fff3f3;
+  color: #b54b4b;
+}
+
+.statusToneMuted {
+  background: #f1f2f0;
   color: #7a827d;
 }
 
-.metaList {
+.toolbar {
   display: grid;
+  gap: 14px;
+}
+
+.toolbarFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.filtersBar {
+  display: grid;
+  gap: 12px;
+}
+
+.filtersActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 10px;
-  margin: 0;
 }
 
-.metaList div {
+.toolbarField,
+.formField {
   display: grid;
-  gap: 2px;
-}
-
-.metaList dd {
-  margin: 0;
-  color: #20232a;
+  gap: 7px;
+  min-width: 0;
+  color: #4d5650;
+  font-size: 13px;
   font-weight: 800;
 }
 
-.linkButton {
-  display: inline-flex;
-  min-height: 36px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: #6f8d4e;
-  color: #ffffff;
-  padding: 0 14px;
-  font-size: 13px;
-  font-weight: 900;
-  text-decoration: none;
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 
-.pricePreview {
-  display: flex;
-  flex-wrap: wrap;
+.formFieldFull,
+.uploadBlock,
+.galleryBlock,
+.formActions,
+.formSection {
+  grid-column: 1 / -1;
+}
+
+.page input,
+.page select,
+.page textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid #d7dfd1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #20232a;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.page textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.formSection {
+  display: grid;
   gap: 10px;
 }
 
-.pricePreview span {
-  border-radius: 999px;
-  background: #edf6e8;
-  color: #4f7134;
-  padding: 8px 12px;
-  font-size: 13px;
+.formSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.formSectionTitle {
+  font-size: 14px;
   font-weight: 900;
 }
 
-.uploadBox {
+.fieldHint {
+  text-transform: none;
+}
+
+.checkboxGrid {
   display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.checkboxCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  border: 1px solid #d7dfd1;
+  border-radius: 14px;
+  background: #f9faf7;
+  padding: 10px 12px;
+  color: #20232a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.checkboxCard input {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+}
+
+.uploadBlock,
+.galleryBlock {
+  display: grid;
+  gap: 12px;
+}
+
+.uploadCard {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
   gap: 14px;
   align-items: center;
   border: 1px dashed #bfd0b5;
-  border-radius: 14px;
+  border-radius: 16px;
   background: #fafcf8;
   padding: 14px;
 }
@@ -287,65 +449,171 @@
   height: 110px;
   place-items: center;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 14px;
   background: #edf2e8;
   color: #6f8d4e;
   font-weight: 900;
 }
 
-.uploadControls {
-  display: grid;
-  gap: 8px;
+.uploadPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.uploadControls p {
-  margin: 0;
-  color: #66706a;
+.uploadBody {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.uploadText {
   font-size: 13px;
 }
 
-.uploadControls input {
+.uploadInput {
   display: none;
 }
 
-.userCard {
+.galleryGrid {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr);
-  gap: 14px;
-  padding: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
 }
 
-.userAvatar {
-  display: grid;
-  width: 56px;
-  height: 56px;
-  place-items: center;
-  border-radius: 16px;
-  background: #edf2e8;
-  color: #6f8d4e;
-  font-weight: 900;
-}
-
-.userInfo {
+.galleryItem {
   display: grid;
   gap: 8px;
-}
-
-.dangerZone {
-  display: flex;
-  justify-content: flex-end;
-  border-top: 1px solid #edf1e9;
-  margin-top: 18px;
-  padding-top: 18px;
-}
-
-.state,
-.stateError {
   border: 1px solid #dfe5da;
   border-radius: 16px;
   background: #ffffff;
-  padding: 18px;
+  padding: 10px;
+}
+
+.galleryImageWrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #edf2e8;
+  aspect-ratio: 1 / 1;
+}
+
+.galleryImageWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.galleryCaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.galleryPrimary {
+  color: #5f7b41;
+}
+
+.tableCard {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+}
+
+.dataTableCard {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid #dfe5da;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(32, 35, 42, 0.05);
+}
+
+.dataTableHeader,
+.dataTableRow,
+.dataTableRowButton {
+  display: grid;
+  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.dataTableHeader {
+  background: #f7f9f4;
+  color: #6c756d;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.dataTableRow,
+.dataTableRowButton {
+  border: 0;
+  border-top: 1px solid #edf1e9;
+  background: #ffffff;
+  color: inherit;
+  text-align: left;
+}
+
+.dataTableRowButton:hover {
+  background: #fbfcf8;
+}
+
+.dataTableCell {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.userTableHeader,
+.userRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr) 120px minmax(210px, auto);
+  gap: 14px;
+  align-items: center;
+  padding: 16px 18px;
+}
+
+.userTableHeader {
+  border-bottom: 1px solid #e8ede4;
+  background: #f9faf7;
+}
+
+.userRow + .userRow {
+  border-top: 1px solid #eef2eb;
+}
+
+.userCell {
+  min-width: 0;
+}
+
+.userName {
+  color: #20232a;
   font-weight: 800;
+}
+
+.tableCellPrimary {
+  color: #20232a;
+  font-weight: 700;
+}
+
+.userMeta {
+  font-size: 13px;
+}
+
+.emptyState {
+  display: grid;
+  gap: 8px;
+  padding: 24px;
+}
+
+.stateCard {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #dfe5da;
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 20px;
 }
 
 .stateError {
@@ -354,13 +622,132 @@
   color: #b54b4b;
 }
 
-@media (max-width: 760px) {
-  .formGrid,
-  .uploadBox {
+.drawerOverlay,
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  background: rgba(32, 35, 42, 0.22);
+}
+
+.drawerOverlay {
+  justify-items: end;
+}
+
+.drawer {
+  display: grid;
+  width: min(560px, 100%);
+  max-height: 100vh;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: -18px 0 42px rgba(32, 35, 42, 0.14);
+}
+
+.drawerHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid #edf1e9;
+  padding: 20px;
+}
+
+.drawerHeader h3,
+.drawerHeader p,
+.confirmModal h3,
+.confirmModal p {
+  margin: 0;
+}
+
+.drawerHeader p,
+.confirmModal p {
+  color: #66706a;
+  line-height: 1.5;
+}
+
+.drawerBody {
+  min-width: 0;
+  overflow: auto;
+  padding: 20px;
+}
+
+.modalOverlay {
+  place-items: center;
+  padding: 20px;
+}
+
+.confirmModal {
+  display: grid;
+  width: min(440px, 100%);
+  gap: 14px;
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 22px;
+  box-shadow: 0 18px 46px rgba(32, 35, 42, 0.14);
+}
+
+.formMessage {
+  color: #5f7b41;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.page :global(.button) {
+  min-height: 40px;
+  border-radius: 12px;
+}
+
+.page :global(.secondary),
+.page :global(.danger),
+.page :global(.primary),
+.page :global(.ghost) {
+  box-shadow: none;
+}
+
+.page :global(.button):hover:not(:disabled) {
+  box-shadow: none;
+}
+
+@media (max-width: 980px) {
+  .twoColumn {
     grid-template-columns: 1fr;
   }
 
-  .pageHeader h2 {
-    font-size: 24px;
+  .userTableHeader,
+  .userRow,
+  .dataTableHeader,
+  .dataTableRow,
+  .dataTableRowButton {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dataTableHeader {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .pageHeader,
+  .panelHeader,
+  .formSectionHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .formGrid,
+  .uploadCard {
+    grid-template-columns: 1fr;
+  }
+
+  .page :global(.button) {
+    min-height: 44px;
+  }
+
+  .entityActions > *,
+  .formActions > *,
+  .panelActions > * {
+    width: 100%;
   }
 }

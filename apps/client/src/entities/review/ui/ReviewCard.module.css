@@ -1,7 +1,7 @@
 .card {
   display: flex;
   height: 100%;
-  min-height: 338px;
+  min-height: 250px;
   flex-direction: column;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
@@ -42,8 +42,8 @@
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  min-height: 104px;
+  -webkit-line-clamp: 3;
+  min-height: 66px;
   font-size: 14px;
 }
 
@@ -75,7 +75,7 @@
 
 @media (max-width: 760px) {
   .card {
-    min-height: 210px;
+    min-height: 168px;
     padding: 12px;
   }
 
@@ -88,7 +88,7 @@
   }
 
   .text {
-    -webkit-line-clamp: 4;
+    -webkit-line-clamp: 3;
     min-height: 0;
     font-size: 12px;
     line-height: 1.45;

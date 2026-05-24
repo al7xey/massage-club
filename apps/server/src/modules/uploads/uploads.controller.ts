@@ -9,7 +9,7 @@ import { UploadsService } from './uploads.service';
 
 @Controller('uploads')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+@Roles(UserRole.CLIENT, UserRole.ADMIN, UserRole.SUPER_ADMIN)
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
 

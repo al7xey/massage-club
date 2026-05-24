@@ -3,14 +3,24 @@ import { Navigate } from 'react-router-dom';
 import { AccountPage } from '@/pages/account';
 import { AccountSettingsPage } from '@/pages/account-settings';
 import {
-  AdminMasterDetailsPage,
   AdminDashboardPage,
+  AdminAppointmentsPage,
+  AdminCertificatesPage,
+  AdminMasterDetailsPage,
   AdminMastersPage,
+  AdminRequestsPage,
+  AdminSchedulePage,
+  AdminServicesPage,
   AdminStudiosPage,
+  SuperAdminAppointmentsPage,
+  SuperAdminCertificatesPage,
   SuperAdminDashboardPage,
   SuperAdminMastersPage,
+  SuperAdminRequestsPage,
+  SuperAdminSchedulePage,
   SuperAdminServiceDetailsPage,
   SuperAdminServicesPage,
+  SuperAdminTariffsPage,
   SuperAdminUsersPage,
 } from '@/pages/admin-crm';
 import { AuthPage } from '@/pages/auth';
@@ -19,10 +29,10 @@ import { CartPage } from '@/pages/cart';
 import { CertificatesPage } from '@/pages/certificates';
 import { ContactsPage } from '@/pages/contacts';
 import { HomePage } from '@/pages/home';
-import { LoginPage } from '@/pages/login';
 import { LegalDocumentsPage } from '@/pages/legal-documents';
-import { MastersPage } from '@/pages/masters';
+import { LoginPage } from '@/pages/login';
 import { MasterDetailsPage } from '@/pages/master-details';
+import { MastersPage } from '@/pages/masters';
 import { MyAppointmentsPage } from '@/pages/my-appointments';
 import { MyPaymentsPage } from '@/pages/my-payments';
 import { MySubscriptionPage } from '@/pages/my-subscription';
@@ -31,6 +41,7 @@ import { ReviewsPage } from '@/pages/reviews';
 import { ServiceDetailsPage } from '@/pages/service-details';
 import { ServicesCatalogPage } from '@/pages/services-catalog';
 import { StudiosPage } from '@/pages/studios';
+import { SubscriptionPurchasePage } from '@/pages/subscription-purchase';
 import { SubscriptionPlansPage } from '@/pages/subscription-plans';
 import { SupportTicketsPage } from '@/pages/support-tickets';
 
@@ -48,14 +59,15 @@ export const publicRoutes: AppRouteConfig[] = [
   { path: 'login', element: <LoginPage /> },
   { path: 'register', element: <RegisterPage /> },
   { path: 'certificates', element: <CertificatesPage /> },
+  { path: 'cart', element: <CartPage /> },
   { path: 'contacts', element: <ContactsPage /> },
   { path: 'reviews', element: <ReviewsPage /> },
   { path: 'legal', element: <LegalDocumentsPage /> },
 ];
 
 export const accountRoutes: AppRouteConfig[] = [
-  { path: 'cart', element: <CartPage /> },
   { path: 'booking', element: <BookingPage /> },
+  { path: 'subscriptions/:planId/purchase', element: <SubscriptionPurchasePage /> },
   { path: 'account', element: <AccountPage /> },
   { path: 'account/settings', element: <AccountSettingsPage /> },
   { path: 'account/subscription', element: <MySubscriptionPage /> },
@@ -67,19 +79,29 @@ export const accountRoutes: AppRouteConfig[] = [
 export const adminRoutes: AppRouteConfig[] = [
   { index: true, element: <Navigate to="dashboard" replace /> },
   { path: 'dashboard', element: <AdminDashboardPage /> },
+  { path: 'schedule', element: <AdminSchedulePage /> },
+  { path: 'appointments', element: <AdminAppointmentsPage /> },
+  { path: 'users', element: <SuperAdminUsersPage /> },
   { path: 'masters', element: <AdminMastersPage /> },
   { path: 'masters/:id', element: <AdminMasterDetailsPage /> },
-  { path: 'studios', element: <AdminStudiosPage /> },
+  { path: 'services', element: <AdminServicesPage /> },
+  { path: 'certificates', element: <AdminCertificatesPage /> },
+  { path: 'requests', element: <AdminRequestsPage /> },
 ];
 
 export const superAdminRoutes: AppRouteConfig[] = [
   { index: true, element: <Navigate to="dashboard" replace /> },
   { path: 'dashboard', element: <SuperAdminDashboardPage /> },
+  { path: 'studios', element: <AdminStudiosPage /> },
+  { path: 'schedule', element: <SuperAdminSchedulePage /> },
+  { path: 'appointments', element: <SuperAdminAppointmentsPage /> },
   { path: 'masters', element: <SuperAdminMastersPage /> },
   { path: 'masters/:id', element: <AdminMasterDetailsPage /> },
   { path: 'services', element: <SuperAdminServicesPage /> },
   { path: 'services/:id', element: <SuperAdminServiceDetailsPage /> },
-  { path: 'studios', element: <AdminStudiosPage /> },
+  { path: 'tariffs', element: <SuperAdminTariffsPage /> },
+  { path: 'certificates', element: <SuperAdminCertificatesPage /> },
+  { path: 'requests', element: <SuperAdminRequestsPage /> },
   { path: 'users', element: <SuperAdminUsersPage /> },
 ];
 

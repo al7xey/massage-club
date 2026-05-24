@@ -136,6 +136,7 @@ export class ServicesService {
   }
 
   async create(dto: CreateServiceDto) {
+    const imageUrl = dto.imageUrl?.trim() || undefined;
     const service = this.servicesRepository.create({
       title: dto.title,
       slug: dto.slug,
@@ -148,8 +149,8 @@ export class ServicesService {
       externalId: dto.externalId,
       priceRub: dto.priceRub,
       subscriptionPriceRub: calculateDiscountedPrice(dto.priceRub, 20),
-      imageUrl: dto.imageUrl,
-      galleryUrls: dto.galleryUrls ?? [],
+      imageUrl,
+      galleryUrls: normalizeGalleryUrls(dto.galleryUrls, imageUrl),
       contraindications: dto.contraindications,
       benefits: dto.benefits,
       rules: dto.rules,
@@ -166,7 +167,19 @@ export class ServicesService {
   async update(id: string, dto: UpdateServiceDto) {
     const service = await this.findOne(id);
     const nextDto = { ...dto };
+    if (dto.imageUrl !== undefined) {
+      nextDto.imageUrl = dto.imageUrl.trim();
+    }
+    if (dto.galleryUrls !== undefined || dto.imageUrl !== undefined) {
+      nextDto.galleryUrls = normalizeGalleryUrls(
+        dto.galleryUrls ?? service.galleryUrls,
+        nextDto.imageUrl !== undefined ? nextDto.imageUrl : service.imageUrl ?? undefined,
+      );
+    }
     Object.assign(service, nextDto);
+    if (dto.imageUrl !== undefined) {
+      service.imageUrl = nextDto.imageUrl || null;
+    }
     if (dto.priceRub !== undefined) {
       service.subscriptionPriceRub = calculateDiscountedPrice(dto.priceRub, 20);
     }
@@ -238,6 +251,21 @@ function parseCategoryFilter(value?: string) {
 function calculateDiscountedPrice(priceRub: number, discountPercent: number) {
   const normalizedDiscount = Math.min(100, Math.max(0, Math.round(discountPercent)));
   return Math.round(Math.max(0, priceRub) * (1 - normalizedDiscount / 100));
+}
+
+function normalizeGalleryUrls(galleryUrls?: string[], imageUrl?: string | null) {
+  const urls = Array.from(
+    new Set(
+      (galleryUrls ?? [])
+        .map((url) => url.trim())
+        .filter(Boolean),
+    ),
+  );
+  const primary = imageUrl?.trim();
+  if (primary) {
+    return [primary, ...urls.filter((url) => url !== primary)];
+  }
+  return urls;
 }
 
 function fillSubscriptionPrices<T extends Service>(service: T): T {

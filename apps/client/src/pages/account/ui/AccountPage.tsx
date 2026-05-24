@@ -5,8 +5,9 @@ import { useCancelAppointmentMutation, useGetMyAppointmentsQuery } from '@/entit
 import { getSubscriptionPlanTitle, useGetMySubscriptionQuery } from '@/entities/subscription';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { formatUserDisplayName } from '@/shared/lib/auth/formatUserDisplayName';
+import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
-import { Button, LinkButton } from '@/shared/ui';
+import { Button, ConfirmModal, LinkButton } from '@/shared/ui';
 import styles from './AccountPage.module.css';
 
 export function AccountPage() {
@@ -15,6 +16,7 @@ export function AccountPage() {
   const { data: appointments = [] } = useGetMyAppointmentsQuery();
   const [cancelAppointment, { isLoading: isCancellingAppointment }] = useCancelAppointmentMutation();
   const [message, setMessage] = useState('');
+  const [pendingCancelAppointmentId, setPendingCancelAppointmentId] = useState<string | null>(null);
 
   const remainingCredits = useMemo(
     () => subscription?.credits.reduce((sum, credit) => sum + credit.remainingCredits, 0) ?? 0,
@@ -52,13 +54,19 @@ export function AccountPage() {
     return null;
   }
 
-  const handleCancelAppointment = async (appointmentId: string) => {
-    if (!window.confirm('Отменить будущую запись?')) {
+  const requestCancelAppointment = (appointmentId: string) => {
+    setMessage('');
+    setPendingCancelAppointmentId(appointmentId);
+  };
+
+  const confirmCancelAppointment = async () => {
+    if (!pendingCancelAppointmentId) {
       return;
     }
 
     try {
-      await cancelAppointment(appointmentId).unwrap();
+      await cancelAppointment(pendingCancelAppointmentId).unwrap();
+      setPendingCancelAppointmentId(null);
     } catch (error) {
       setMessage(getApiErrorMessage(error, 'Не удалось отменить запись'));
     }
@@ -69,7 +77,7 @@ export function AccountPage() {
       <section className={styles.topbar}>
         <div className={styles.profileBadge}>
           <Link className={styles.avatar} to={appRoutes.accountSettings()} aria-label="Открыть настройки профиля">
-            {user.avatarUrl ? <img src={user.avatarUrl} alt={userDisplayName} /> : accountInitial}
+            {user.avatarUrl ? <img src={resolveMediaUrl(user.avatarUrl)} alt={userDisplayName} /> : accountInitial}
           </Link>
           <div className={styles.profileIdentity}>
             <h1>{userDisplayName}</h1>
@@ -173,15 +181,25 @@ export function AccountPage() {
           size="standard"
         />
         <QuickTile
-          title="Записаться на услугу"
-          description="Выберите процедуру, мастера и удобное время."
-          to={appRoutes.booking()}
+          title="Мастера"
+          description="Выберите специалиста и посмотрите доступные студии."
+          to={appRoutes.masters()}
           tone="light"
           size="standard"
         />
       </section>
 
       {message ? <p className={styles.message}>{message}</p> : null}
+
+      <ConfirmModal
+        confirmLabel="Отменить запись"
+        description="Запись будет отменена, а время снова станет доступным для расписания."
+        isLoading={isCancellingAppointment}
+        isOpen={Boolean(pendingCancelAppointmentId)}
+        title="Отменить будущую запись?"
+        onClose={() => setPendingCancelAppointmentId(null)}
+        onConfirm={() => void confirmCancelAppointment()}
+      />
 
       <section className={`${styles.lowerGrid} ${styles.lowerGridSingle}`}>
         <section className={styles.card}>
@@ -207,7 +225,7 @@ export function AccountPage() {
                 <Button
                   className={styles.actionButton}
                   variant="secondary"
-                  onClick={() => void handleCancelAppointment(nextAppointment.id)}
+                  onClick={() => requestCancelAppointment(nextAppointment.id)}
                   disabled={isCancellingAppointment}
                 >
                   Отменить

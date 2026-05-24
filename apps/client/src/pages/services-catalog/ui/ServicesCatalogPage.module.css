@@ -363,10 +363,38 @@
   }
 
   .filters {
+    position: fixed;
+    z-index: 70;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    max-height: min(82vh, 720px);
+    overflow: auto;
+    border-radius: 28px 28px 0 0;
     padding: 18px;
   }
 
   .filterGroup {
+    border-radius: 22px;
     padding: 16px;
+  }
+
+  .categoryGrid {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .checkRow {
+    display: inline-flex;
+    min-height: 42px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-round);
+    background: #ffffff;
+    padding: 0 14px;
+  }
+
+  .checkRow input {
+    width: 16px;
+    height: 16px;
   }
 }
