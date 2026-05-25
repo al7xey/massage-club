@@ -164,19 +164,117 @@
 
   .sidebar {
     position: static;
+    z-index: 20;
     height: auto;
     grid-template-columns: 1fr;
+    gap: 16px;
     overflow: visible;
+    border-right: 0;
+    border-bottom: 1px solid #dfe5da;
+    padding: 18px;
+    box-shadow: 0 12px 28px rgba(32, 35, 42, 0.06);
   }
 
   .nav {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 4px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    overflow: visible;
+    padding: 0;
   }
 
   .nav a {
-    flex: 0 0 auto;
-    white-space: nowrap;
+    min-height: 48px;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid #dfe5da;
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 8px;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.15;
+  }
+
+  .logout {
+    min-height: 44px;
+    border-radius: 10px;
+  }
+
+  .topbar {
+    position: static;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 20px;
+  }
+
+  .topbar h1 {
+    font-size: 26px;
+    overflow-wrap: anywhere;
+  }
+
+  .user {
+    display: flex;
+    width: 100%;
+    max-width: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    text-align: left;
+  }
+
+  .user strong {
+    text-align: right;
+  }
+
+  .content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .nav a {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .sidebar {
+    padding: 16px;
+  }
+
+  .brandMark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .topbar {
+    padding: 18px 16px;
+  }
+
+  .topbar h1 {
+    font-size: 24px;
+  }
+
+  .user {
+    display: grid;
+    justify-items: start;
+  }
+
+  .user strong {
+    text-align: left;
+  }
+
+  .content {
+    padding: 16px;
   }
 }

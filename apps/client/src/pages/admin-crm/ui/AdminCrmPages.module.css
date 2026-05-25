@@ -741,6 +741,10 @@
 }
 
 @media (max-width: 760px) {
+  .page {
+    gap: 16px;
+  }
+
   .pageHeader,
   .panelHeader,
   .formSectionHeader {
@@ -748,9 +752,46 @@
     align-items: stretch;
   }
 
+  .pageHeader h2 {
+    font-size: 26px;
+  }
+
+  .panel,
+  .statCard,
+  .emptyState,
+  .stateCard {
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .statsGrid,
+  .grid,
+  .toolbarFields {
+    grid-template-columns: 1fr;
+  }
+
+  .entityCard {
+    grid-template-rows: 180px 1fr;
+  }
+
+  .entityMedia {
+    height: 180px;
+  }
+
+  .entityBody {
+    padding: 16px;
+  }
+
   .formGrid,
   .uploadCard {
     grid-template-columns: 1fr;
+  }
+
+  .dataTableRow,
+  .dataTableRowButton,
+  .userRow {
+    gap: 10px;
+    padding: 14px;
   }
 
   .page :global(.button) {
