@@ -115,7 +115,6 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
-  text-transform: uppercase;
 }
 
 .card h3 {
@@ -147,12 +146,12 @@
 
 @media (max-width: 760px) {
   .card {
-    min-height: 244px;
+    min-height: 292px;
     border-radius: var(--radius-card);
   }
 
   .media {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 1 / 0.82;
   }
 
   .timeBadge {
@@ -163,17 +162,20 @@
   }
 
   .body {
-    gap: 5px;
+    min-height: 124px;
+    gap: 6px;
     padding: var(--mobile-tile-padding);
   }
 
   .category {
-    font-size: 10px;
+    font-size: 11px;
+    line-height: 1.2;
   }
 
   .card h3 {
-    min-height: 32px;
+    min-height: 51px;
     font-size: 14px;
+    -webkit-line-clamp: 3;
   }
 
   .actionWrap {
@@ -185,6 +187,10 @@
   }
 
   .priceRow strong {
-    font-size: 18px;
+    font-size: 20px;
+  }
+
+  .priceRow {
+    margin-top: 2px;
   }
 }

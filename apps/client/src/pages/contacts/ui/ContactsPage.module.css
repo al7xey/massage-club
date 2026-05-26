@@ -37,6 +37,7 @@
   color: var(--color-text);
   font-size: var(--font-h3);
   line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .primaryLink {
@@ -95,5 +96,11 @@
   .contactCard strong {
     margin-top: 10px;
     font-size: 14px;
+  }
+}
+
+@media (max-width: 560px) {
+  .cards {
+    grid-template-columns: 1fr;
   }
 }

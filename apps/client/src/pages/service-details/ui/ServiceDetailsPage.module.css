@@ -21,6 +21,28 @@
   background: var(--color-soft);
 }
 
+.backButton {
+  display: inline-grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  margin: 0 0 18px;
+  border: 1px solid rgba(111, 141, 78, 0.2);
+  border-radius: var(--radius-round);
+  background: #ffffff;
+  color: var(--color-primary-hover);
+  box-shadow: 0 8px 18px rgba(32, 35, 42, 0.06);
+  font-size: 23px;
+  line-height: 1;
+  transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+}
+
+.backButton:hover {
+  border-color: var(--color-line-strong);
+  background: var(--color-surface-soft);
+  transform: translateX(-2px);
+}
+
 .servicePhoto {
   position: absolute;
   inset: 0;
@@ -69,85 +91,9 @@
   transform: rotate(-6deg);
 }
 
-.photoBadges {
-  position: absolute;
-  top: 28px;
-  right: 28px;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.photoBadges span {
-  border-radius: var(--radius-control);
-  background: rgba(255, 255, 255, 0.86);
-  color: var(--color-primary);
-  padding: 10px 14px;
-  font-size: 13px;
-  font-weight: 900;
-  backdrop-filter: blur(10px);
-}
-
-.galleryControls {
-  position: absolute;
-  right: 22px;
-  bottom: 22px;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: var(--radius-control);
-  background: rgba(255, 255, 255, 0.82);
-  padding: 6px;
-  backdrop-filter: blur(10px);
-}
-
-.galleryControls button {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  border: 0;
-  border-radius: var(--radius-round);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  font-size: 18px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.galleryControls span {
-  min-width: 42px;
-  color: var(--color-text);
-  font-size: 12px;
-  font-weight: 900;
-  text-align: center;
-}
-
-.galleryDots {
-  position: absolute;
-  left: 24px;
-  bottom: 32px;
-  z-index: 1;
-  display: flex;
-  gap: 7px;
-}
-
-.galleryDots button {
-  width: 9px;
-  height: 9px;
-  border: 0;
-  border-radius: var(--radius-round);
-  background: rgba(255, 255, 255, 0.72);
-  padding: 0;
-  cursor: pointer;
-}
-
-.galleryDots button[aria-pressed="true"] {
-  width: 24px;
-  background: var(--color-primary);
+.servicePhoto[data-has-image="true"]::before,
+.servicePhoto[data-has-image="true"]::after {
+  display: none;
 }
 
 .bookingCard {
@@ -336,11 +282,6 @@
     min-height: 380px;
   }
 
-  .photoBadges {
-    top: 18px;
-    right: 18px;
-  }
-
   .bookingCard,
   .description {
     padding: 18px;
@@ -352,18 +293,9 @@
     min-height: 0;
   }
 
-  .galleryControls button,
-  .galleryDots button {
-    min-width: 44px;
-    min-height: 44px;
-  }
-
-  .galleryDots {
-    bottom: 22px;
-    gap: 4px;
-  }
-
-  .galleryDots button[aria-pressed="true"] {
+  .backButton {
     width: 44px;
+    height: 44px;
+    margin-bottom: 14px;
   }
 }

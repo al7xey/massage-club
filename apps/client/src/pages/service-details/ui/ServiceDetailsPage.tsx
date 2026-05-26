@@ -43,11 +43,8 @@ export function ServiceDetailsPage() {
   const serviceTariffs = buildTariffs(plans).slice(0, 4);
   const title = selected?.title ?? 'Услуга';
   const description = selected?.description ?? 'Описание услуги загружается из базы данных.';
-  const durationLabel = selected?.durationLabel?.trim() || `${selected?.durationMinutes ?? 0} мин`;
   const photoItems = useMemo(() => getServiceGallery(selected), [selected]);
   const activePhoto = photoItems[activePhotoIndex] ?? photoItems[0];
-  const displayDuration = getDurationDisplay(selected?.durationMinutes, durationLabel);
-  const categoryLabel = getServiceCategoryLabel(selected);
   const cartItemsForService = useMemo(
     () => cartItems.filter((item) => item.service.id === selected?.id),
     [cartItems, selected?.id],
@@ -58,14 +55,6 @@ export function ServiceDetailsPage() {
     window.scrollTo({ top: 0, behavior: 'auto' });
     setActivePhotoIndex(0);
   }, [id]);
-
-  const showPreviousPhoto = () => {
-    setActivePhotoIndex((index) => (index === 0 ? photoItems.length - 1 : index - 1));
-  };
-
-  const showNextPhoto = () => {
-    setActivePhotoIndex((index) => (index + 1) % photoItems.length);
-  };
 
   const navigateToAuth = (action: 'cart') => {
     navigate(appRoutes.login(), {
@@ -97,41 +86,20 @@ export function ServiceDetailsPage() {
 
   return (
     <PageShell title={title}>
+      <button className={styles.backButton} type="button" aria-label="Назад" onClick={() => navigate(-1)}>
+        <span aria-hidden="true">←</span>
+      </button>
+
       <section className={styles.top}>
         <div className={styles.visual}>
           <div
             className={styles.servicePhoto}
+            data-has-image={activePhoto?.url ? 'true' : undefined}
             data-tone={activePhoto?.tone}
             role="img"
             aria-label={`Фото услуги ${title}`}
             style={activePhoto?.url ? { backgroundImage: `url("${activePhoto.url}")` } : undefined}
           />
-          <div className={styles.photoBadges}>
-            <span>{categoryLabel}</span>
-            <span>{displayDuration}</span>
-          </div>
-          <div className={styles.galleryControls}>
-            <button type="button" aria-label="Предыдущее фото" onClick={showPreviousPhoto}>
-              ←
-            </button>
-            <span>
-              {activePhotoIndex + 1} / {photoItems.length}
-            </span>
-            <button type="button" aria-label="Следующее фото" onClick={showNextPhoto}>
-              →
-            </button>
-          </div>
-          <div className={styles.galleryDots}>
-            {photoItems.map((photo, index) => (
-              <button
-                key={`${photo.label}-${index}`}
-                type="button"
-                aria-label={`Показать фото ${index + 1}`}
-                aria-pressed={index === activePhotoIndex}
-                onClick={() => setActivePhotoIndex(index)}
-              />
-            ))}
-          </div>
         </div>
 
         <aside className={styles.bookingCard}>
@@ -243,17 +211,4 @@ function getServiceGallery(service: ServiceDto | undefined) {
 
 function uniqueUrls(values: Array<string | null | undefined>) {
   return Array.from(new Set(values.map((url) => url?.trim()).filter(Boolean))) as string[];
-}
-
-function getDurationDisplay(durationMinutes?: number, fallback = '') {
-  if (durationMinutes) {
-    return `${durationMinutes} минут`;
-  }
-
-  const match = fallback.match(/\d+/);
-  return match ? `${match[0]} минут` : fallback;
-}
-
-function getServiceCategoryLabel(service: ServiceDto | undefined) {
-  return service?.category?.name ?? 'Массаж';
 }

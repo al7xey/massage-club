@@ -21,8 +21,9 @@
   overflow-wrap: break-word;
 }
 
-.hero h1 span {
-  color: var(--color-primary);
+.heroTitleLine {
+  display: block;
+  color: inherit;
   font-weight: 900;
 }
 
@@ -103,8 +104,10 @@
 .giftBanner {
   position: relative;
   display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 260px);
+  gap: 32px;
   min-height: 260px;
-  place-items: center start;
+  align-items: center;
   margin-top: 72px;
   overflow: hidden;
   border-radius: var(--radius-card-large);
@@ -112,36 +115,65 @@
   padding: 54px 70px;
 }
 
-.giftBanner::before,
-.giftBanner::after {
+.giftBanner > div:first-child {
+  position: relative;
+  z-index: 1;
+}
+
+.giftArt {
+  position: relative;
+  justify-self: end;
+  width: min(100%, 230px);
+  aspect-ratio: 1;
+  opacity: 0.72;
+}
+
+.giftArt::before {
   position: absolute;
+  right: 10%;
+  bottom: 8%;
+  width: 80%;
+  height: 58%;
+  border: 14px solid rgba(111, 141, 78, 0.16);
+  border-radius: 26px;
+  background:
+    linear-gradient(90deg, transparent 0 42%, rgba(111, 141, 78, 0.16) 42% 58%, transparent 58%),
+    linear-gradient(180deg, rgba(111, 141, 78, 0.16) 0 26%, transparent 26%),
+    rgba(255, 255, 255, 0.48);
   content: "";
 }
 
-.giftBanner::before {
-  right: 74px;
-  bottom: 44px;
-  width: 166px;
-  height: 136px;
-  border: 2px solid rgba(111, 141, 78, 0.22);
-  border-radius: 22px;
-  background:
-    linear-gradient(90deg, transparent 0 43%, rgba(111, 141, 78, 0.18) 43% 57%, transparent 57%),
-    linear-gradient(180deg, rgba(111, 141, 78, 0.18) 0 18%, transparent 18%),
-    rgba(255, 255, 255, 0.52);
-  box-shadow: 0 16px 34px rgba(32, 35, 42, 0.07);
-  transform: rotate(7deg);
+.giftArt::after {
+  position: absolute;
+  left: 11%;
+  top: 34%;
+  width: 78%;
+  height: 18%;
+  border-radius: 18px;
+  background: rgba(111, 141, 78, 0.16);
+  content: "";
 }
 
-.giftBanner::after {
-  right: 125px;
-  bottom: 176px;
-  width: 74px;
-  height: 44px;
-  border: 12px solid rgba(111, 141, 78, 0.18);
+.giftArt span {
+  position: absolute;
+  top: 10%;
+  width: 34%;
+  height: 34%;
+  border: 14px solid rgba(111, 141, 78, 0.13);
   border-bottom: 0;
-  border-radius: 48px 48px 0 0;
-  transform: rotate(7deg);
+  content: "";
+}
+
+.giftArt span:first-child {
+  left: 22%;
+  border-radius: 999px 999px 0 999px;
+  transform: rotate(-38deg);
+}
+
+.giftArt span:last-child {
+  right: 17%;
+  border-radius: 999px 999px 999px 0;
+  transform: rotate(38deg);
 }
 
 .giftBanner h2,
@@ -231,12 +263,16 @@
   }
 
   .giftBanner {
+    grid-template-columns: 1fr;
     padding: 32px 24px;
   }
 
-  .giftBanner::before,
-  .giftBanner::after {
-    opacity: 0.35;
+  .giftArt {
+    position: absolute;
+    right: -18px;
+    bottom: -28px;
+    width: 160px;
+    opacity: 0.28;
   }
 
   .cta {
