@@ -4,7 +4,7 @@ export const mockSubscriptionPlans: SubscriptionPlanDto[] = [
   {
     id: 'plan-lady',
     code: 'LADY',
-    name: 'ЛЕДИ',
+    name: 'LADY',
     description: 'Fallback only for isolated component tests.',
     monthlyPriceRub: 2490,
     periodDays: 30,
@@ -19,7 +19,7 @@ export const mockSubscriptionPlans: SubscriptionPlanDto[] = [
   {
     id: 'plan-lady-super',
     code: 'LADY_SUPER',
-    name: 'ЛЕДИ СУПЕР',
+    name: 'LADY SUPER',
     description: 'Fallback only for isolated component tests.',
     monthlyPriceRub: 4490,
     periodDays: 30,
@@ -34,7 +34,7 @@ export const mockSubscriptionPlans: SubscriptionPlanDto[] = [
   {
     id: 'plan-mister',
     code: 'MISTER',
-    name: 'МИСТЕР',
+    name: 'MISTER',
     description: 'Fallback only for isolated component tests.',
     monthlyPriceRub: 2990,
     periodDays: 30,
@@ -49,7 +49,7 @@ export const mockSubscriptionPlans: SubscriptionPlanDto[] = [
   {
     id: 'plan-mister-super',
     code: 'MISTER_SUPER',
-    name: 'МИСТЕР СУПЕР',
+    name: 'MISTER SUPER',
     description: 'Fallback only for isolated component tests.',
     monthlyPriceRub: 5390,
     periodDays: 30,
@@ -64,7 +64,7 @@ export const mockSubscriptionPlans: SubscriptionPlanDto[] = [
   {
     id: 'plan-family',
     code: 'FAMILY',
-    name: 'СЕМЕЙНЫЙ',
+    name: 'FAMILY',
     description: 'Fallback only for isolated component tests.',
     monthlyPriceRub: 4700,
     periodDays: 30,
@@ -79,7 +79,7 @@ export const mockSubscriptionPlans: SubscriptionPlanDto[] = [
   {
     id: 'plan-family-super',
     code: 'FAMILY_SUPER',
-    name: 'СЕМЕЙНЫЙ СУПЕР',
+    name: 'FAMILY SUPER',
     description: 'Fallback only for isolated component tests.',
     monthlyPriceRub: 8400,
     periodDays: 30,

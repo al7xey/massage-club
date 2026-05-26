@@ -1,14 +1,5 @@
 import type { PlanMeta, SubscriptionPlanDto, TariffItem } from '../model/types';
-import { getSubscriptionPlanTitle } from './getSubscriptionPlanTitle';
-
-const tariffOrder: Record<SubscriptionPlanDto['code'], number> = {
-  LADY: 0,
-  LADY_SUPER: 1,
-  FAMILY: 2,
-  FAMILY_SUPER: 3,
-  MISTER: 4,
-  MISTER_SUPER: 5,
-};
+import { getSubscriptionPlanSortIndex, getSubscriptionPlanTitle } from './getSubscriptionPlanTitle';
 
 function getSegment(code: string): TariffItem['segment'] {
   if (code.startsWith('MISTER')) {
@@ -43,7 +34,7 @@ function createPlanMeta(plan: SubscriptionPlanDto): PlanMeta {
 
 export function buildTariffs(plans: SubscriptionPlanDto[]): TariffItem[] {
   return [...plans]
-    .sort((left, right) => (tariffOrder[left.code] ?? Number.MAX_SAFE_INTEGER) - (tariffOrder[right.code] ?? Number.MAX_SAFE_INTEGER))
+    .sort((left, right) => getSubscriptionPlanSortIndex(left.code) - getSubscriptionPlanSortIndex(right.code))
     .map((plan) => ({
       id: plan.id,
       code: plan.code,

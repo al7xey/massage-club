@@ -12,7 +12,8 @@ export class SubscriptionPlansService {
   ) {}
 
   async findAll() {
-    return this.plansRepository.find({ where: { isActive: true }, order: { monthlyPriceRub: 'ASC' } });
+    const plans = await this.plansRepository.find({ where: { isActive: true } });
+    return plans.sort((left, right) => getPlanSortIndex(left.code) - getPlanSortIndex(right.code)).map(withDisplayName);
   }
 
   async findOne(id: string) {
@@ -38,4 +39,25 @@ export class SubscriptionPlansService {
     plan.isActive = false;
     return this.plansRepository.save(plan);
   }
+}
+
+const planTitlesByCode: Record<string, string> = {
+  LADY: 'LADY',
+  LADY_SUPER: 'LADY SUPER',
+  MISTER: 'MISTER',
+  MISTER_SUPER: 'MISTER SUPER',
+  FAMILY: 'FAMILY',
+  FAMILY_SUPER: 'FAMILY SUPER',
+};
+
+const planOrder = ['LADY', 'LADY_SUPER', 'MISTER', 'MISTER_SUPER', 'FAMILY', 'FAMILY_SUPER'] as const;
+
+function getPlanSortIndex(code: string) {
+  const index = planOrder.indexOf(code as (typeof planOrder)[number]);
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+}
+
+function withDisplayName(plan: SubscriptionPlan) {
+  const displayName = planTitlesByCode[plan.code];
+  return displayName ? Object.assign(plan, { name: displayName }) : plan;
 }

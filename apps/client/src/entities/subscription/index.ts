@@ -8,7 +8,7 @@ export {
   useReplaceCardMutation,
 } from './api/subscriptionApi';
 export { buildTariffs } from './lib/buildTariffs';
-export { getSubscriptionPlanTitle } from './lib/getSubscriptionPlanTitle';
+export { getSubscriptionPlanSortIndex, getSubscriptionPlanTitle } from './lib/getSubscriptionPlanTitle';
 export type {
   MembershipEntryFeeSettingDto,
   MySubscriptionDto,

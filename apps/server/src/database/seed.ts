@@ -452,7 +452,7 @@ const serviceSeeds: ServiceSeed[] = [
 const planSeeds = [
   {
     code: 'LADY',
-    name: 'ЛЕДИ',
+    name: 'LADY',
     monthlyPriceRub: 2490,
     discountPercent: 20,
     certificateDiscountPercent: 10,
@@ -464,7 +464,7 @@ const planSeeds = [
   },
   {
     code: 'LADY_SUPER',
-    name: 'ЛЕДИ СУПЕР',
+    name: 'LADY SUPER',
     monthlyPriceRub: 4490,
     discountPercent: 30,
     certificateDiscountPercent: 20,
@@ -476,7 +476,7 @@ const planSeeds = [
   },
   {
     code: 'MISTER',
-    name: 'МИСТЕР',
+    name: 'MISTER',
     monthlyPriceRub: 2990,
     discountPercent: 20,
     certificateDiscountPercent: 10,
@@ -488,7 +488,7 @@ const planSeeds = [
   },
   {
     code: 'MISTER_SUPER',
-    name: 'МИСТЕР СУПЕР',
+    name: 'MISTER SUPER',
     monthlyPriceRub: 5390,
     discountPercent: 30,
     certificateDiscountPercent: 20,
@@ -500,7 +500,7 @@ const planSeeds = [
   },
   {
     code: 'FAMILY',
-    name: 'СЕМЕЙНЫЙ',
+    name: 'FAMILY',
     monthlyPriceRub: 4700,
     discountPercent: 20,
     certificateDiscountPercent: 10,
@@ -512,7 +512,7 @@ const planSeeds = [
   },
   {
     code: 'FAMILY_SUPER',
-    name: 'СЕМЕЙНЫЙ СУПЕР',
+    name: 'FAMILY SUPER',
     monthlyPriceRub: 8400,
     discountPercent: 30,
     certificateDiscountPercent: 20,

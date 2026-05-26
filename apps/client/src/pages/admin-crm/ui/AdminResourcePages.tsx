@@ -2,6 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { UserRole } from '@massage/shared';
 import type { ServiceDto } from '@/entities/service';
+import { getSubscriptionPlanSortIndex, getSubscriptionPlanTitle } from '@/entities/subscription';
 import {
   type AdminAppointmentDto,
   type AdminAppointmentStatus,
@@ -174,6 +175,13 @@ export function SuperAdminTariffsPage() {
   const [selected, setSelected] = useState<AdminSubscriptionPlanDto | null>(null);
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<AdminSubscriptionPlanDto | null>(null);
+  const tariffItems = useMemo(
+    () =>
+      [...(tariffs.data ?? [])]
+        .sort((left, right) => getSubscriptionPlanSortIndex(left.code) - getSubscriptionPlanSortIndex(right.code))
+        .map((tariff) => ({ ...tariff, name: getSubscriptionPlanTitle(tariff.code, tariff.name) })),
+    [tariffs.data],
+  );
 
   return (
     <AdminPageShell
@@ -185,7 +193,7 @@ export function SuperAdminTariffsPage() {
     >
       <AdminDataTable
         columns={[
-          { key: 'name', title: 'Тариф', render: (item) => <strong>{item.name}</strong> },
+          { key: 'name', title: 'Тариф', render: (item) => <strong>{getSubscriptionPlanTitle(item.code, item.name)}</strong> },
           { key: 'price', title: 'Цена', render: (item) => formatCurrency(item.monthlyPriceRub) },
           { key: 'credits', title: 'Посещения', render: (item) => item.includedCredits },
           { key: 'family', title: 'Тип', render: (item) => ((item.familyMembersLimit ?? 1) > 1 ? `Семейный, ${item.familyMembersLimit ?? 1}` : 'Индивидуальный') },
@@ -207,7 +215,7 @@ export function SuperAdminTariffsPage() {
         ]}
         emptyTitle="Тарифы не найдены"
         getRowKey={(item) => item.id}
-        items={tariffs.data ?? []}
+        items={tariffItems}
       />
 
       <AdminDrawer title={selected ? 'Редактирование тарифа' : 'Новый тариф'} isOpen={Boolean(selected) || isCreateOpen} onClose={() => { setSelected(null); setCreateOpen(false); }}>

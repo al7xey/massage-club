@@ -1,7 +1,7 @@
 import { mockReviews } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
-import { buildTariffs, type TariffItem, useGetSubscriptionPlansQuery } from '@/entities/subscription';
+import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { appRoutes } from '@/shared/routes';
 import { LinkButton } from '@/shared/ui';
 import { PlansCarousel } from '@/widgets/plans-carousel';
@@ -17,10 +17,7 @@ export function HomePage() {
 
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
-  const tariffs = buildTariffs(plans);
-  const homeTariffs = pickTariffs(tariffs, ['LADY', 'LADY_SUPER', 'FAMILY', 'FAMILY_SUPER']).map((tariff) =>
-    tariff.code === 'LADY_SUPER' ? renameTariff(tariff, 'Супер') : renameFamilyAsRussian(tariff),
-  );
+  const homeTariffs = buildTariffs(plans);
 
   return (
     <main className={styles.page}>
@@ -81,19 +78,4 @@ export function HomePage() {
       </section>
     </main>
   );
-}
-
-function pickTariffs(tariffs: TariffItem[], codes: string[]) {
-  const byCode = new Map(tariffs.map((tariff) => [tariff.code, tariff]));
-  return codes.map((code) => byCode.get(code)).filter((tariff): tariff is TariffItem => Boolean(tariff));
-}
-
-function renameTariff(tariff: TariffItem, title: string): TariffItem {
-  return { ...tariff, title, planMeta: { ...tariff.planMeta, title } };
-}
-
-function renameFamilyAsRussian(tariff: TariffItem): TariffItem {
-  if (tariff.code === 'FAMILY') return renameTariff(tariff, 'Семейный');
-  if (tariff.code === 'FAMILY_SUPER') return renameTariff(tariff, 'Семейный Супер');
-  return tariff;
 }
