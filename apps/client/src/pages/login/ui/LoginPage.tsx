@@ -185,12 +185,13 @@ function mapLoginErrorMessage(message: string) {
     return 'Неверный пароль.';
   }
 
-  if (normalized.includes('unauthorized') || normalized.includes('forbidden')) {
+  if (
+    normalized.includes('unauthorized') ||
+    normalized.includes('forbidden') ||
+    normalized.includes('invalid credentials') ||
+    normalized.includes('invalid phone/email or password')
+  ) {
     return 'Неверная почта/телефон или пароль.';
-  }
-
-  if (normalized.includes('invalid phone/email or password')) {
-    return 'Неверные данные для входа.';
   }
 
   if (normalized.includes('network') || normalized.includes('failed to fetch')) {

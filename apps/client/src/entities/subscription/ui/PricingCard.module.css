@@ -13,11 +13,11 @@
 
 .card:hover {
   border-color: var(--color-line-strong);
-  background: linear-gradient(180deg, #ffffff 0%, #fbfcf8 100%);
+  background: #fbfcf8;
 }
 
 .card > :last-child {
-  margin-top: auto;
+  margin-top: 12px;
 }
 
 .title {
@@ -59,7 +59,7 @@
   flex: 1;
   align-content: start;
   gap: 11px;
-  margin: 20px 0 20px;
+  margin: 18px 0 16px;
   border-top: 1px solid var(--color-line);
   padding: 20px 0 0;
   list-style: none;
@@ -112,7 +112,7 @@
 
 @media (max-width: 760px) {
   .card {
-    min-height: 346px;
+    min-height: 330px;
     padding: 18px;
   }
 
@@ -132,7 +132,7 @@
 
   .features {
     gap: 9px;
-    margin: 18px 0 16px;
+    margin: 14px 0 12px;
     padding-top: 16px;
   }
 

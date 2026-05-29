@@ -279,7 +279,11 @@
 
 @media (max-width: 640px) {
   .visual {
-    min-height: 380px;
+    min-height: 230px;
+  }
+
+  .top {
+    gap: 18px;
   }
 
   .bookingCard,
@@ -288,9 +292,14 @@
   }
 
   .priceRow {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
     min-height: 0;
+    padding: 14px 16px;
+  }
+
+  .priceValue {
+    font-size: 22px;
   }
 
   .backButton {

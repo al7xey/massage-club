@@ -146,12 +146,12 @@
 
 @media (max-width: 760px) {
   .card {
-    min-height: 292px;
+    min-height: 268px;
     border-radius: var(--radius-card);
   }
 
   .media {
-    aspect-ratio: 1 / 0.82;
+    aspect-ratio: 1 / 0.9;
   }
 
   .timeBadge {
@@ -162,9 +162,9 @@
   }
 
   .body {
-    min-height: 124px;
-    gap: 6px;
-    padding: var(--mobile-tile-padding);
+    min-height: 106px;
+    gap: 5px;
+    padding: 9px 10px 10px;
   }
 
   .category {
@@ -173,8 +173,9 @@
   }
 
   .card h3 {
-    min-height: 51px;
-    font-size: 14px;
+    min-height: 40px;
+    font-size: 13px;
+    line-height: 1.18;
     -webkit-line-clamp: 3;
   }
 
@@ -187,10 +188,10 @@
   }
 
   .priceRow strong {
-    font-size: 20px;
+    font-size: 19px;
   }
 
   .priceRow {
-    margin-top: 2px;
+    margin-top: 0;
   }
 }

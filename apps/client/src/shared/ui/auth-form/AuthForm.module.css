@@ -50,6 +50,7 @@
 .pageCard {
   display: grid;
   width: min(460px, 100%);
+  min-width: 0;
   gap: 18px;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
@@ -183,6 +184,7 @@
 
 .form {
   display: grid;
+  min-width: 0;
   gap: 14px;
   padding: 0;
 }
@@ -272,13 +274,16 @@
 
 @media (max-width: 760px) {
   .pageRoot {
+    width: min(var(--container-page), calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
     min-height: calc(100dvh - 136px - env(safe-area-inset-bottom));
     padding: 24px 0;
     place-items: start center;
   }
 
   .pageCard {
-    width: 100%;
+    width: min(100%, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
     border-radius: var(--radius-card-small);
     padding: 20px 16px;
   }
