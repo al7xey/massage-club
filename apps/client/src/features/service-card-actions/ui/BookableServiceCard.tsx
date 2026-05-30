@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
-import { useAddCartItemMutation } from '@/entities/cart';
+import { pendingCartStorage, useAddCartItemMutation } from '@/entities/cart';
 import { ServiceCard, type ServiceCardModel } from '@/entities/service';
 import { appRoutes } from '@/shared/routes';
 
@@ -28,12 +28,12 @@ export function BookableServiceCard({ service }: BookableServiceCardProps) {
 
   const handleAddToCart = async () => {
     if (!user) {
+      pendingCartStorage.set(service.id);
       navigateToAuth('cart');
       return;
     }
 
     await addCartItem({ serviceId: service.id }).unwrap();
-    navigate(appRoutes.cart());
   };
 
   const handleBook = async () => {

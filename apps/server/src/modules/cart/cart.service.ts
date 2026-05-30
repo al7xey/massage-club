@@ -72,6 +72,7 @@ export class CartService {
 
       const cartItems = await cartRepository.find({
         where: { user: { id: userId } },
+        relations: ['user'],
         order: { createdAt: 'ASC' },
       });
 

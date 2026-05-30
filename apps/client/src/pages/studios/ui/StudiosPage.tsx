@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { mockReviews } from '@/entities/review';
+import { createReviewCardModel, useGetReviewsQuery } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
@@ -16,11 +16,13 @@ export function StudiosPage() {
   const { data = [], isLoading } = useGetStudiosQuery();
   const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
+  const { data: reviews = [] } = useGetReviewsQuery();
 
   const studios = useMemo(() => data.map((studio, index) => createStudioCardModel(studio, index)), [data]);
   const mapSrc = useMemo(() => buildYandexMapSrc(studios), [studios]);
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const studioTariffs = buildTariffs(plans).slice(0, 4);
+  const reviewCards = reviews.slice(0, 3).map(createReviewCardModel);
 
   return (
     <PageShell title="Наши студии">
@@ -70,7 +72,7 @@ export function StudiosPage() {
         />
       ) : null}
 
-      <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" actionLabel="Смотреть все" reviews={mockReviews} />
+      <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" actionLabel="Смотреть все" reviews={reviewCards} />
 
       {studios.length > 0 ? (
         <section className={styles.mapSection} id="map">

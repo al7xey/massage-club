@@ -1,7 +1,7 @@
 import { applySubscriptionBenefits } from '@massage/shared/lib/subscription-benefits';
 import { useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAddCartItemMutation, useGetCartQuery, useRemoveCartItemMutation } from '@/entities/cart';
+import { pendingCartStorage, useAddCartItemMutation, useGetCartQuery, useRemoveCartItemMutation } from '@/entities/cart';
 import type { CartItemDto } from '@/entities/cart';
 import { getSubscriptionPlanTitle, useGetMySubscriptionQuery } from '@/entities/subscription';
 import { useAuth } from '@/features/auth';
@@ -28,7 +28,8 @@ export function CartPage() {
     }
 
     if (!user) {
-      navigate(appRoutes.login(), { replace: true, state: { from: `${appRoutes.cart()}?addServiceId=${addServiceId}` } });
+      pendingCartStorage.set(addServiceId);
+      navigate(appRoutes.login(), { replace: true, state: { action: 'cart', from: appRoutes.cart(), serviceId: addServiceId } });
       return;
     }
 

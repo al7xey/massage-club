@@ -11,6 +11,10 @@ interface ReviewsShowcaseProps {
 }
 
 export function ReviewsShowcase({ title, reviews, subtitle, actionLabel }: ReviewsShowcaseProps) {
+  if (reviews.length === 0) {
+    return null;
+  }
+
   return (
     <section className={styles.section}>
       <SectionHeader title={title} actionLabel={actionLabel} actionHref={actionLabel ? appRoutes.reviews() : undefined} />

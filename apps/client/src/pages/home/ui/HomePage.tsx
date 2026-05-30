@@ -1,4 +1,4 @@
-import { mockReviews } from '@/entities/review';
+import { createReviewCardModel, useGetReviewsQuery } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
@@ -14,10 +14,12 @@ export function HomePage() {
   const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
   const { data: studios = [] } = useGetStudiosQuery();
+  const { data: reviews = [] } = useGetReviewsQuery();
 
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
   const homeTariffs = buildTariffs(plans);
+  const reviewCards = reviews.slice(0, 3).map(createReviewCardModel);
 
   return (
     <main className={styles.page}>
@@ -74,7 +76,7 @@ export function HomePage() {
         title="Отзывы наших гостей"
         subtitle="Честные мнения тех, кто уже попробовал"
         actionLabel="Смотреть все"
-        reviews={mockReviews}
+        reviews={reviewCards}
       />
 
       <section className={styles.cta}>

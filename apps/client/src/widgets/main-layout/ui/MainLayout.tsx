@@ -1,6 +1,6 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { useGetCartQuery } from '@/entities/cart';
+import { pendingCartStorage, useAddCartItemMutation, useGetCartQuery } from '@/entities/cart';
 import { useAuth } from '@/features/auth';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
@@ -37,8 +37,10 @@ export function MainLayout() {
   const location = useLocation();
   const mobileMenuId = useId();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const isFlushingPendingCart = useRef(false);
   const { isAuthLoading, user } = useAuth();
   const { data: cartItems = [] } = useGetCartQuery(undefined, { skip: !user });
+  const [addCartItem] = useAddCartItemMutation();
   const logoRoute = user ? appRoutes.account() : appRoutes.home();
   const accountInitial = (user?.fullName?.trim()?.[0] ?? 'Р').toUpperCase();
   const authState = { from: `${location.pathname}${location.search}` };
@@ -50,6 +52,29 @@ export function MainLayout() {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (!user || isFlushingPendingCart.current) {
+      return;
+    }
+
+    const pendingServiceId = pendingCartStorage.get();
+    if (!pendingServiceId) {
+      return;
+    }
+
+    isFlushingPendingCart.current = true;
+    pendingCartStorage.clear();
+
+    void addCartItem({ serviceId: pendingServiceId })
+      .unwrap()
+      .catch(() => {
+        pendingCartStorage.set(pendingServiceId);
+      })
+      .finally(() => {
+        isFlushingPendingCart.current = false;
+      });
+  }, [addCartItem, user]);
 
   return (
     <div className={styles.shell}>

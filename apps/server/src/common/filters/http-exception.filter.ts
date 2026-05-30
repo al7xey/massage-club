@@ -8,8 +8,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-    const exceptionResponse = exception instanceof HttpException ? exception.getResponse() : 'Internal server error';
+    const isHttpException = exception instanceof HttpException;
+    const status = isHttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+    const exceptionResponse = isHttpException
+      ? exception.getResponse()
+      : this.exposeDetails
+        ? getUnknownExceptionResponse(exception)
+        : 'Internal server error';
     const message = getExceptionMessage(exceptionResponse);
 
     response.status(status).json({
@@ -32,4 +37,19 @@ function getExceptionMessage(exceptionResponse: unknown) {
   }
 
   return 'Request failed';
+}
+
+function getUnknownExceptionResponse(exception: unknown) {
+  if (exception instanceof Error) {
+    return {
+      message: exception.message || 'Internal server error',
+      name: exception.name,
+      stack: exception.stack,
+    };
+  }
+
+  return {
+    message: 'Internal server error',
+    error: exception,
+  };
 }

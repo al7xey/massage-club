@@ -1,6 +1,5 @@
 import { baseApi } from '@/shared/api/baseApi';
 import type { MasterDto } from '../model/types';
-import { mockMasters } from '../model/mock';
 
 export const masterApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -8,10 +7,10 @@ export const masterApi = baseApi.injectEndpoints({
       async queryFn(_arg, _api, _extraOptions, fetchWithBaseQuery) {
         const result = await fetchWithBaseQuery('/masters');
         if (result.error) {
-          return { data: mockMasters };
+          return { error: result.error };
         }
 
-        return { data: (result.data as MasterDto[]) ?? mockMasters };
+        return { data: (result.data as MasterDto[]) ?? [] };
       },
       providesTags: ['Masters'],
     }),
@@ -19,8 +18,7 @@ export const masterApi = baseApi.injectEndpoints({
       async queryFn(id, _api, _extraOptions, fetchWithBaseQuery) {
         const result = await fetchWithBaseQuery(`/masters/${id}`);
         if (result.error) {
-          const fallback = mockMasters.find((master) => master.id === id) ?? null;
-          return { data: fallback };
+          return { error: result.error };
         }
 
         return { data: (result.data as MasterDto | null) ?? null };

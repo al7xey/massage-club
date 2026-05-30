@@ -1,6 +1,6 @@
 import { FormEvent, useMemo, useState } from 'react';
 import { useAuth } from '@/features/auth';
-import { mockReviews, ReviewCard, type ReviewCardModel, useCreateReviewMutation, useGetReviewsQuery } from '@/entities/review';
+import { createReviewCardModel, ReviewCard, type ReviewCardModel, useCreateReviewMutation, useGetReviewsQuery } from '@/entities/review';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { Button, EmptyState, TextAreaField } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
@@ -14,20 +14,7 @@ export function ReviewsPage() {
   const [comment, setComment] = useState('');
   const [message, setMessage] = useState('');
 
-  const reviewCards = useMemo<ReviewCardModel[]>(
-    () =>
-      reviews.length > 0
-        ? reviews.map((review) => ({
-            id: review.id,
-            author: review.user?.fullName || 'Гость RelaxUp',
-            role: review.service?.title ?? 'Гость клуба',
-            text: review.comment || 'Спасибо за заботу и внимательный сервис.',
-            date: new Intl.DateTimeFormat('ru-RU').format(new Date(review.createdAt)),
-            rating: review.rating,
-          }))
-        : mockReviews,
-    [reviews],
-  );
+  const reviewCards = useMemo<ReviewCardModel[]>(() => reviews.map(createReviewCardModel), [reviews]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useAddCartItemMutation, useGetCartQuery, useRemoveCartItemMutation } from '@/entities/cart';
-import { mockReviews } from '@/entities/review';
+import { pendingCartStorage, useAddCartItemMutation, useGetCartQuery, useRemoveCartItemMutation } from '@/entities/cart';
+import { createReviewCardModel, useGetReviewsQuery } from '@/entities/review';
 import { createServiceCardModel, type ServiceDto, useGetServiceQuery, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
@@ -9,7 +9,7 @@ import { useAuth } from '@/features/auth';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
-import { Button, LinkButton } from '@/shared/ui';
+import { Button, EmptyState, LinkButton } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import { PlansCarousel } from '@/widgets/plans-carousel';
 import { ReviewsShowcase } from '@/widgets/reviews-showcase';
@@ -26,12 +26,13 @@ export function ServiceDetailsPage() {
   const { data: cartItems = [] } = useGetCartQuery(undefined, { skip: !user });
   const [addCartItem, { isLoading: isAddingToCart }] = useAddCartItemMutation();
   const [removeCartItem, { isLoading: isRemovingFromCart }] = useRemoveCartItemMutation();
-  const { data: service } = useGetServiceQuery(id, { skip: !id });
+  const { data: service, isLoading: isLoadingService } = useGetServiceQuery(id, { skip: !id });
   const { data: servicesPage } = useGetServicesQuery({ limit: 5, sort: 'popular' });
   const { data: studios = [] } = useGetStudiosQuery();
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
+  const { data: reviews = [] } = useGetReviewsQuery();
 
-  const selected = service ?? servicesPage?.items[0];
+  const selected = service;
   const selectedPrice = selected?.priceRub ?? 0;
   const regularSubscriptionPrice = selected?.subscriptionPriceRub ?? Math.round(selectedPrice * 0.8);
   const superSubscriptionPrice = selected?.superSubscriptionPriceRub ?? Math.round(selectedPrice * 0.7);
@@ -41,6 +42,7 @@ export function ServiceDetailsPage() {
     .map((item) => createServiceCardModel(item));
   const studioCards = studios.slice(0, 2).map(createStudioCardModel);
   const serviceTariffs = buildTariffs(plans).slice(0, 4);
+  const reviewCards = reviews.slice(0, 3).map(createReviewCardModel);
   const title = selected?.title ?? 'Услуга';
   const description = selected?.description ?? 'Описание услуги загружается из базы данных.';
   const photoItems = useMemo(() => getServiceGallery(selected), [selected]);
@@ -70,6 +72,7 @@ export function ServiceDetailsPage() {
   const handleAddToCart = async () => {
     if (!selected) return;
     if (!user) {
+      pendingCartStorage.set(selected.id);
       navigateToAuth('cart');
       return;
     }
@@ -83,6 +86,26 @@ export function ServiceDetailsPage() {
 
     await removeCartItem(lastItem.id).unwrap();
   };
+
+  if (isLoadingService) {
+    return (
+      <PageShell title="Услуга">
+        <p>Загружаем услугу...</p>
+      </PageShell>
+    );
+  }
+
+  if (!selected) {
+    return (
+      <PageShell title="Услуга">
+        <EmptyState
+          title="Услуга не найдена"
+          description="Проверьте ссылку или вернитесь в каталог услуг."
+          actions={<LinkButton to={appRoutes.services()}>Все услуги</LinkButton>}
+        />
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell title={title}>
@@ -166,7 +189,7 @@ export function ServiceDetailsPage() {
 
       {similar.length > 0 ? <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={similar} /> : null}
       <StudioShowcase title="Где пройти процедуру" actionLabel="Подробнее" studios={studioCards} />
-      <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" actionLabel="Смотреть все" reviews={mockReviews} />
+      <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" actionLabel="Смотреть все" reviews={reviewCards} />
     </PageShell>
   );
 }

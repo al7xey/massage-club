@@ -1,5 +1,5 @@
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
-import { mockReviews } from '@/entities/review';
+import { createReviewCardModel, useGetReviewsQuery } from '@/entities/review';
 import {
   buildTariffs,
   type TariffItem,
@@ -19,15 +19,19 @@ export function SubscriptionPlansPage() {
   const { data: entryFee } = useGetMembershipEntryFeeQuery();
   const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
   const { data: studios = [] } = useGetStudiosQuery();
+  const { data: reviews = [] } = useGetReviewsQuery();
 
   const tariffs = buildTariffs(plans);
   const womenTariffs = pickTariffs(tariffs, ['LADY', 'LADY_SUPER', 'FAMILY', 'FAMILY_SUPER']);
   const menTariffs = pickTariffs(tariffs, ['MISTER', 'MISTER_SUPER', 'FAMILY', 'FAMILY_SUPER']);
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
-  const entryFeeText = entryFee?.entryFeeEnabled
-    ? `Вступление в клуб ${entryFee.entryFeeRub.toLocaleString('ru-RU')} ₽ при покупке первой подписки.`
-    : `Акция: первое вступление в клуб 0 ₽ вместо ${entryFee?.entryFeeRub.toLocaleString('ru-RU') ?? '1 200'} ₽.`;
+  const reviewCards = reviews.slice(0, 3).map(createReviewCardModel);
+  const entryFeeText = entryFee
+    ? entryFee.entryFeeEnabled
+      ? `Вступление в клуб ${entryFee.entryFeeRub.toLocaleString('ru-RU')} ₽ при покупке первой подписки.`
+      : `Акция: первое вступление в клуб 0 ₽ вместо ${entryFee.entryFeeRub.toLocaleString('ru-RU')} ₽.`
+    : 'Условия вступления загружаются из настроек клуба.';
 
   return (
     <PageShell title="Тарифы">
@@ -44,7 +48,7 @@ export function SubscriptionPlansPage() {
 
       {popularServices.length > 0 ? <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={popularServices} /> : null}
       <StudioShowcase title="Где пройти процедуру" actionLabel="Подробнее" studios={popularStudios} />
-      <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" actionLabel="Смотреть все" reviews={mockReviews} />
+      <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" actionLabel="Смотреть все" reviews={reviewCards} />
     </PageShell>
   );
 }

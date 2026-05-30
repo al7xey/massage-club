@@ -11,3 +11,4 @@ export type {
   CheckoutCartItemRequest,
   CheckoutCartRequest,
 } from './model/types';
+export { pendingCartStorage } from './lib/pendingCartStorage';

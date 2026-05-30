@@ -215,7 +215,7 @@ function resolvePostAuthPath(state: AuthLocationState | null, role: PublicUserDt
   }
 
   if (state.action === 'cart' && state.serviceId) {
-    return `${appRoutes.cart()}?addServiceId=${encodeURIComponent(state.serviceId)}`;
+    return state.from ?? appRoutes.serviceDetails(state.serviceId);
   }
 
   if (state.action === 'book' && state.serviceId) {

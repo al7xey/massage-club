@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useGetMasterQuery } from '@/entities/master';
-import { mockReviews } from '@/entities/review';
+import { createReviewCardModel, useGetReviewsQuery } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { resolveMediaUrl } from '@/shared/lib/media';
@@ -18,6 +18,7 @@ export function MasterDetailsPage() {
   const { data: master, isLoading } = useGetMasterQuery(id, { skip: !id });
   const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
   const { data: studios = [] } = useGetStudiosQuery();
+  const { data: reviews = [] } = useGetReviewsQuery();
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
   useEffect(() => {
@@ -29,6 +30,7 @@ export function MasterDetailsPage() {
   const stats = getMasterStats(id);
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const studioCards = studios.slice(0, 2).map(createStudioCardModel);
+  const reviewCards = reviews.slice(0, 3).map(createReviewCardModel);
   const photos = useMemo(
     () => uniqueUrls([master?.photoUrl, ...(master?.photoUrls ?? [])]).map(resolveMediaUrl),
     [master],
@@ -114,7 +116,7 @@ export function MasterDetailsPage() {
 
       </section>
 
-      <ReviewsShowcase title="Отзывы гостей" actionLabel="Смотреть все" reviews={mockReviews} />
+      <ReviewsShowcase title="Отзывы гостей" actionLabel="Смотреть все" reviews={reviewCards} />
 
       {popularServices.length > 0 ? <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={popularServices} /> : null}
       <StudioShowcase title="Наши студии" actionLabel="Подробнее" studios={studioCards} />
