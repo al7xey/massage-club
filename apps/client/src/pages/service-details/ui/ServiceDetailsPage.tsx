@@ -133,6 +133,9 @@ export function ServiceDetailsPage() {
             <PriceRow title="SUPER-тариф" note="Максимальная выгода" price={superSubscriptionPrice} badge="-30%" featured />
           </div>
           <div className={styles.actions}>
+            <LinkButton fullWidth to={`${appRoutes.booking()}?serviceId=${selected.id}`}>
+              Записаться
+            </LinkButton>
             {selectedCountInCart > 0 ? (
               <div className={styles.cartCounter} aria-label={`В корзине: ${selectedCountInCart}`}>
                 <Button variant="secondary" disabled={isRemovingFromCart} onClick={() => void handleRemoveOneFromCart()}>

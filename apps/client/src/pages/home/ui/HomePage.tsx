@@ -18,7 +18,7 @@ export function HomePage() {
 
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const popularStudios = studios.slice(0, 2).map(createStudioCardModel);
-  const homeTariffs = buildTariffs(plans);
+  const homeTariffs = buildTariffs(plans).slice(0, 4);
   const reviewCards = reviews.slice(0, 3).map(createReviewCardModel);
 
   return (
