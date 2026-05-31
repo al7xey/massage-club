@@ -4,6 +4,7 @@ import { useGetMasterQuery } from '@/entities/master';
 import { createReviewCardModel, useGetReviewsQuery } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
+import { getFallbackImage } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
 import { EmptyState, LinkButton } from '@/shared/ui';
@@ -32,8 +33,11 @@ export function MasterDetailsPage() {
   const studioCards = studios.slice(0, 2).map(createStudioCardModel);
   const reviewCards = reviews.slice(0, 3).map(createReviewCardModel);
   const photos = useMemo(
-    () => uniqueUrls([master?.photoUrl, ...(master?.photoUrls ?? [])]).map(resolveMediaUrl),
-    [master],
+    () => {
+      const urls = uniqueUrls([master?.photoUrl, ...(master?.photoUrls ?? [])]);
+      return (urls.length > 0 ? urls : [getFallbackImage('masters', id)]).map(resolveMediaUrl);
+    },
+    [id, master],
   );
 
   useEffect(() => {
@@ -69,7 +73,6 @@ export function MasterDetailsPage() {
           role="img"
           style={photos[activePhotoIndex] ? { backgroundImage: `url("${photos[activePhotoIndex]}")` } : undefined}
         >
-          {!photos.length ? <span>{master.studio?.name ?? 'Massage Club'}</span> : null}
           {photos.length > 1 ? (
             <div className={styles.galleryControls}>
               <button type="button" aria-label="Предыдущее фото" onClick={() => setActivePhotoIndex((index) => (index === 0 ? photos.length - 1 : index - 1))}>

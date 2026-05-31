@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { appRoutes } from '@/shared/routes';
+import { fallbackImages } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { LinkButton } from '@/shared/ui';
 import type { StudioCardModel } from '../model/types';
@@ -11,12 +12,11 @@ interface StudioCardProps {
 }
 
 export function StudioCard({ studio, variant = 'full' }: StudioCardProps) {
-  const fallbackSlides = ['Зал массажа', 'Зона ожидания', 'Кабинет SPA'];
+  const fallbackSlides = fallbackImages.studios;
   const slides = studio.photoUrls.length > 0 ? studio.photoUrls : fallbackSlides;
   const [activeIndex, setActiveIndex] = useState(0);
   const activeSlide = slides[activeIndex] ?? slides[0];
   const activePhotoUrl = resolveMediaUrl(activeSlide);
-  const hasRealPhoto = studio.photoUrls.length > 0;
   const isCompact = variant === 'compact';
   const showGalleryControls = !isCompact && slides.length > 1;
   const goToSlide = (direction: -1 | 1) => {
@@ -26,13 +26,7 @@ export function StudioCard({ studio, variant = 'full' }: StudioCardProps) {
   return (
     <article className={`${styles.card} ${isCompact ? styles.cardCompact : ''}`}>
       <div className={styles.media}>
-        {hasRealPhoto ? (
-          <img src={activePhotoUrl} alt={`${studio.title}, фото ${activeIndex + 1}`} loading="lazy" />
-        ) : (
-          <div aria-hidden="true" className={styles.placeholder} data-slide={activeIndex}>
-            <span>{activeSlide}</span>
-          </div>
-        )}
+        <img src={activePhotoUrl} alt={`${studio.title}, фото ${activeIndex + 1}`} loading="lazy" />
         {showGalleryControls ? (
           <>
             <button className={styles.navButton} type="button" aria-label="Предыдущее фото" onClick={() => goToSlide(-1)}>

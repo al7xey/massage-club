@@ -7,6 +7,7 @@ import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { useAuth } from '@/features/auth';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
+import { getFallbackImage } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
 import { Button, EmptyState, LinkButton } from '@/shared/ui';
@@ -117,8 +118,6 @@ export function ServiceDetailsPage() {
         <div className={styles.visual}>
           <div
             className={styles.servicePhoto}
-            data-has-image={activePhoto?.url ? 'true' : undefined}
-            data-tone={activePhoto?.tone}
             role="img"
             aria-label={`Фото услуги ${title}`}
             style={activePhoto?.url ? { backgroundImage: `url("${activePhoto.url}")` } : undefined}
@@ -226,12 +225,11 @@ function PriceRow({
 
 function getServiceGallery(service: ServiceDto | undefined) {
   const urls = uniqueUrls([service?.imageUrl, ...(service?.galleryUrls ?? [])]);
-  const count = urls.length > 0 ? urls.length : 3;
+  const items = urls.length > 0 ? urls : [getFallbackImage('services', service?.category?.slug ?? service?.title ?? 'service')];
 
-  return Array.from({ length: count }, (_, index) => ({
+  return items.map((url, index) => ({
     label: `Фото ${index + 1}`,
-    tone: index,
-    url: resolveMediaUrl(urls[index]),
+    url: resolveMediaUrl(url),
   }));
 }
 

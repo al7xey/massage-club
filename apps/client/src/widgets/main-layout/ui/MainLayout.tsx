@@ -118,7 +118,7 @@ export function MainLayout() {
                     Админ-панель
                   </LinkButton>
                 ) : null}
-                <LinkButton aria-label="Профиль" className={styles.iconButton} to={appRoutes.account()} variant="secondary" size="sm">
+                <LinkButton aria-label="Профиль" className={`${styles.iconButton} ${styles.profileButton}`} to={appRoutes.account()} variant="secondary" size="sm">
                   <span className={styles.avatar} aria-hidden="true">
                     {user.avatarUrl ? <img src={resolveMediaUrl(user.avatarUrl)} alt="" /> : accountInitial}
                   </span>

@@ -17,56 +17,9 @@
   min-height: 520px;
   overflow: hidden;
   border-radius: var(--radius-card);
-  background:
-    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.84), transparent 25%),
-    linear-gradient(145deg, #edf3e7 0%, #f8efe3 100%);
+  background: var(--color-soft);
   background-position: center;
   background-size: cover;
-}
-
-.portrait::before,
-.portrait::after {
-  position: absolute;
-  content: "";
-}
-
-.portrait::before {
-  right: 16%;
-  bottom: 0;
-  left: 16%;
-  height: 76%;
-  border-radius: 240px 240px 0 0;
-  background: rgba(255, 255, 255, 0.74);
-}
-
-.portrait::after {
-  top: 16%;
-  left: 50%;
-  width: 112px;
-  height: 112px;
-  border: 14px solid rgba(111, 141, 78, 0.14);
-  border-radius: var(--radius-round);
-  transform: translateX(-50%);
-}
-
-.portrait[style]::before,
-.portrait[style]::after {
-  display: none;
-}
-
-.portrait span {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  z-index: 1;
-  max-width: calc(100% - 32px);
-  border-radius: var(--radius-control);
-  background: rgba(255, 255, 255, 0.86);
-  color: var(--color-text);
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 800;
-  backdrop-filter: blur(8px);
 }
 
 .galleryControls {

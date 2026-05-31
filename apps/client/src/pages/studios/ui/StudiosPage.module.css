@@ -25,32 +25,9 @@
 .photo {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at 76% 28%, rgba(255, 255, 255, 0.74), transparent 28%),
-    linear-gradient(135deg, #e8eee0 0%, #f8f4ec 100%);
+  background: var(--color-soft);
   background-position: center;
   background-size: cover;
-}
-
-.photo[data-tone="1"] {
-  background:
-    radial-gradient(circle at 24% 26%, rgba(255, 255, 255, 0.74), transparent 30%),
-    linear-gradient(135deg, #f3eadf 0%, #edf3e8 100%);
-}
-
-.photo[data-tone="2"] {
-  background:
-    radial-gradient(circle at 72% 72%, rgba(255, 255, 255, 0.7), transparent 32%),
-    linear-gradient(135deg, #eef1e6 0%, #f8efe4 100%);
-}
-
-.photo::after {
-  position: absolute;
-  inset: auto 16px 16px 16px;
-  height: 42%;
-  border-radius: 120px 120px 18px 18px;
-  background: rgba(255, 255, 255, 0.48);
-  content: "";
 }
 
 .galleryControls {

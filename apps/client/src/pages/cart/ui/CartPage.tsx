@@ -6,6 +6,7 @@ import type { CartItemDto } from '@/entities/cart';
 import { getSubscriptionPlanTitle, useGetMySubscriptionQuery } from '@/entities/subscription';
 import { useAuth } from '@/features/auth';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
+import { getFallbackImage } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
 import { Button, EmptyState, LinkButton } from '@/shared/ui';
@@ -188,22 +189,5 @@ function getSuperPrice(priceRub: number) {
 
 function getServiceImageUrl(service: { category?: { slug?: string } | null; galleryUrls?: string[] | null; imageUrl?: string | null }) {
   const uploadedUrl = resolveMediaUrl(service.imageUrl ?? service.galleryUrls?.[0]);
-  if (uploadedUrl) {
-    return uploadedUrl;
-  }
-
-  const categorySlug = service.category?.slug;
-  if (categorySlug === 'face-care') {
-    return 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=420&q=80';
-  }
-
-  if (categorySlug === 'laser-hair-removal') {
-    return 'https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=420&q=80';
-  }
-
-  if (categorySlug === 'spa-programs') {
-    return 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=420&q=80';
-  }
-
-  return 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=420&q=80';
+  return uploadedUrl || getFallbackImage('services', service.category?.slug ?? 'service');
 }

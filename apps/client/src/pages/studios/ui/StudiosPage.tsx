@@ -3,6 +3,7 @@ import { createReviewCardModel, useGetReviewsQuery } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
+import { fallbackImages } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
 import { EmptyState, LinkButton } from '@/shared/ui';
@@ -134,14 +135,12 @@ function getMapCenter(studios: Array<ReturnType<typeof createStudioCardModel>>) 
 }
 
 function getStudioGallery(studio: ReturnType<typeof createStudioCardModel>, index: number) {
-  const labels = ['Фото 1', 'Фото 2', 'Фото 3'];
   const photos = uniqueUrls(studio.photoUrls.length > 0 ? studio.photoUrls : [studio.photoUrl]);
-  const items = photos.length > 0 ? photos : labels;
+  const items = photos.length > 0 ? photos : fallbackImages.studios;
 
   return items.map((item, photoIndex) => ({
-    label: photos.length > 0 ? `Фото ${photoIndex + 1}` : item,
-    url: photos.length > 0 ? resolveMediaUrl(item) : undefined,
-    tone: (index + photoIndex) % 3,
+    label: `Фото ${photoIndex + 1}`,
+    url: resolveMediaUrl(item),
   }));
 }
 
@@ -171,7 +170,6 @@ function StudioGallery({
     <div className={styles.gallery} aria-label={`Фото студии ${studioTitle}`}>
       <div
         className={styles.photo}
-        data-tone={activePhoto?.tone}
         role="img"
         aria-label={`${studioTitle}, фото ${activeIndex + 1}`}
         style={activePhoto?.url ? { backgroundImage: `url("${activePhoto.url}")` } : undefined}

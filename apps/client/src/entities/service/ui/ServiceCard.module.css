@@ -1,4 +1,5 @@
 .card {
+  position: relative;
   display: flex;
   height: 100%;
   flex-direction: column;
@@ -37,6 +38,17 @@
   gap: 10px;
 }
 
+.cartIcon {
+  display: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
 .media {
   position: relative;
   flex: 0 0 auto;
@@ -52,37 +64,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.media::before,
-.media::after {
-  position: absolute;
-  content: "";
-}
-
-.media::before {
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 1;
-  height: 54%;
-  border-radius: 52px 52px 0 0;
-  background: rgba(111, 141, 78, 0.1);
-}
-
-.media::after {
-  right: 22px;
-  top: 24px;
-  z-index: 1;
-  width: 54px;
-  height: 54px;
-  border: 10px solid rgba(111, 141, 78, 0.12);
-  border-radius: var(--radius-round);
-}
-
-.media:has(img)::before,
-.media:has(img)::after {
-  display: none;
 }
 
 .timeBadge {
@@ -180,11 +161,41 @@
   }
 
   .actionWrap {
-    display: none;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 2;
+    padding: 0;
   }
 
   .actionButtons {
+    display: block;
+  }
+
+  .bookAction {
     display: none;
+  }
+
+  .cartAction {
+    display: inline-grid;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    place-items: center;
+    border-radius: var(--radius-round);
+    padding: 0;
+    font-size: 0;
+  }
+
+  .cartIcon {
+    display: block;
+    font-size: initial;
+  }
+
+  .body {
+    padding-right: 60px;
+    padding-bottom: 14px;
   }
 
   .priceRow strong {

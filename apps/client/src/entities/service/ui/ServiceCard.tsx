@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { appRoutes } from '@/shared/routes';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
+import { getFallbackImage } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { Button } from '@/shared/ui';
 import type { ServiceCardModel } from '../model/types';
@@ -15,13 +16,13 @@ interface ServiceCardProps {
 
 export function ServiceCard({ isActionDisabled = false, onAddToCart, onBook, service }: ServiceCardProps) {
   const detailsPath = appRoutes.serviceDetails(service.id);
-  const imageUrl = resolveMediaUrl(service.imageUrl ?? service.galleryUrls?.[0]);
+  const imageUrl = resolveMediaUrl(service.imageUrl ?? service.galleryUrls?.[0]) || getFallbackImage('services', service.category?.slug ?? service.title);
 
   return (
     <article className={styles.card}>
       <Link className={styles.link} to={detailsPath}>
         <div className={styles.media} aria-hidden="true">
-          {imageUrl ? <img src={imageUrl} alt="" loading="lazy" /> : null}
+          <img src={imageUrl} alt="" loading="lazy" />
           <span className={styles.timeBadge}>{service.badgeText}</span>
         </div>
         <div className={styles.body}>
@@ -34,14 +35,24 @@ export function ServiceCard({ isActionDisabled = false, onAddToCart, onBook, ser
       </Link>
       <div className={styles.actionWrap}>
         <div className={styles.actionButtons}>
-          <Button size="sm" variant="secondary" disabled={isActionDisabled || !onAddToCart} onClick={() => void onAddToCart?.(service)}>
+          <Button className={styles.cartAction} size="sm" variant="secondary" disabled={isActionDisabled || !onAddToCart} onClick={() => void onAddToCart?.(service)}>
+            <CartIcon />
             В корзину
           </Button>
-          <Button size="sm" disabled={isActionDisabled || !onBook} onClick={() => void onBook?.(service)}>
+          <Button className={styles.bookAction} size="sm" disabled={isActionDisabled || !onBook} onClick={() => void onBook?.(service)}>
             Записаться
           </Button>
         </div>
       </div>
     </article>
+  );
+}
+
+function CartIcon() {
+  return (
+    <svg className={styles.cartIcon} viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 7h13l-1.4 7.5H8L6.8 4.5H4" />
+      <path d="M9 19a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM17 19a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+    </svg>
   );
 }
