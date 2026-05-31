@@ -28,8 +28,8 @@
 
 .brandMark {
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 84px;
+  height: 30px;
   place-items: center;
   color: #6f8d4e;
 }
@@ -249,8 +249,8 @@
   }
 
   .brandMark {
-    width: 36px;
-    height: 36px;
+    width: 72px;
+    height: 26px;
   }
 
   .nav {

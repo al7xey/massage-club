@@ -16,6 +16,13 @@ export interface AppEnvironment {
   JWT_ACCESS_EXPIRES_IN: string;
   JWT_REFRESH_EXPIRES_IN: string;
   BCRYPT_ROUNDS: number;
+  APP_ENCRYPTION_KEY?: string;
+  REQUEST_RATE_LIMIT_WINDOW_MS: number;
+  REQUEST_RATE_LIMIT_MAX: number;
+  AUTH_RATE_LIMIT_WINDOW_MS: number;
+  AUTH_RATE_LIMIT_MAX: number;
+  TRUST_PROXY_HOPS: number;
+  HSTS_MAX_AGE_SECONDS: number;
 }
 
 export function validateEnv(config: Record<string, unknown>): AppEnvironment {
@@ -37,6 +44,13 @@ export function validateEnv(config: Record<string, unknown>): AppEnvironment {
     JWT_ACCESS_EXPIRES_IN: readString(config, 'JWT_ACCESS_EXPIRES_IN', '15m'),
     JWT_REFRESH_EXPIRES_IN: readString(config, 'JWT_REFRESH_EXPIRES_IN', '7d'),
     BCRYPT_ROUNDS: readNumber(config, 'BCRYPT_ROUNDS', 12),
+    APP_ENCRYPTION_KEY: readOptionalString(config, 'APP_ENCRYPTION_KEY'),
+    REQUEST_RATE_LIMIT_WINDOW_MS: readNumber(config, 'REQUEST_RATE_LIMIT_WINDOW_MS', 60_000),
+    REQUEST_RATE_LIMIT_MAX: readNumber(config, 'REQUEST_RATE_LIMIT_MAX', 300),
+    AUTH_RATE_LIMIT_WINDOW_MS: readNumber(config, 'AUTH_RATE_LIMIT_WINDOW_MS', 15 * 60_000),
+    AUTH_RATE_LIMIT_MAX: readNumber(config, 'AUTH_RATE_LIMIT_MAX', 30),
+    TRUST_PROXY_HOPS: readNumber(config, 'TRUST_PROXY_HOPS', 1),
+    HSTS_MAX_AGE_SECONDS: readNumber(config, 'HSTS_MAX_AGE_SECONDS', 15552000),
   };
 
   validateProductionSafety(env);
@@ -58,6 +72,10 @@ function validateProductionSafety(env: AppEnvironment) {
 
   if (env.JWT_ACCESS_SECRET.length < 32 || env.JWT_REFRESH_SECRET.length < 32) {
     throw new Error('JWT secrets must be at least 32 characters in production');
+  }
+
+  if (!env.APP_ENCRYPTION_KEY) {
+    throw new Error('APP_ENCRYPTION_KEY is required in production');
   }
 }
 

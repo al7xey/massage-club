@@ -6,6 +6,7 @@ import { json, static as serveStatic, type NextFunction, type Request, type Resp
 import path from 'node:path';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { createRateLimitMiddleware } from './common/security/rate-limit.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,9 +16,25 @@ async function bootstrap() {
   const isSensitiveRuntime = nodeEnv === 'production' || nodeEnv === 'docker';
   const allowedOrigins = resolveCorsOrigins(configService.get<string>('CORS_ORIGIN'), nodeEnv);
 
-  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
+  app.getHttpAdapter().getInstance().set('trust proxy', configService.get<number>('TRUST_PROXY_HOPS', 1));
   app.setGlobalPrefix(apiPrefix);
   app.use('/uploads', serveStatic(path.resolve(process.cwd(), 'uploads')));
+  app.use(
+    createRateLimitMiddleware({
+      keyPrefix: 'api',
+      maxRequests: configService.get<number>('REQUEST_RATE_LIMIT_MAX', 300),
+      windowMs: configService.get<number>('REQUEST_RATE_LIMIT_WINDOW_MS', 60_000),
+    }),
+  );
+  app.use(
+    `/${apiPrefix}/auth`,
+    createRateLimitMiddleware({
+      keyPrefix: 'auth',
+      maxRequests: configService.get<number>('AUTH_RATE_LIMIT_MAX', 30),
+      windowMs: configService.get<number>('AUTH_RATE_LIMIT_WINDOW_MS', 15 * 60_000),
+    }),
+  );
   app.use(json({ limit: '256kb' }));
   app.use(urlencoded({ extended: true, limit: '256kb' }));
   app.use((_request: Request, response: Response, next: NextFunction) => {
@@ -26,6 +43,15 @@ async function bootstrap() {
     response.setHeader('Referrer-Policy', 'no-referrer');
     response.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
     response.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    response.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+    response.setHeader('X-DNS-Prefetch-Control', 'off');
+    response.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'; form-action 'self'",
+    );
+    if (isSensitiveRuntime) {
+      response.setHeader('Strict-Transport-Security', `max-age=${configService.get<number>('HSTS_MAX_AGE_SECONDS', 15552000)}; includeSubDomains`);
+    }
     next();
   });
   app.enableCors({
@@ -66,6 +92,10 @@ async function bootstrap() {
 void bootstrap();
 
 function resolveCorsOrigins(configValue?: string, nodeEnv = 'development') {
+  if ((nodeEnv === 'production' || nodeEnv === 'docker') && !configValue?.trim()) {
+    throw new Error('CORS_ORIGIN must be set in production');
+  }
+
   const defaultOrigins =
     nodeEnv === 'production' || nodeEnv === 'docker'
       ? []
