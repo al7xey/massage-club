@@ -449,6 +449,51 @@ const serviceSeeds: ServiceSeed[] = [
   },
 ];
 
+// Test images for services by category (from Unsplash)
+const serviceImagesByCategory: Record<string, string[]> = {
+  'spa-programs': [
+    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80',
+  ],
+  'massage': [
+    'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80',
+  ],
+  'massage-men': [
+    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80',
+  ],
+  'body-correction-wraps': [
+    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
+  ],
+  'face-care': [
+    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
+  ],
+  'laser-hair-removal': [
+    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
+    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
+  ],
+};
+
+function getServiceImage(categorySlug: string, index: number): string {
+  const images = serviceImagesByCategory[categorySlug] ?? serviceImagesByCategory['spa-programs'];
+  return images[index % images.length];
+}
+
 const planSeeds = [
   {
     code: 'LADY',
@@ -650,6 +695,7 @@ async function seed() {
 
     const slug = `${item.categorySlug}-${slugify(item.title)}-${index + 1}`;
     activeServiceSlugs.push(slug);
+    const imageUrl = getServiceImage(item.categorySlug, index);
     const service = await findOrCreate(services, { slug } as Partial<Service>, () => ({
       title: item.title,
       slug,
@@ -659,10 +705,16 @@ async function seed() {
       composition: item.composition,
       priceRub: item.priceRub,
       category,
+      imageUrl,
       externalSource: 'seed',
       externalId: `${item.categorySlug}-${index + 1}`,
       isActive: true,
     }));
+    // Ensure imageUrl is set for all services
+    if (!service.imageUrl) {
+      service.imageUrl = imageUrl;
+      await services.save(service);
+    }
     savedServices.push(service);
   }
 

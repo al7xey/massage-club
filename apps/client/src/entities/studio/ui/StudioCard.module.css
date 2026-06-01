@@ -137,6 +137,7 @@
   .cardCompact {
     min-height: 228px;
     border-radius: var(--radius-card);
+    cursor: pointer;
   }
 
   .media,

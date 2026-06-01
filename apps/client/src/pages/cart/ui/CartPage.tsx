@@ -8,8 +8,9 @@ import { useAuth } from '@/features/auth';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
 import { getFallbackImage } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
+import { formatServiceCount } from '@/shared/lib/text/formatServiceCount';
 import { appRoutes } from '@/shared/routes';
-import { Button, EmptyState, LinkButton } from '@/shared/ui';
+import { EmptyState, LinkButton } from '@/shared/ui';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import styles from './CartPage.module.css';
 
@@ -114,13 +115,13 @@ export function CartPage() {
                   {row.hasIncludedCredit && row.totalRub === 0 ? 'В подписке' : formatPrice(row.totalRub)}
                 </strong>
                 <div className={styles.quantityControl} aria-label={`Количество: ${row.items.length}`}>
-                  <Button size="sm" variant="secondary" disabled={isMutating} onClick={() => removeOne(row.items)}>
-                    -
-                  </Button>
+                  <button className={styles.quantityButton} type="button" disabled={isMutating} aria-label="Уменьшить количество" onClick={() => removeOne(row.items)}>
+                    −
+                  </button>
                   <span>{row.items.length}</span>
-                  <Button size="sm" variant="secondary" disabled={isMutating} onClick={() => addSameService(row.service.id)}>
+                  <button className={styles.quantityButton} type="button" disabled={isMutating} aria-label="Увеличить количество" onClick={() => addSameService(row.service.id)}>
                     +
-                  </Button>
+                  </button>
                 </div>
               </div>
             </article>
@@ -131,7 +132,7 @@ export function CartPage() {
           <aside className={styles.summary}>
             <p className={styles.summaryLabel}>Итого</p>
             <strong>{formatPrice(pricingPreview.totalAmountRub)}</strong>
-            <span>{cartItems.length} услуг</span>
+            <span>{formatServiceCount(cartItems.length)}</span>
             {activeSubscription ? (
               <p>
                 {getSubscriptionPlanTitle(activeSubscription.plan.code, activeSubscription.plan.name)}: {pricingPreview.subscriptionCreditsUsed} по подписке,

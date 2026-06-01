@@ -447,10 +447,14 @@
     gap: 14px;
   }
 
+  .layout {
+    gap: 14px;
+  }
+
   .stage,
   .successCard {
-    border-radius: 26px;
-    padding: 20px;
+    border-radius: 24px;
+    padding: 18px;
   }
 
   .stepper,
@@ -461,16 +465,47 @@
   }
 
   .stepper {
-    display: flex;
-    overflow-x: auto;
+    order: 1;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+    overflow: visible;
     border-radius: 24px;
     padding: 10px;
-    scroll-snap-type: x mandatory;
   }
 
   .stepButton {
-    min-width: 86px;
-    scroll-snap-align: start;
+    min-width: 0;
+    min-height: 58px;
+    gap: 6px;
+    padding: 8px 4px;
+  }
+
+  .stepButton span {
+    width: 28px;
+    height: 28px;
+  }
+
+  .stepButton strong {
+    font-size: 12px;
+  }
+
+  .stage {
+    order: 2;
+    gap: 18px;
+  }
+
+  .stageHeader {
+    gap: 6px;
+  }
+
+  .stageHeader h2 {
+    font-size: 22px;
+  }
+
+  .stageHeader p {
+    font-size: 13px;
+    line-height: 1.45;
   }
 
   .serviceRow,
@@ -495,6 +530,12 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .studioGrid,
+  .masterGrid,
+  .confirmGrid {
+    grid-template-columns: 1fr;
+  }
+
   .slotButton,
   .dateButton,
   .masterButton,
@@ -516,5 +557,51 @@
   .stageActions > *,
   .actions > * {
     width: 100%;
+  }
+
+  .sideSummary {
+    order: 3;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 14px;
+    border-radius: 24px;
+    padding: 18px;
+  }
+
+  .sideSummary > strong {
+    grid-column: 1 / -1;
+    font-size: 28px;
+  }
+
+  .sideSummary > p {
+    grid-column: 1 / -1;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .sideSummary dl {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding-top: 12px;
+  }
+
+  .sideSummary dd {
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  .serviceRow {
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .serviceRow h3,
+  .confirmCard h3 {
+    font-size: 16px;
+  }
+
+  .totalCard {
+    gap: 10px;
   }
 }

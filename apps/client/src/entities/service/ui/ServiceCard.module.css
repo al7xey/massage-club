@@ -42,6 +42,7 @@
   display: none;
   width: 20px;
   height: 20px;
+  flex: 0 0 20px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -177,20 +178,24 @@
   }
 
   .cartAction {
-    display: inline-grid;
+    display: inline-flex;
     width: 44px;
     min-width: 44px;
     height: 44px;
     min-height: 44px;
-    place-items: center;
+    align-items: center;
+    justify-content: center;
     border-radius: var(--radius-round);
     padding: 0;
-    font-size: 0;
+    gap: 0;
   }
 
   .cartIcon {
     display: block;
-    font-size: initial;
+  }
+
+  .actionLabel {
+    display: none;
   }
 
   .body {

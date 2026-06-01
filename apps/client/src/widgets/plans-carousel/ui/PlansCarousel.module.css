@@ -75,8 +75,9 @@
 
 @media (max-width: 760px) {
   .top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    flex-direction: row;
     gap: 12px;
   }
 
@@ -96,18 +97,24 @@
   }
 
   .actions > * {
-    width: 42px;
-    min-width: 42px;
-    height: 42px;
-    min-height: 42px;
+    width: 52px !important;
+    max-width: 52px;
+    min-width: 52px;
+    height: 52px;
+    min-height: 52px;
+    flex: 0 0 52px;
+    border-color: rgba(111, 141, 78, 0.18);
     border-radius: var(--radius-round);
+    background: #ffffff;
+    color: var(--color-text) !important;
     padding: 0;
     font-size: 0;
+    box-shadow: 0 10px 20px rgba(31, 41, 55, 0.04);
   }
 
   .actions > *::before {
-    content: "→";
-    font-size: 22px;
+    content: "\2192";
+    font-size: 24px;
     line-height: 1;
   }
 

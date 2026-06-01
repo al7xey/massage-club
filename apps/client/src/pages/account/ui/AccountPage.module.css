@@ -509,6 +509,42 @@
     grid-template-columns: 1fr;
   }
 
+  .subscriptionContent {
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+  }
+
+  .subscriptionCopy {
+    display: contents;
+  }
+
+  .subscriptionCopy h2 {
+    order: 1;
+  }
+
+  .subscriptionCopy p {
+    order: 2;
+    line-height: 1.5;
+  }
+
+  .subscriptionMeta {
+    order: 3;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    max-width: none;
+  }
+
+  .subscriptionRing {
+    order: 4;
+    justify-self: center;
+  }
+
+  .subscriptionActions {
+    order: 5;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    width: 100%;
+  }
+
   .tilestandard,
   .tilewide {
     grid-column: span 6;
@@ -524,9 +560,11 @@
   .sectionLead a,
   .cardHeader a {
     display: inline-grid;
-    width: 42px;
-    min-width: 42px;
-    height: 42px;
+    width: 52px;
+    max-width: 52px;
+    min-width: 52px;
+    height: 52px;
+    min-height: 52px;
     place-items: center;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.24);
@@ -544,7 +582,7 @@
 
   .sectionLead a::before,
   .cardHeader a::before {
-    content: "→";
+    content: "\2192";
     font-size: 22px;
     line-height: 1;
   }

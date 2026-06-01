@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { type MouseEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { appRoutes } from '@/shared/routes';
 import { fallbackImages } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
@@ -12,6 +13,7 @@ interface StudioCardProps {
 }
 
 export function StudioCard({ studio, variant = 'full' }: StudioCardProps) {
+  const navigate = useNavigate();
   const fallbackSlides = fallbackImages.studios;
   const slides = studio.photoUrls.length > 0 ? studio.photoUrls : fallbackSlides;
   const [activeIndex, setActiveIndex] = useState(0);
@@ -19,12 +21,24 @@ export function StudioCard({ studio, variant = 'full' }: StudioCardProps) {
   const activePhotoUrl = resolveMediaUrl(activeSlide);
   const isCompact = variant === 'compact';
   const showGalleryControls = !isCompact && slides.length > 1;
+  const bookingPath = `${appRoutes.booking()}?studioId=${studio.id}`;
   const goToSlide = (direction: -1 | 1) => {
     setActiveIndex((current) => (current + direction + slides.length) % slides.length);
   };
+  const handleCardClick = (event: MouseEvent<HTMLElement>) => {
+    if (!window.matchMedia('(max-width: 760px)').matches) {
+      return;
+    }
+
+    if ((event.target as HTMLElement).closest('a, button')) {
+      return;
+    }
+
+    navigate(bookingPath);
+  };
 
   return (
-    <article className={`${styles.card} ${isCompact ? styles.cardCompact : ''}`}>
+    <article className={`${styles.card} ${isCompact ? styles.cardCompact : ''}`} onClick={handleCardClick}>
       <div className={styles.media}>
         <img src={activePhotoUrl} alt={`${studio.title}, фото ${activeIndex + 1}`} loading="lazy" />
         {showGalleryControls ? (
@@ -55,7 +69,7 @@ export function StudioCard({ studio, variant = 'full' }: StudioCardProps) {
         <p>{studio.address}</p>
         {!isCompact ? <p>{studio.phone}</p> : null}
         <p>{studio.openLabel}</p>
-        <LinkButton fullWidth to={`${appRoutes.booking()}?studioId=${studio.id}`}>
+        <LinkButton fullWidth to={bookingPath}>
           Записаться
         </LinkButton>
       </div>

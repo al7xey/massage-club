@@ -1,3 +1,4 @@
+import { formatServiceCount } from '@/shared/lib/text/formatServiceCount';
 import type { PlanMeta, SubscriptionPlanDto, TariffItem } from '../model/types';
 import { getSubscriptionPlanSortIndex, getSubscriptionPlanTitle } from './getSubscriptionPlanTitle';
 
@@ -21,7 +22,7 @@ function createPlanMeta(plan: SubscriptionPlanDto): PlanMeta {
     title: getSubscriptionPlanTitle(plan.code, plan.name),
     subtitle: `${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽ / ${periodDays} дней`,
     features: [
-      includedDescription || `${plan.includedCredits} включенных услуги`,
+      includedDescription || `Включено ${formatServiceCount(plan.includedCredits)}`,
       `скидка ${plan.discountPercent}% на все услуги`,
       `Скидка ${plan.certificateDiscountPercent}% на сертификаты`,
       plan.freezeCountPerYear > 0

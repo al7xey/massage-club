@@ -387,6 +387,28 @@
     min-height: 40px;
   }
 
+  .galleryControls {
+    right: 12px;
+    bottom: 12px;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+    backdrop-filter: none;
+  }
+
+  .galleryControls button {
+    width: 52px !important;
+    max-width: 52px;
+    min-width: 52px;
+    height: 52px;
+    min-height: 52px;
+    border: 1px solid rgba(111, 141, 78, 0.18);
+    background: #ffffff;
+    color: var(--color-text);
+    font-size: 24px;
+    box-shadow: 0 10px 20px rgba(31, 41, 55, 0.08);
+  }
+
   .galleryDots {
     bottom: 14px;
     gap: 4px;

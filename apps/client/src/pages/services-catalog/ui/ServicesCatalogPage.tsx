@@ -158,10 +158,12 @@ export function ServicesCatalogPage() {
           <Button
             className={styles.filterButton}
             variant="secondary"
+            aria-label="Фильтры"
             aria-expanded={isFiltersOpen}
             onClick={() => setIsFiltersOpen((value) => !value)}
           >
-            Фильтры
+            <FilterIcon />
+            <span className={styles.filterButtonText}>Фильтры</span>
           </Button>
         </div>
 
@@ -170,8 +172,15 @@ export function ServicesCatalogPage() {
             <aside className={styles.filters}>
               <div className={styles.filtersHeader}>
                 <strong>Фильтры</strong>
-                <Button size="sm" variant="ghost" onClick={resetFilters} disabled={!hasActiveFilters}>
-                  Сбросить
+                <Button
+                  className={styles.resetButton}
+                  size="sm"
+                  variant="ghost"
+                  aria-label="Сбросить фильтры"
+                  onClick={resetFilters}
+                  disabled={!hasActiveFilters}
+                >
+                  <ResetIcon />
                 </Button>
               </div>
 
@@ -293,6 +302,28 @@ export function ServicesCatalogPage() {
         </div>
       </section>
     </PageShell>
+  );
+}
+
+function FilterIcon() {
+  return (
+    <svg className={styles.filterIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M4 7h16" />
+      <path d="M7 12h10" />
+      <path d="M10 17h4" />
+    </svg>
+  );
+}
+
+function ResetIcon() {
+  return (
+    <svg className={styles.resetIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <path d="M6 6l1 15h10l1-15" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+    </svg>
   );
 }
 

@@ -32,10 +32,20 @@
 
 .actionArrow {
   display: none;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 @media (max-width: 760px) {
   .header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 12px;
     margin-bottom: 14px;
@@ -48,13 +58,21 @@
   }
 
   .compactAction {
-    width: 42px;
-    min-width: 42px;
-    height: 42px;
-    min-height: 42px;
-    flex: 0 0 42px;
+    width: 52px !important;
+    max-width: 52px;
+    min-width: 52px;
+    height: 52px;
+    min-height: 52px;
+    align-items: center;
+    flex: 0 0 52px;
+    justify-content: center;
+    border-color: rgba(111, 141, 78, 0.18);
     border-radius: var(--radius-round);
+    background: #ffffff;
+    color: var(--color-text);
     padding: 0;
+    gap: 0;
+    box-shadow: 0 10px 20px rgba(31, 41, 55, 0.04);
   }
 
   .actionText {
@@ -67,8 +85,8 @@
   }
 
   .actionArrow {
-    display: inline-block;
-    font-size: 22px;
-    line-height: 1;
+    display: block;
+    width: 22px;
+    height: 22px;
   }
 }

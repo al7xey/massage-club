@@ -10,6 +10,7 @@ import { useGetStudiosQuery } from '@/entities/studio';
 import { useGetMySubscriptionQuery } from '@/entities/subscription';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
+import { formatServiceCount } from '@/shared/lib/text/formatServiceCount';
 import { appRoutes } from '@/shared/routes';
 import { Button, EmptyState, LinkButton, TextField } from '@/shared/ui';
 import styles from './BookingDraftForm.module.css';
@@ -295,7 +296,7 @@ export function BookingDraftForm() {
         <aside className={styles.sideSummary}>
           <span className={styles.kicker}>Итого</span>
           <strong>{formatPrice(pricingPreview.totalAmountRub)}</strong>
-          <p>{cartItems.length} услуг · {pricingPreview.subscriptionCreditsUsed} по подписке</p>
+          <p>{formatServiceCount(cartItems.length)} · {pricingPreview.subscriptionCreditsUsed} по подписке</p>
           <dl>
             <div>
               <dt>Студия</dt>
@@ -471,7 +472,7 @@ function SlotPicker({
         <span>Доступное время</span>
         <h3>Единое время начала для всей записи</h3>
         <p>
-          {cartItems.length} услуг · примерно {totalDuration} мин · {studioId ? 'почасовые слоты с 10:00 до 19:00' : 'сначала выберите студию'}
+          {formatServiceCount(cartItems.length)} · примерно {totalDuration} мин · {studioId ? 'почасовые слоты с 10:00 до 19:00' : 'сначала выберите студию'}
         </p>
       </div>
       <div className={styles.slotGrid}>
@@ -605,7 +606,7 @@ function PanelTitle({ cartItems, title }: { cartItems: CartItemDto[]; title: str
   return (
     <div className={styles.panelTitle}>
       <span>{title}</span>
-      <h3>{cartItems.length > 1 ? `${cartItems.length} услуг в записи` : cartItems[0]?.service.title ?? 'Услуга'}</h3>
+      <h3>{cartItems.length > 1 ? `${formatServiceCount(cartItems.length)} в записи` : cartItems[0]?.service.title ?? 'Услуга'}</h3>
       <p>{cartItems.reduce((sum, item) => sum + item.service.durationMinutes, 0)} мин</p>
     </div>
   );

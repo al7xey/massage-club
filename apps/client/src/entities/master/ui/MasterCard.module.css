@@ -119,17 +119,19 @@
 
 @media (max-width: 760px) {
   .card {
-    min-height: 224px;
+    min-height: 268px;
     border-radius: var(--radius-card);
   }
 
   .media {
-    min-height: 148px;
+    min-height: 0;
+    aspect-ratio: 1 / 0.9;
   }
 
   .meta {
     gap: 3px;
-    padding: var(--mobile-tile-padding) var(--mobile-tile-padding) 0;
+    min-height: 106px;
+    padding: 9px 60px 14px 10px;
   }
 
   .role {
@@ -141,8 +143,9 @@
     overflow: hidden;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-    font-size: 14px;
-    min-height: 34px;
+    font-size: 13px;
+    min-height: 40px;
+    line-height: 1.18;
   }
 
   .meta p {
@@ -150,7 +153,12 @@
   }
 
   .actions {
-    display: none;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 2;
+    display: block;
+    padding: 0;
   }
 
   .actions > * {
@@ -160,20 +168,20 @@
     font-size: var(--mobile-listing-button-font);
   }
 
-  .actions > :last-child {
-    flex: 1;
-  }
-
   .detailsAction {
-    order: 2;
-    width: var(--mobile-icon-action-size);
-    min-width: var(--mobile-icon-action-size);
-    height: var(--mobile-icon-action-size);
-    min-height: var(--mobile-icon-action-size);
-    flex: 0 0 var(--mobile-icon-action-size);
+    width: 44px !important;
+    max-width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    flex: 0 0 44px;
     align-self: auto;
     border-radius: var(--radius-round);
     padding: 0;
+  }
+
+  .actions > :last-child {
+    display: none;
   }
 
   .detailsText {

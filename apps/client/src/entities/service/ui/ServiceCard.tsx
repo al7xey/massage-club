@@ -37,7 +37,7 @@ export function ServiceCard({ isActionDisabled = false, onAddToCart, onBook, ser
         <div className={styles.actionButtons}>
           <Button className={styles.cartAction} size="sm" variant="secondary" disabled={isActionDisabled || !onAddToCart} onClick={() => void onAddToCart?.(service)}>
             <CartIcon />
-            В корзину
+            <span className={styles.actionLabel}>В корзину</span>
           </Button>
           <Button className={styles.bookAction} size="sm" disabled={isActionDisabled || !onBook} onClick={() => void onBook?.(service)}>
             Записаться
