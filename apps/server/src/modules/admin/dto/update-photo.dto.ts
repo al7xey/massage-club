@@ -1,8 +1,9 @@
-import { IsArray, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString } from 'class-validator';
 
 export class UpdatePhotoDto {
+  @IsOptional()
   @IsString()
-  photoUrl: string;
+  photoUrl?: string | null;
 }
 
 export class UpdateServicePhotoDto {

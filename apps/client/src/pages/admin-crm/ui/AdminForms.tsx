@@ -40,6 +40,7 @@ export function MasterForm({
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setMessage('');
+    const photoUrl = values.photoUrl.trim();
 
     try {
       await onSubmit({
@@ -48,8 +49,8 @@ export function MasterForm({
         description: values.description.trim(),
         specialization: values.specialization.trim(),
         experienceYears: Number(values.experienceYears) || 0,
-        photoUrl: values.photoUrl || undefined,
-        photoUrls: values.photoUrl ? [values.photoUrl] : [],
+        photoUrl,
+        photoUrls: photoUrl ? [photoUrl] : [],
         studioIds: values.studioIds,
       });
       setMessage('Сохранено');
@@ -241,6 +242,7 @@ export function StudioForm({
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setMessage('');
+    const photoUrl = values.photoUrl.trim();
 
     try {
       await onSubmit({
@@ -248,8 +250,8 @@ export function StudioForm({
         city: values.city.trim(),
         address: values.address.trim(),
         phone: values.phone.trim(),
-        photoUrl: values.photoUrl || undefined,
-        photoUrls: values.photoUrl ? [values.photoUrl] : [],
+        photoUrl,
+        photoUrls: photoUrl ? [photoUrl] : [],
       });
       setMessage('Сохранено');
     } catch (error) {

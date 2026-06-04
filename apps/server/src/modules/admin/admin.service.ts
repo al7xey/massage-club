@@ -353,11 +353,11 @@ export class AdminService {
     return saved;
   }
 
-  async updateMasterPhoto(id: string, photoUrl: string, actor?: JwtUserPayload) {
+  async updateMasterPhoto(id: string, photoUrl?: string | null, actor?: JwtUserPayload) {
     const master = await this.findMaster(id);
     await this.ensureActorCanAccessMaster(master, actor);
     const before = snapshotMaster(master);
-    master.photoUrl = photoUrl.trim() || null;
+    master.photoUrl = photoUrl?.trim() || null;
     master.photoUrls = normalizePhotoUrls(master.photoUrls, master.photoUrl);
     const saved = await this.mastersRepository.save(master);
     await this.audit(actor, 'UPDATE_MASTER_PHOTO', 'master', saved.id, before, snapshotMaster(saved));

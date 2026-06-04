@@ -129,9 +129,9 @@
   }
 
   .meta {
-    gap: 3px;
-    min-height: 106px;
-    padding: 9px 10px 14px;
+    gap: 4px;
+    min-height: 88px;
+    padding: 11px 12px 13px;
   }
 
   .meta h3 {
@@ -139,13 +139,14 @@
     overflow: hidden;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-    font-size: 13px;
-    min-height: 40px;
-    line-height: 1.18;
+    font-size: 16px;
+    min-height: 0;
+    line-height: 1.12;
   }
 
   .meta p {
-    font-size: 12px;
+    font-size: 11px;
+    line-height: 1.22;
   }
 
   .actions {

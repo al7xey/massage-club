@@ -39,27 +39,27 @@
   align-items: center;
   gap: 8px;
   border-radius: var(--radius-control);
-  background: rgba(255, 255, 255, 0.82);
-  padding: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 5px;
   backdrop-filter: blur(10px);
 }
 
 .galleryControls button {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   place-items: center;
-  border: 0;
+  border: 1px solid var(--color-line);
   border-radius: var(--radius-round);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: #ffffff;
+  color: var(--color-text);
   cursor: pointer;
 }
 
 .arrowIcon {
   display: block;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;

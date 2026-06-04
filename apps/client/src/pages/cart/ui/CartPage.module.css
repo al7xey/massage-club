@@ -134,9 +134,9 @@
 }
 
 .cardSide strong {
-  color: var(--color-text);
+  color: var(--color-primary-hover);
   max-width: 100%;
-  font-size: clamp(18px, 1.8vw, 24px);
+  font-size: clamp(20px, 1.9vw, 26px);
   line-height: 1;
   letter-spacing: 0;
   text-align: right;
@@ -150,11 +150,12 @@
 }
 
 .oldPrice {
-  color: var(--color-muted);
-  font-size: 12px;
-  font-weight: 900;
+  color: var(--color-subtle);
+  font-size: 11px;
+  font-weight: 700;
   text-decoration: line-through;
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(32, 35, 42, 0.35);
 }
 
 .summary {
@@ -256,7 +257,7 @@
 }
 
 .summary span {
-  color: var(--color-primary);
+  color: var(--color-primary-hover);
   font-size: 18px;
   font-weight: 800;
 }

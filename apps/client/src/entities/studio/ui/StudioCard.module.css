@@ -44,14 +44,14 @@
   top: 50%;
   left: 10px;
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   place-items: center;
-  border: 1px solid rgba(32, 35, 42, 0.08);
+  border: 1px solid var(--color-line);
   border-radius: var(--radius-round);
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.9);
   color: var(--color-text);
-  box-shadow: 0 6px 14px rgba(32, 35, 42, 0.08);
+  box-shadow: none;
   transform: translateY(-50%);
   transition: background-color 0.18s ease, transform 0.18s ease;
 }

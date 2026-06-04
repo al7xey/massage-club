@@ -23,20 +23,20 @@
 
 .backButton {
   display: none;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   place-items: center;
-  border: 1px solid var(--color-text);
+  border: 1px solid var(--color-line);
   border-radius: var(--radius-round);
   background: #ffffff;
   color: var(--color-text);
-  box-shadow: 0 8px 18px rgba(32, 35, 42, 0.06);
+  box-shadow: none;
   transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
 }
 
 .backButton:hover {
-  border-color: var(--color-text);
-  background: #ffffff;
+  border-color: var(--color-primary);
+  background: var(--color-soft);
   transform: translateX(-2px);
 }
 

@@ -127,7 +127,12 @@
   gap: 12px;
 }
 
+.subscriptionBlock > .sectionLead {
+  display: none;
+}
+
 .sectionLead a,
+.subscriptionHeading a,
 .cardHeader a {
   color: var(--color-primary);
   font-size: 13px;
@@ -142,6 +147,13 @@
 
 .subscriptionCopy {
   gap: 14px;
+}
+
+.subscriptionHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .subscriptionCopy h2,
@@ -171,6 +183,7 @@
 }
 
 .subscriptionBlock .sectionLabel,
+.subscriptionBlock .subscriptionHeading h2,
 .subscriptionBlock .subscriptionCopy h2,
 .subscriptionBlock .subscriptionCopy p,
 .subscriptionBlock .subscriptionRing strong,
@@ -181,6 +194,7 @@
 }
 
 .sectionLead .actionButton,
+.subscriptionHeading .actionButton,
 .cardHeader .actionButton {
   color: var(--color-primary-hover);
 }
@@ -532,7 +546,7 @@
     display: contents;
   }
 
-  .subscriptionCopy h2 {
+  .subscriptionHeading {
     order: 1;
   }
 
@@ -572,32 +586,42 @@
   }
 
   .sectionLead a,
+  .subscriptionHeading a,
   .cardHeader a {
     display: inline-grid;
-    width: 52px;
-    max-width: 52px;
-    min-width: 52px;
-    height: 52px;
-    min-height: 52px;
+    width: 44px;
+    max-width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
     place-items: center;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.24);
+    border: 1px solid rgba(255, 255, 255, 0.28);
     border-radius: var(--radius-round);
     background: rgba(255, 255, 255, 0.16);
     color: inherit;
     font-size: 0;
+    box-shadow: none;
   }
 
   .cardHeader a {
-    border-color: var(--color-text);
+    border-color: var(--color-line);
     background: #ffffff;
     color: var(--color-text);
   }
 
+  .sectionLead a:hover,
+  .subscriptionHeading a:hover,
+  .cardHeader a:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
   .sectionLead a::before,
+  .subscriptionHeading a::before,
   .cardHeader a::before {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     background: currentColor;
     content: "";
     -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
@@ -671,6 +695,7 @@
   }
 
   .cardHeader,
+  .subscriptionHeading,
   .sectionLead {
     align-items: center;
     flex-direction: row;

@@ -108,7 +108,6 @@ export class AuthService {
       client_id: clientId,
       redirect_uri: redirectUri,
       response_type: 'code',
-      scope: 'login:info login:email login:phone',
       state: encodeOAuthState(returnTo),
     });
 

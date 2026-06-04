@@ -55,6 +55,12 @@ export function AccountPage() {
     return null;
   }
 
+  const subscriptionDetailsLink = (
+    <LinkButton className={styles.actionButton} size="sm" to={appRoutes.accountSubscription()} variant="secondary">
+      РџРѕРґСЂРѕР±РЅРµРµ
+    </LinkButton>
+  );
+
   const requestCancelAppointment = (appointmentId: string) => {
     setMessage('');
     setPendingCancelAppointmentId(appointmentId);
@@ -107,7 +113,10 @@ export function AccountPage() {
           {subscription ? (
             <div className={styles.subscriptionContent}>
               <div className={styles.subscriptionCopy}>
-                <h2>{getSubscriptionPlanTitle(subscription.plan.code, subscription.plan.name)}</h2>
+                <div className={styles.subscriptionHeading}>
+                  <h2>{getSubscriptionPlanTitle(subscription.plan.code, subscription.plan.name)}</h2>
+                  {subscriptionDetailsLink}
+                </div>
                 <p>
                   Активна до {formatDate(subscription.endsAt)}.
                   {nextPaymentDate ? ` Следующий платеж ${formatDate(nextPaymentDate.toISOString())}.` : ''}
