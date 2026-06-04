@@ -158,16 +158,13 @@ export function MainLayout() {
               </button>
             </div>
 
-            <div className={styles.mobileMenuGrid}>
-            <nav className={styles.mobileMenuNav} aria-label="Разделы сайта">
+            <nav className={styles.mobileMenuGrid} aria-label="Разделы сайта">
               {links.map(([to, label]) => (
                 <NavLink key={to} to={to} className={({ isActive }) => (isActive ? styles.mobileActiveLink : undefined)} onClick={() => setIsMobileMenuOpen(false)}>
                   {label}
                 </NavLink>
               ))}
-            </nav>
 
-            <div className={styles.mobileMenuActions}>
               {!user && !isAuthLoading ? (
                 <LinkButton state={authState} to={appRoutes.login()} variant="secondary" fullWidth onClick={() => setIsMobileMenuOpen(false)}>
                   Войти
@@ -192,8 +189,7 @@ export function MainLayout() {
                   </Button>
                 </>
               ) : null}
-            </div>
-            </div>
+            </nav>
           </aside>
         </div>
       ) : null}
