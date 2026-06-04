@@ -13,7 +13,7 @@ relaxup.ru      A  195.208.118.38
 www.relaxup.ru  A  195.208.118.38
 ```
 
-2. Copy `.env.vps.example` to `.env` and replace every `change_me_*` value. For Yandex ID login, create an OAuth app and fill `YANDEX_CLIENT_ID`, `YANDEX_CLIENT_SECRET`, and `YANDEX_REDIRECT_URI=https://relaxup.ru/api/auth/yandex/callback`.
+2. Copy `.env.vps.example` to `.env` and replace every `change_me_*` value. For Yandex ID login, create an OAuth app and fill `YANDEX_CLIENT_ID`, `YANDEX_CLIENT_SECRET`, and `YANDEX_REDIRECT_URI=https://relaxup.ru/account`.
 
 3. Start the VPS stack:
 

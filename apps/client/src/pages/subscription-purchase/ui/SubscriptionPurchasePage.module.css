@@ -152,11 +152,28 @@
   position: sticky;
   top: 92px;
   display: grid;
+  min-height: 420px;
   gap: 14px;
+  align-content: start;
+}
+
+.sideSummary > p {
+  order: 2;
+}
+
+.sideSummary > strong {
+  order: 4;
+  align-self: end;
+  margin-top: auto;
+}
+
+.sideSummary > .actions {
+  order: 5;
 }
 
 .summaryList {
   display: grid;
+  order: 3;
   gap: 12px;
   margin: 0;
   padding-top: 14px;

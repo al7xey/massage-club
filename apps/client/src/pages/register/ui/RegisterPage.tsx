@@ -6,6 +6,8 @@ import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
 import { buildYandexOAuthUrl } from '@/shared/lib/auth/yandexOAuth';
 import { appRoutes } from '@/shared/routes';
 import { Button, TextField } from '@/shared/ui';
+import { cx } from '@/shared/ui/button/Button';
+import buttonStyles from '@/shared/ui/button/Button.module.css';
 import styles from '@/shared/ui/auth-form/AuthForm.module.css';
 
 interface AuthLocationState {
@@ -174,7 +176,7 @@ export function RegisterPage() {
             <span>или</span>
           </div>
 
-          <a className={styles.oauthButton} href={buildYandexOAuthUrl(successPath)}>
+          <a className={cx(buttonStyles.button, buttonStyles.secondary, buttonStyles.md, buttonStyles.fullWidth, styles.oauthButton)} href={buildYandexOAuthUrl(successPath)}>
             <YandexIcon />
             Войти с Яндекс ID
           </a>

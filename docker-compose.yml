@@ -45,7 +45,7 @@ services:
       PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:-https://relaxup.ru/api}
       YANDEX_CLIENT_ID: ${YANDEX_CLIENT_ID:-}
       YANDEX_CLIENT_SECRET: ${YANDEX_CLIENT_SECRET:-}
-      YANDEX_REDIRECT_URI: ${YANDEX_REDIRECT_URI:-https://relaxup.ru/api/auth/yandex/callback}
+      YANDEX_REDIRECT_URI: ${YANDEX_REDIRECT_URI:-https://relaxup.ru/account}
       REQUEST_RATE_LIMIT_WINDOW_MS: ${REQUEST_RATE_LIMIT_WINDOW_MS:-60000}
       REQUEST_RATE_LIMIT_MAX: ${REQUEST_RATE_LIMIT_MAX:-300}
       AUTH_RATE_LIMIT_WINDOW_MS: ${AUTH_RATE_LIMIT_WINDOW_MS:-900000}
@@ -59,6 +59,8 @@ services:
         condition: service_completed_successfully
     expose:
       - "3000"
+    volumes:
+      - uploads_data:/app/apps/server/uploads
     healthcheck:
       test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3000/api/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""]
       interval: 10s
@@ -78,6 +80,8 @@ services:
         condition: service_completed_successfully
     expose:
       - "3000"
+    volumes:
+      - uploads_data:/app/apps/server/uploads
     healthcheck:
       test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3000/api/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""]
       interval: 10s
@@ -94,6 +98,8 @@ services:
       postgres:
         condition: service_healthy
     command: ["node", "dist/database/seed.js"]
+    volumes:
+      - uploads_data:/app/apps/server/uploads
 
   web:
     build:
@@ -127,3 +133,4 @@ services:
 
 volumes:
   postgres_data:
+  uploads_data:

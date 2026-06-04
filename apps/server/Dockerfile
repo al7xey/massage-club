@@ -17,6 +17,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/packages/shared ./packages/shared
 COPY --from=build /app/apps/server/package*.json ./apps/server/
 COPY --from=build /app/apps/server/dist ./apps/server/dist
+RUN mkdir -p /app/apps/server/uploads && chown -R node:node /app/apps/server/uploads
 USER node
 WORKDIR /app/apps/server
 EXPOSE 3000

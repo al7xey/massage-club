@@ -57,7 +57,8 @@ export function AccountPage() {
 
   const subscriptionDetailsLink = (
     <LinkButton className={styles.actionButton} size="sm" to={appRoutes.accountSubscription()} variant="secondary">
-      РџРѕРґСЂРѕР±РЅРµРµ
+      <span className={styles.actionText}>Подробнее</span>
+      <ActionArrow />
     </LinkButton>
   );
 
@@ -106,7 +107,8 @@ export function AccountPage() {
         <div className={styles.subscriptionBlock}>
           <div className={styles.sectionLead}>
             <LinkButton className={styles.actionButton} size="sm" to={appRoutes.accountSubscription()} variant="secondary">
-              Подробнее
+              <span className={styles.actionText}>Подробнее</span>
+              <ActionArrow />
             </LinkButton>
           </div>
 
@@ -225,7 +227,8 @@ export function AccountPage() {
               <h3>Ваши визиты</h3>
             </div>
             <LinkButton className={styles.actionButton} size="sm" to={appRoutes.accountAppointments()} variant="secondary">
-              Открыть все
+              <span className={styles.actionText}>Открыть все</span>
+              <ActionArrow />
             </LinkButton>
           </div>
 
@@ -302,6 +305,15 @@ function InfoPill({ label, value }: { label: string; value: string }) {
       <span>{label}</span>
       <strong>{value}</strong>
     </div>
+  );
+}
+
+function ActionArrow() {
+  return (
+    <svg className={styles.actionArrow} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
   );
 }
 

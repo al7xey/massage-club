@@ -7,7 +7,7 @@ import { appRoutes } from '@/shared/routes';
 import { BrandMark, Button, LinkButton } from '@/shared/ui';
 import styles from './MainLayout.module.css';
 
-type MobileIconName = 'bag' | 'cart' | 'credit-card' | 'gift' | 'hands' | 'home' | 'login' | 'sparkles' | 'tariff' | 'user-circle';
+type MobileIconName = 'bag' | 'cart' | 'credit-card' | 'gift' | 'home' | 'login' | 'sparkles' | 'tariff' | 'user-circle' | 'users';
 
 const links = [
   [appRoutes.services(), 'Услуги'],
@@ -29,7 +29,7 @@ const userBottomLinks = [
   { icon: 'home' as const, label: 'Главная', to: appRoutes.home(), match: (path: string) => path === '/' },
   { icon: 'sparkles' as const, label: 'Услуги', to: appRoutes.services(), match: (path: string) => path.startsWith('/services') },
   { icon: 'cart' as const, label: 'Корзина', to: appRoutes.cart(), match: (path: string) => path.startsWith('/cart') },
-  { icon: 'hands' as const, label: 'Мастера', to: appRoutes.masters(), match: (path: string) => path.startsWith('/masters') },
+  { icon: 'users' as const, label: 'Мастера', to: appRoutes.masters(), match: (path: string) => path.startsWith('/masters') },
   { icon: 'user-circle' as const, label: 'Профиль', to: appRoutes.account(), match: (path: string) => path.startsWith('/account') },
 ] as const;
 
@@ -158,6 +158,7 @@ export function MainLayout() {
               </button>
             </div>
 
+            <div className={styles.mobileMenuGrid}>
             <nav className={styles.mobileMenuNav} aria-label="Разделы сайта">
               {links.map(([to, label]) => (
                 <NavLink key={to} to={to} className={({ isActive }) => (isActive ? styles.mobileActiveLink : undefined)} onClick={() => setIsMobileMenuOpen(false)}>
@@ -186,11 +187,12 @@ export function MainLayout() {
                       Админ-панель
                     </LinkButton>
                   ) : null}
-                  <Button variant="danger" fullWidth onClick={() => void handleLogout()}>
+                  <Button className={styles.mobileMenuLogout} variant="danger" fullWidth onClick={() => void handleLogout()}>
                     Выйти
                   </Button>
                 </>
               ) : null}
+            </div>
             </div>
           </aside>
         </div>
@@ -257,12 +259,12 @@ function MobileNavIcon({ name }: { name: MobileIconName }) {
     cart: ['M6 7h13l-1.4 7.5H8L6.8 4.5H4', 'M9 19a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM17 19a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z'],
     'credit-card': ['M4.5 7.5h15v10h-15v-10Z', 'M4.5 10.5h15', 'M7 15h4'],
     gift: ['M5 10h14v10H5V10Z', 'M12 10v10M4 10h16', 'M8.5 7.5C6 7.5 6 4 8.5 4 11 4 12 8 12 8s1-4 3.5-4S18 7.5 15.5 7.5H8.5Z'],
-    hands: ['M7.2 12.6 10 9.8a2 2 0 0 1 2.8 0l.4.4', 'M16.8 12.6 14 9.8a2 2 0 0 0-2.8 0l-.4.4', 'M5.2 14.2l3.5 3.5a4.7 4.7 0 0 0 6.6 0l3.5-3.5', 'M4.8 10.4a2 2 0 0 0 0 2.8l2.1 2.1', 'M19.2 10.4a2 2 0 0 1 0 2.8l-2.1 2.1'],
     home: ['M4.5 11.5 12 5l7.5 6.5', 'M6.5 10.5V20h4.2v-5.2h2.6V20h4.2v-9.5'],
     login: ['M14 5h3.5A1.5 1.5 0 0 1 19 6.5v11a1.5 1.5 0 0 1-1.5 1.5H14', 'M5 12h9', 'M11 8.5 14.5 12 11 15.5'],
     sparkles: ['M12 3.5 13.7 8l4.8 1.7-4.8 1.7L12 16l-1.7-4.6-4.8-1.7L10.3 8 12 3.5Z', 'M18.5 14.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1Z', 'M5.5 14.5l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7.7-1.6Z'],
     tariff: ['M12 11.2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', 'M6.5 10.4a2.1 2.1 0 1 0 0-4.2 2.1 2.1 0 0 0 0 4.2Z', 'M17.5 10.4a2.1 2.1 0 1 0 0-4.2 2.1 2.1 0 0 0 0 4.2Z', 'M5 19c.45-3.6 3-5.7 7-5.7s6.55 2.1 7 5.7', 'M2.8 17.8c.35-2.4 1.8-3.8 4-4.2', 'M21.2 17.8c-.35-2.4-1.8-3.8-4-4.2'],
     'user-circle': ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z', 'M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', 'M6.8 18c1.2-2.6 3-4 5.2-4s4 1.4 5.2 4'],
+    users: ['M16 21v-1.5a4 4 0 0 0-8 0V21', 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z', 'M22 21v-1.5a4 4 0 0 0-4.2-4', 'M2 21v-1.5a4 4 0 0 1 4.2-4', 'M18 11a3 3 0 1 0-1.6-5.5', 'M6 11a3 3 0 1 1 1.6-5.5'],
   };
 
   return (

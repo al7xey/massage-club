@@ -41,4 +41,9 @@ export class AuthController {
     const authResponse = await this.authService.loginWithYandexCode(code);
     response.type('html').send(this.authService.buildOAuthCallbackHtml(authResponse, state));
   }
+
+  @Post('yandex/exchange')
+  exchangeYandexCode(@Body() dto: { code?: string }) {
+    return this.authService.loginWithYandexCode(dto.code);
+  }
 }

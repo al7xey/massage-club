@@ -375,12 +375,18 @@ export class AppointmentsService {
       order: { intervalIndex: 'ASC' },
     });
 
-    return weeklyRows
+    const weeklyWindows = weeklyRows
       .filter((row) => row.startTime && row.endTime)
       .map((row) => ({
         startsAt: parseMoscowDateTime(dateKey, row.startTime as string),
         endsAt: parseMoscowDateTime(dateKey, row.endTime as string),
       }));
+
+    if (weeklyWindows.length) {
+      return weeklyWindows;
+    }
+
+    return [{ startsAt: parseMoscowDateTime(dateKey, '00:00'), endsAt: parseMoscowDateTime(dateKey, '23:59') }];
   }
 }
 

@@ -308,7 +308,20 @@ export class AuthService {
   private getYandexRedirectUri() {
     const explicitRedirectUri = this.configService.get<string>('YANDEX_REDIRECT_URI');
     if (explicitRedirectUri?.trim()) {
-      return explicitRedirectUri.trim();
+      const redirectUri = explicitRedirectUri.trim();
+      if (redirectUri.endsWith('/api/auth/yandex/callback')) {
+        const publicAppUrl = this.getPublicAppUrl();
+        if (publicAppUrl === 'https://relaxup.ru' || publicAppUrl === 'https://www.relaxup.ru') {
+          return `${publicAppUrl}/account`;
+        }
+      }
+
+      return redirectUri;
+    }
+
+    const publicAppUrl = this.getPublicAppUrl();
+    if (publicAppUrl === 'https://relaxup.ru' || publicAppUrl === 'https://www.relaxup.ru') {
+      return `${publicAppUrl}/account`;
     }
 
     const publicApiBaseUrl = this.configService.get<string>('PUBLIC_API_BASE_URL')?.trim() || 'http://localhost:3000/api';

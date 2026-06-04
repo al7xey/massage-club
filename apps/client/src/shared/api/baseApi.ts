@@ -5,7 +5,7 @@ import { tokenStorage } from '../lib/storage/tokenStorage';
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
-  timeout: 2500,
+  timeout: 10000,
   prepareHeaders: (headers) => {
     const token = tokenStorage.getAccessToken();
     if (token) {

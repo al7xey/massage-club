@@ -1221,6 +1221,9 @@ export class AdminService {
     const shifts = await this.shiftsRepository.find({
       where: { master: { id: masterId }, isAvailable: true },
     });
+    if (shifts.length === 0) {
+      return true;
+    }
     return shifts.some((shift) => shift.startsAt <= startsAt && shift.endsAt >= endsAt);
   }
 

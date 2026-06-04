@@ -234,8 +234,15 @@
 }
 
 .primarySubmit {
+  width: 100%;
+  height: var(--control-height);
   min-height: var(--control-height);
+  box-sizing: border-box;
+  border-radius: var(--radius-round);
+  padding: 0 22px;
   font-size: var(--font-body);
+  font-weight: var(--button-font-weight);
+  line-height: 1.2;
 }
 
 .oauthDivider {
@@ -257,20 +264,10 @@
 
 .oauthButton {
   display: flex;
-  width: 100%;
-  min-height: var(--control-height);
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-round);
-  background: #ffffff;
-  color: var(--color-text);
-  padding: 0 18px;
-  font-size: 14px;
-  font-weight: 800;
+  gap: 8px;
   text-decoration: none;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .oauthButton:hover {
