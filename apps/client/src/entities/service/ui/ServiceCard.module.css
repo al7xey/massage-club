@@ -232,16 +232,16 @@
   }
 
   .cartActionActive {
-    border-color: var(--color-primary);
+    border-color: var(--color-line);
     background: #ffffff;
-    color: var(--color-primary-hover);
+    color: var(--color-text);
   }
 
   .cartActionActive:hover,
   .cartActionActive:focus-visible {
-    border-color: var(--color-primary-hover);
-    background: #ffffff;
-    color: var(--color-primary-hover);
+    border-color: var(--color-line-strong);
+    background: var(--color-soft);
+    color: var(--color-text);
   }
 
   .cartIcon {
@@ -253,20 +253,20 @@
   }
 
   .cartCountBadge {
-    top: 5px;
-    right: 5px;
+    top: 6px;
+    right: 6px;
     min-width: 17px;
     height: 17px;
     background: var(--color-primary);
     color: #ffffff;
     font-size: 10px;
-    box-shadow: 0 0 0 2px #ffffff;
+    box-shadow: none;
   }
 
   .cartActionActive .cartCountBadge {
     background: var(--color-primary);
     color: #ffffff;
-    box-shadow: 0 0 0 2px #ffffff;
+    box-shadow: none;
   }
 
   .actionLabel {
