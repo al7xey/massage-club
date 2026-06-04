@@ -206,22 +206,27 @@
 
   .cartAction {
     display: inline-flex;
-    width: 104px;
-    min-width: 104px;
+    width: 42px;
+    min-width: 42px;
     height: 42px;
     min-height: 42px;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-round);
     background: #ffffff;
     color: var(--color-primary-hover);
-    padding: 0 10px;
-    gap: 6px;
-    font-size: 13px;
-    white-space: nowrap;
+    padding: 0;
+    gap: 0;
   }
 
   .cartIcon {
+    display: block;
+    width: 21px;
+    height: 21px;
+    flex: 0 0 21px;
+  }
+
+  .actionLabel {
     display: none;
   }
 
@@ -240,6 +245,6 @@
     margin-top: 0;
     min-height: 42px;
     align-content: center;
-    padding-right: 114px;
+    padding-right: 52px;
   }
 }

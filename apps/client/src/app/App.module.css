@@ -133,6 +133,12 @@
 }
 
 @media (max-width: 760px) {
+  :global(html),
+  :global(body),
+  :global(#root) {
+    background: #6f8d4e;
+  }
+
   .app {
     --container-page: calc(100% - 32px);
     --page-padding-top: 24px;
