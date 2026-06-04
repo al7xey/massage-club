@@ -146,9 +146,9 @@
 
 .card .priceRow strong {
   display: block;
-  color: #000000 !important;
+  color: var(--color-primary-hover) !important;
   font-size: 24px;
-  font-weight: 760;
+  font-weight: 900;
   line-height: 1;
 }
 
@@ -183,7 +183,7 @@
   .card h3 {
     min-height: 53px;
     max-height: 53px;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.18;
     -webkit-line-clamp: 3;
   }
@@ -230,9 +230,9 @@
   }
 
   .card .priceRow strong {
-    color: #000000 !important;
-    font-size: 19px;
-    font-weight: 760;
+    color: var(--color-primary-hover) !important;
+    font-size: 20px;
+    font-weight: 900;
     white-space: nowrap;
   }
 

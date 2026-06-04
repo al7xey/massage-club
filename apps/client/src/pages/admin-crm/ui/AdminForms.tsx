@@ -52,6 +52,7 @@ export function MasterForm({
         photoUrl,
         photoUrls: photoUrl ? [photoUrl] : [],
         studioIds: values.studioIds,
+        serviceIds: values.serviceIds,
       });
       setMessage('Сохранено');
     } catch (error) {

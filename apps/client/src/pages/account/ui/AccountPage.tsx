@@ -105,13 +105,6 @@ export function AccountPage() {
 
       <section className={styles.subscriptionPanel}>
         <div className={styles.subscriptionBlock}>
-          <div className={styles.sectionLead}>
-            <LinkButton className={styles.actionButton} size="sm" to={appRoutes.accountSubscription()} variant="secondary">
-              <span className={styles.actionText}>Подробнее</span>
-              <ActionArrow />
-            </LinkButton>
-          </div>
-
           {subscription ? (
             <div className={styles.subscriptionContent}>
               <div className={styles.subscriptionCopy}>

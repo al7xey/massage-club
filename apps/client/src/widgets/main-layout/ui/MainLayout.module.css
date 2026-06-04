@@ -193,20 +193,20 @@
 
 .cartBadge {
   position: absolute;
-  top: -3px;
-  right: -3px;
+  top: 0;
+  right: 0;
   display: inline-grid;
-  min-width: 19px;
-  height: 20px;
+  min-width: 18px;
+  height: 18px;
   place-items: center;
   border-radius: var(--radius-round);
   background: var(--color-primary);
   color: #ffffff;
   padding: 0 5px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
   line-height: 1;
-  box-shadow: 0 0 0 2px var(--color-bg);
+  box-shadow: 0 0 0 2px #ffffff;
 }
 
 .profileButton {
@@ -397,8 +397,8 @@
     background: rgba(255, 255, 255, 0.92);
     padding: 16px;
     box-shadow:
-      0 22px 54px rgba(32, 35, 42, 0.2),
-      0 8px 22px rgba(111, 141, 78, 0.12);
+      0 10px 24px rgba(32, 35, 42, 0.06),
+      0 4px 12px rgba(111, 141, 78, 0.06);
     backdrop-filter: blur(22px) saturate(1.18);
   }
 
@@ -485,8 +485,7 @@
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.88);
     box-shadow:
-      0 14px 34px rgba(32, 35, 42, 0.14),
-      0 6px 16px rgba(111, 141, 78, 0.1),
+      0 8px 18px rgba(32, 35, 42, 0.05),
       inset 0 1px 0 rgba(255, 255, 255, 0.96);
     padding: 7px 8px;
     transform: translateX(-50%);
