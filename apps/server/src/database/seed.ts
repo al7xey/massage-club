@@ -789,8 +789,8 @@ async function seed() {
     master.bio = bio;
     master.studio = studioCenter;
     master.services = savedServices;
-    master.photoUrl = photoUrl;
-    master.photoUrls = [photoUrl];
+    master.photoUrl = master.photoUrl ?? photoUrl;
+    master.photoUrls = master.photoUrls?.length ? master.photoUrls : [master.photoUrl];
     master.isActive = true;
     await masters.save(master);
   }
