@@ -765,8 +765,6 @@ async function seed() {
     .where('slug NOT IN (:...activeServiceSlugs)', { activeServiceSlugs })
     .execute();
 
-  await masters.createQueryBuilder().update(Master).set({ isActive: false }).execute();
-
   for (const [masterIndex, masterSeed] of [
     ['Екатерина', 'Реснянская'],
     ['Фадиля', 'Каримова'],
