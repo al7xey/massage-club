@@ -40,7 +40,7 @@ input[type='password']::placeholder {
 input[type='password'] {
   font-size: 28px;
   font-weight: 900;
-  letter-spacing: 8px;
+  letter-spacing: 1px;
   -webkit-text-security: disc;
 }
 

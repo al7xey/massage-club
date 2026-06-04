@@ -146,9 +146,9 @@
 
 .card .priceRow strong {
   display: block;
-  color: var(--color-primary-hover) !important;
+  color: #000000 !important;
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 760;
   line-height: 1;
 }
 
@@ -230,9 +230,9 @@
   }
 
   .card .priceRow strong {
-    color: var(--color-primary-hover) !important;
+    color: #000000 !important;
     font-size: 20px;
-    font-weight: 900;
+    font-weight: 760;
     white-space: nowrap;
   }
 

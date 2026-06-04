@@ -264,9 +264,17 @@
 
 .oauthButton {
   display: flex;
+  height: var(--control-height);
+  min-height: var(--control-height);
+  box-sizing: border-box;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  border-radius: var(--radius-round);
+  padding: 0 22px;
+  font-size: var(--font-body);
+  font-weight: var(--button-font-weight);
+  line-height: 1.2;
   text-decoration: none;
 }
 
