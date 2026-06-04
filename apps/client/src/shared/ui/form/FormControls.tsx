@@ -18,13 +18,20 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(({ classNa
   const generatedId = useId();
   const controlId = id ?? generatedId;
   const messageId = `${controlId}-message`;
+  const isPasswordHidden = props.type === 'password';
 
   const input = (
     <input
       ref={ref}
       aria-describedby={error || helperText ? messageId : undefined}
       aria-invalid={error ? true : undefined}
-      className={cx(styles.control, error && styles.invalid, Boolean(endAdornment) && styles.controlWithAdornment, className)}
+      className={cx(
+        styles.control,
+        isPasswordHidden && styles.passwordControl,
+        error && styles.invalid,
+        Boolean(endAdornment) && styles.controlWithAdornment,
+        className,
+      )}
       id={controlId}
       {...props}
     />

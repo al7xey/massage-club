@@ -20,13 +20,13 @@ function createPlanMeta(plan: SubscriptionPlanDto): PlanMeta {
 
   return {
     title: getSubscriptionPlanTitle(plan.code, plan.name),
-    subtitle: `${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽ / ${periodDays} дней`,
+    subtitle: `${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽ за ${periodDays} дней`,
     features: [
       includedDescription || `Включено ${formatServiceCount(plan.includedCredits)}`,
-      `скидка ${plan.discountPercent}% на все услуги`,
-      `Скидка ${plan.certificateDiscountPercent}% на сертификаты`,
+      `Услуги дешевле на ${plan.discountPercent}%`,
+      `Сертификаты дешевле на ${plan.certificateDiscountPercent}%`,
       plan.freezeCountPerYear > 0
-        ? `Заморозка ${plan.freezeCountPerYear} раз(а) в год до ${plan.freezeDays} дней`
+        ? `Заморозка: ${plan.freezeCountPerYear} раз(а) до ${plan.freezeDays} дней`
         : 'Без заморозки',
       plan.familyMembersLimit > 1 ? `До ${plan.familyMembersLimit} участников` : 'Для одного участника',
     ],

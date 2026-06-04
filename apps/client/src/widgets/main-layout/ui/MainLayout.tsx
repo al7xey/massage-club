@@ -21,7 +21,6 @@ const guestBottomLinks = [
   { icon: 'home' as const, label: 'Главная', to: appRoutes.home(), match: (path: string) => path === '/' },
   { icon: 'sparkles' as const, label: 'Услуги', to: appRoutes.services(), match: (path: string) => path.startsWith('/services') },
   { icon: 'tariff' as const, label: 'Тарифы', to: appRoutes.subscriptions(), match: (path: string) => path.startsWith('/subscriptions') },
-  { icon: 'gift' as const, label: 'Сертификаты', to: appRoutes.certificates(), match: (path: string) => path.startsWith('/certificates') },
   { icon: 'user-circle' as const, label: 'Войти', to: appRoutes.login(), match: (path: string) => path.startsWith('/login') },
 ] as const;
 
@@ -29,7 +28,6 @@ const userBottomLinks = [
   { icon: 'home' as const, label: 'Главная', to: appRoutes.home(), match: (path: string) => path === '/' },
   { icon: 'sparkles' as const, label: 'Услуги', to: appRoutes.services(), match: (path: string) => path.startsWith('/services') },
   { icon: 'cart' as const, label: 'Корзина', to: appRoutes.cart(), match: (path: string) => path.startsWith('/cart') },
-  { icon: 'users' as const, label: 'Мастера', to: appRoutes.masters(), match: (path: string) => path.startsWith('/masters') },
   { icon: 'user-circle' as const, label: 'Профиль', to: appRoutes.account(), match: (path: string) => path.startsWith('/account') },
 ] as const;
 

@@ -53,7 +53,7 @@
   background: var(--color-soft);
   color: var(--color-primary-hover);
   font-size: 28px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .avatar img {
@@ -70,16 +70,16 @@
 
 .overline,
 .sectionLabel {
-  color: var(--color-primary);
+  color: var(--color-muted);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
 .profileIdentity h1 {
   margin: 0;
   font-size: var(--font-h1);
-  font-weight: 950;
+  font-weight: 600;
   line-height: 1.06;
 }
 
@@ -107,11 +107,9 @@
 .subscriptionBlock {
   gap: 18px;
   padding: 26px;
-  border-color: transparent;
-  background:
-    radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.14), transparent 34%),
-    var(--gradient-primary);
-  box-shadow: var(--shadow-green);
+  border-color: var(--color-line);
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
 }
 
 .sectionLead,
@@ -136,7 +134,7 @@
 .cardHeader a {
   color: var(--color-primary);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .subscriptionContent {
@@ -163,6 +161,7 @@
 
 .subscriptionCopy h2 {
   font-size: 38px;
+  font-weight: 600;
   line-height: 1.05;
 }
 
@@ -183,14 +182,17 @@
 }
 
 .subscriptionBlock .sectionLabel,
+.subscriptionBlock .subscriptionCopy p,
+.subscriptionBlock .subscriptionRing span,
+.subscriptionBlock .infoPill span {
+  color: var(--color-muted);
+}
+
 .subscriptionBlock .subscriptionHeading h2,
 .subscriptionBlock .subscriptionCopy h2,
-.subscriptionBlock .subscriptionCopy p,
 .subscriptionBlock .subscriptionRing strong,
-.subscriptionBlock .subscriptionRing span,
-.subscriptionBlock .infoPill span,
 .subscriptionBlock .infoPill strong {
-  color: var(--color-on-primary);
+  color: var(--color-text);
 }
 
 .sectionLead .actionButton,
@@ -206,9 +208,9 @@
 }
 
 .infoPill {
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--color-line);
   border-radius: var(--radius-card-small);
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--color-surface-soft);
   padding: 12px 14px;
 }
 
@@ -216,7 +218,7 @@
   display: block;
   color: var(--color-muted);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 500;
   text-transform: uppercase;
 }
 
@@ -224,6 +226,7 @@
   display: block;
   margin-top: 6px;
   font-size: 18px;
+  font-weight: 600;
 }
 
 .subscriptionActions {
@@ -258,8 +261,8 @@
   place-items: center;
   border-radius: var(--radius-round);
   background:
-    radial-gradient(circle, var(--color-primary) 52%, transparent 53%),
-    conic-gradient(#ffffff 0 var(--ring-progress), rgba(255, 255, 255, 0.24) var(--ring-progress) 100%);
+    radial-gradient(circle, #ffffff 52%, transparent 53%),
+    conic-gradient(var(--color-primary) 0 var(--ring-progress), var(--color-line) var(--ring-progress) 100%);
 }
 
 .subscriptionRing > div {
@@ -268,20 +271,21 @@
   height: 120px;
   place-items: center;
   border-radius: var(--radius-round);
-  background: var(--color-primary);
+  background: #ffffff;
   text-align: center;
-  color: var(--color-on-primary);
+  color: var(--color-text);
 }
 
 .subscriptionRing strong {
   font-size: 46px;
+  font-weight: 600;
   line-height: 1;
 }
 
 .subscriptionRing span {
   color: var(--color-muted);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .summaryStrip {
@@ -299,7 +303,7 @@
 .summaryCard span {
   display: block;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .summaryCard strong {
@@ -351,18 +355,16 @@
 }
 
 .tileaccent {
-  border-color: transparent;
-  background:
-    radial-gradient(circle at 92% 12%, rgba(255, 255, 255, 0.14), transparent 26%),
-    var(--gradient-primary);
-  color: var(--color-on-primary);
-  box-shadow: var(--shadow-green);
+  border-color: var(--color-line);
+  background: #ffffff;
+  color: var(--color-text);
+  box-shadow: var(--shadow-card);
 }
 
 .tileaccent strong,
 .tileaccent p,
 .tileaccent .tileMark {
-  color: var(--color-on-primary);
+  color: var(--color-text);
 }
 
 .tilesoft {
@@ -382,18 +384,19 @@
   background: var(--color-soft);
   color: var(--color-primary-hover);
   font-size: 16px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .tileaccent .tileMark {
-  background: rgba(255, 255, 255, 0.14);
-  color: var(--color-on-primary);
+  background: var(--color-soft);
+  color: var(--color-primary-hover);
 }
 
 .tile strong {
   display: block;
   max-width: 12ch;
   font-size: 28px;
+  font-weight: 600;
   line-height: 1.06;
 }
 
@@ -440,7 +443,7 @@
   border-radius: var(--radius-card-small);
   background: var(--color-soft);
   padding: 12px 14px;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .formActions,
@@ -466,7 +469,7 @@
 
 .highlightVisit p {
   margin: 0;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .visitList {
@@ -500,7 +503,7 @@
   color: var(--color-primary-hover);
   font-size: 12px;
   font-style: normal;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .empty {

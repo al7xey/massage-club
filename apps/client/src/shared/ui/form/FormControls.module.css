@@ -6,7 +6,7 @@
 .label {
   color: var(--color-text);
   font-size: var(--font-small);
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .control {
@@ -37,10 +37,10 @@ input[type='password']::placeholder {
   color: var(--color-subtle);
 }
 
-input[type='password'] {
+.control.passwordControl {
   font-size: 28px;
   font-weight: 900;
-  letter-spacing: 1px;
+  letter-spacing: 0;
   -webkit-text-security: disc;
 }
 

@@ -1,29 +1,31 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserGender } from '@massage/shared';
-import { IsEmail, IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class RegisterDto {
   @ApiProperty({ example: 'Anna Ivanova' })
-  @IsString()
+  @IsNotEmpty({ message: 'Введите имя и фамилию' })
+  @IsString({ message: 'Введите имя и фамилию' })
   fullName: string;
 
   @ApiPropertyOptional({ example: 'client@example.com' })
   @IsOptional()
-  @IsEmail()
+  @IsEmail({}, { message: 'Введите корректный email' })
   email?: string;
 
   @ApiPropertyOptional({ example: '+79990000000' })
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'Введите корректный телефон' })
   phone?: string;
 
   @ApiProperty({ enum: UserGender, example: UserGender.FEMALE })
-  @IsEnum(UserGender)
+  @IsEnum(UserGender, { message: 'Выберите пол' })
   gender: UserGender;
 
   @ApiProperty({ example: 'password123' })
-  @IsString()
-  @MinLength(8)
-  @MaxLength(128)
+  @IsNotEmpty({ message: 'Введите пароль' })
+  @IsString({ message: 'Введите пароль' })
+  @MinLength(8, { message: 'Пароль должен быть не короче 8 символов' })
+  @MaxLength(128, { message: 'Пароль слишком длинный' })
   password: string;
 }

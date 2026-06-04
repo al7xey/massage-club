@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationError, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -70,6 +70,7 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
+      exceptionFactory: (errors) => new BadRequestException(formatValidationErrors(errors)),
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter(!isSensitiveRuntime));
@@ -119,4 +120,39 @@ function resolveCorsOrigins(configValue?: string, nodeEnv = 'development') {
     .filter(Boolean);
 
   return Array.from(new Set([...defaultOrigins, ...configuredOrigins]));
+}
+
+function formatValidationErrors(errors: ValidationError[]) {
+  const messages = errors.flatMap((error) => Object.values(error.constraints ?? {}).map(translateValidationMessage));
+  return messages.length > 0 ? messages : ['Проверьте заполнение формы'];
+}
+
+function translateValidationMessage(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes('should not exist')) {
+    return 'Переданы лишние поля';
+  }
+
+  if (normalized.includes('must be an email')) {
+    return 'Введите корректный email';
+  }
+
+  if (normalized.includes('must be longer than or equal to 8')) {
+    return 'Пароль должен быть не короче 8 символов';
+  }
+
+  if (normalized.includes('must be shorter than or equal to')) {
+    return 'Поле заполнено слишком длинно';
+  }
+
+  if (normalized.includes('must be a string')) {
+    return 'Введите текстовое значение';
+  }
+
+  if (normalized.includes('must be one of the following values')) {
+    return 'Выберите значение из списка';
+  }
+
+  return message;
 }

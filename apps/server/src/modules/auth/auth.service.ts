@@ -35,7 +35,7 @@ export class AuthService {
     const fullName = dto.fullName.trim();
 
     if (!fullName) {
-      throw new BadRequestException('Full name is required');
+      throw new BadRequestException('Введите имя и фамилию');
     }
 
     this.ensureAtLeastOneContact(email, phone);
@@ -56,6 +56,10 @@ export class AuthService {
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const identifier = dto.identifier.trim();
+    if (!identifier || !dto.password.trim()) {
+      throw new BadRequestException('Введите почту или телефон и пароль');
+    }
+
     const attemptKey = normalizeLoginAttemptKey(identifier);
 
     this.ensureLoginIsNotLocked(attemptKey);
@@ -70,12 +74,12 @@ export class AuthService {
 
     if (!user) {
       this.recordFailedLogin(attemptKey);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Аккаунт с такими данными не найден');
     }
 
     if (!(await compare(dto.password, user.passwordHash))) {
       this.recordFailedLogin(attemptKey);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Неверный пароль');
     }
 
     this.failedLogins.delete(attemptKey);
@@ -89,11 +93,11 @@ export class AuthService {
       });
       const user = await this.usersRepository.findOne({ where: { id: payload.sub, isActive: true } });
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new UnauthorizedException('Пользователь не найден');
       }
       return this.buildAuthResponse(user);
     } catch {
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException('Сессия истекла. Войдите снова');
     }
   }
 
@@ -116,7 +120,7 @@ export class AuthService {
 
   async loginWithYandexCode(code?: string): Promise<AuthResponseDto> {
     if (!code?.trim()) {
-      throw new BadRequestException('Yandex authorization code is required');
+      throw new BadRequestException('Не получен код авторизации Яндекса');
     }
 
     const clientId = this.getRequiredYandexConfig('YANDEX_CLIENT_ID');
@@ -135,12 +139,12 @@ export class AuthService {
     });
 
     if (!tokenResponse.ok) {
-      throw new UnauthorizedException('Yandex authorization failed');
+      throw new UnauthorizedException('Не удалось войти через Яндекс');
     }
 
     const tokenPayload = (await tokenResponse.json()) as { access_token?: string };
     if (!tokenPayload.access_token) {
-      throw new UnauthorizedException('Yandex did not return access token');
+      throw new UnauthorizedException('Яндекс не вернул токен доступа');
     }
 
     const userInfoResponse = await fetch(`${YANDEX_USERINFO_URL}?format=json`, {
@@ -148,7 +152,7 @@ export class AuthService {
     });
 
     if (!userInfoResponse.ok) {
-      throw new UnauthorizedException('Yandex profile request failed');
+      throw new UnauthorizedException('Не удалось получить профиль Яндекса');
     }
 
     const yandexUser = (await userInfoResponse.json()) as {
@@ -169,7 +173,7 @@ export class AuthService {
     const phone = normalizePhone(yandexUser.default_phone?.number ?? yandexUser.phones?.[0]?.number);
 
     if (!yandexId) {
-      throw new UnauthorizedException('Yandex did not return user id');
+      throw new UnauthorizedException('Яндекс не вернул идентификатор пользователя');
     }
 
     let user = await this.usersRepository.findOne({ where: { yandexId } });
@@ -264,7 +268,7 @@ export class AuthService {
 
   private ensureAtLeastOneContact(email: null | string, phone: null | string) {
     if (!email && !phone) {
-      throw new BadRequestException('Email or phone is required');
+      throw new BadRequestException('Укажите телефон или email');
     }
   }
 
@@ -272,14 +276,14 @@ export class AuthService {
     if (email) {
       const existingByEmail = await this.usersRepository.findOne({ where: { email } });
       if (existingByEmail && existingByEmail.id !== currentUserId) {
-        throw new ConflictException('User with this email already exists');
+        throw new ConflictException('Пользователь с таким email уже зарегистрирован');
       }
     }
 
     if (phone) {
       const existingByPhone = await this.usersRepository.findOne({ where: { phone } });
       if (existingByPhone && existingByPhone.id !== currentUserId) {
-        throw new ConflictException('User with this phone already exists');
+        throw new ConflictException('Пользователь с таким телефоном уже зарегистрирован');
       }
     }
   }
@@ -295,7 +299,7 @@ export class AuthService {
       return;
     }
 
-    throw new UnauthorizedException('Too many failed login attempts. Try again later.');
+    throw new UnauthorizedException('Слишком много попыток входа. Попробуйте позже');
   }
 
   private recordFailedLogin(attemptKey: string) {
@@ -341,7 +345,7 @@ export class AuthService {
   private getRequiredYandexConfig(key: 'YANDEX_CLIENT_ID' | 'YANDEX_CLIENT_SECRET') {
     const value = this.configService.get<string>(key)?.trim();
     if (!value) {
-      throw new BadRequestException('Yandex OAuth is not configured');
+      throw new BadRequestException('Вход через Яндекс не настроен');
     }
 
     return value;

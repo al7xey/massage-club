@@ -1315,7 +1315,7 @@ export class AdminService {
 
   private async findUser(id: string) {
     const user = await this.usersRepository.findOneBy({ id });
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException('Пользователь не найден');
     return user;
   }
 

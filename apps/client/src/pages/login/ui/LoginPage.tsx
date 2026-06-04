@@ -189,22 +189,26 @@ function validateLoginInput(identifier: string, password: string) {
     }
   }
 
-  if (password.trim().length < 6) {
-    return 'Пароль должен быть не короче 6 символов';
-  }
-
   return null;
 }
 
 function mapLoginErrorMessage(message: string) {
   const normalized = message.toLowerCase();
 
-  if (normalized.includes('account not found') || normalized.includes('user not found')) {
-    return 'Аккаунт не найден. Проверьте данные или зарегистрируйтесь.';
+  if (
+    normalized.includes('аккаунт с такими данными не найден') ||
+    normalized.includes('account not found') ||
+    normalized.includes('user not found')
+  ) {
+    return 'Аккаунт с такими данными не найден';
   }
 
-  if (normalized.includes('invalid password')) {
-    return 'Неверный пароль.';
+  if (normalized.includes('неверный пароль') || normalized.includes('invalid password')) {
+    return 'Неверный пароль';
+  }
+
+  if (normalized.includes('too many failed') || normalized.includes('слишком много попыток')) {
+    return 'Слишком много попыток входа. Попробуйте позже';
   }
 
   if (
@@ -213,11 +217,11 @@ function mapLoginErrorMessage(message: string) {
     normalized.includes('invalid credentials') ||
     normalized.includes('invalid phone/email or password')
   ) {
-    return 'Неверная почта/телефон или пароль.';
+    return 'Неверная почта, телефон или пароль';
   }
 
   if (normalized.includes('network') || normalized.includes('failed to fetch')) {
-    return 'Ошибка сети. Проверьте интернет-соединение и попробуйте снова.';
+    return 'Ошибка сети. Проверьте интернет-соединение и попробуйте снова';
   }
 
   return message;

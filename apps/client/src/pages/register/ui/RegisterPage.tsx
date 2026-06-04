@@ -59,8 +59,8 @@ export function RegisterPage() {
       return;
     }
 
-    if (values.password.length < 6) {
-      setError('Пароль должен быть не короче 6 символов.');
+    if (values.password.length < 8) {
+      setError('Пароль должен быть не короче 8 символов.');
       return;
     }
 
@@ -86,7 +86,7 @@ export function RegisterPage() {
       });
       navigate(successPath, { replace: true });
     } catch (registerError) {
-      setError(getApiErrorMessage(registerError, 'Не удалось зарегистрироваться.'));
+      setError(mapRegisterErrorMessage(getApiErrorMessage(registerError, 'Не удалось зарегистрироваться.')));
     } finally {
       setIsLoading(false);
     }
@@ -239,6 +239,32 @@ function PasswordToggle({ isVisible, onClick }: { isVisible: boolean; onClick: (
       </svg>
     </button>
   );
+}
+
+function mapRegisterErrorMessage(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes('email already exists') || normalized.includes('таким email')) {
+    return 'Пользователь с таким email уже зарегистрирован.';
+  }
+
+  if (normalized.includes('phone already exists') || normalized.includes('таким телефоном')) {
+    return 'Пользователь с таким телефоном уже зарегистрирован.';
+  }
+
+  if (normalized.includes('must be longer than or equal to 8') || normalized.includes('не короче 8')) {
+    return 'Пароль должен быть не короче 8 символов.';
+  }
+
+  if (normalized.includes('email must be an email') || normalized.includes('корректный email')) {
+    return 'Введите корректный email.';
+  }
+
+  if (normalized.includes('network') || normalized.includes('failed to fetch')) {
+    return 'Ошибка сети. Проверьте интернет-соединение и попробуйте снова.';
+  }
+
+  return message;
 }
 
 function resolvePostAuthPath(state: AuthLocationState | null) {

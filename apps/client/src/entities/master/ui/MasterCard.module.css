@@ -75,7 +75,7 @@
 .meta h3 {
   color: var(--color-text);
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.25;
 }
 
@@ -87,12 +87,12 @@
 
 .stars {
   color: var(--color-accent);
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .meta p strong {
   color: var(--color-text);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .actions {

@@ -179,22 +179,22 @@ export function AccountPage() {
           size="standard"
         />
         <QuickTile
-          title="Подарочные карты"
-          description="Оформление сертификатов для себя и близких."
+          title="Сертификаты"
+          description="Проверить код или оформить подарок."
           to={appRoutes.certificates()}
           tone="light"
           size="standard"
         />
         <QuickTile
           title="История платежей"
-          description="Открыть список покупок и оплат в кабинете."
+          description="Покупки, тарифы и оплаты."
           to={appRoutes.accountPayments()}
           tone="soft"
           size="standard"
         />
         <QuickTile
           title="Мастера"
-          description="Выберите специалиста и посмотрите доступные студии."
+          description="Специалисты и доступные студии."
           to={appRoutes.masters()}
           tone="light"
           size="standard"

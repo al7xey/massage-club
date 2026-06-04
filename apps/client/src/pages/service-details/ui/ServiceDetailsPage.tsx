@@ -123,9 +123,9 @@ export function ServiceDetailsPage() {
         <aside className={styles.bookingCard}>
           <h2>Стоимость</h2>
           <div className={styles.priceList}>
-            <PriceRow title="Разовый визит" note="Без клубного тарифа" price={selectedPrice} />
-            <PriceRow title="Клубная цена" note="Тарифы 20%" price={regularSubscriptionPrice} badge="-20%" />
-            <PriceRow title="SUPER-тариф" note="Максимальная выгода" price={superSubscriptionPrice} badge="-30%" featured />
+            <PriceRow title="Разовый визит" note="Цена без клубного тарифа" price={selectedPrice} />
+            <PriceRow title="С тарифом" note="Активный тариф даёт скидку 20%" price={regularSubscriptionPrice} badge="-20%" />
+            <PriceRow title="С SUPER-тарифом" note="Максимальная клубная скидка 30%" price={superSubscriptionPrice} badge="-30%" featured />
           </div>
           <div className={styles.actions}>
             <LinkButton fullWidth to={`${appRoutes.booking()}?serviceId=${selected.id}`}>
@@ -147,7 +147,7 @@ export function ServiceDetailsPage() {
               </Button>
             )}
           </div>
-          <p className={styles.note}>Клубная цена применяется по активному тарифу.</p>
+          <p className={styles.note}>В карточке услуги показана разовая цена. Скидка применяется после покупки тарифа.</p>
         </aside>
       </section>
 

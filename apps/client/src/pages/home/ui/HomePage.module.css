@@ -16,7 +16,7 @@
   margin: 0;
   color: var(--color-text);
   font-size: 44px;
-  font-weight: 900;
+  font-weight: 600;
   line-height: 1.12;
   overflow-wrap: break-word;
 }
@@ -28,7 +28,7 @@
 .heroTitleLine {
   display: block;
   color: inherit;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .heroContent > p {
@@ -163,7 +163,7 @@
   max-width: 420px;
   margin: 0;
   font-size: var(--font-h2);
-  font-weight: 900;
+  font-weight: 600;
   line-height: 1.18;
 }
 
@@ -181,15 +181,16 @@
   gap: 28px;
   margin-top: var(--section-gap);
   border-radius: var(--radius-card-large);
-  background: var(--gradient-primary);
-  color: var(--color-on-primary);
+  border: 1px solid var(--color-line);
+  background: var(--color-soft);
+  color: var(--color-text);
   padding: 38px 48px;
   text-align: left;
 }
 
 .cta h2 {
   max-width: 620px;
-  color: var(--color-on-primary);
+  color: var(--color-text);
   font-size: 26px;
   line-height: 1.22;
 }
@@ -197,8 +198,8 @@
 .whiteButton {
   flex: 0 0 auto;
   min-width: 190px;
-  background: #ffffff;
-  color: var(--color-primary-hover) !important;
+  background: var(--color-primary);
+  color: var(--color-on-primary) !important;
 }
 
 @media (max-width: 920px) {

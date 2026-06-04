@@ -102,7 +102,7 @@
   white-space: nowrap;
   text-overflow: clip;
   color: var(--color-text);
-  font-weight: 800;
+  font-weight: 500;
   border-radius: var(--radius-control);
   text-align: left;
   box-shadow: 0 8px 18px rgba(32, 35, 42, 0.05);
@@ -137,7 +137,7 @@
 .sortGroup select option:checked {
   background: rgba(122, 161, 94, 0.14);
   color: var(--color-text);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .body {
@@ -170,7 +170,7 @@
 
 .filtersHeader strong {
   font-size: 16px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .filterGroup {
@@ -206,7 +206,7 @@
 .filterGroup h3 {
   margin: 0 0 2px;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .checkRow {
@@ -235,7 +235,7 @@
   color: var(--color-muted);
   padding: 8px 14px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 1.25;
   overflow-wrap: anywhere;
   transition:
@@ -371,7 +371,7 @@
   color: var(--color-muted);
   font-size: 12px;
   font-style: normal;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .rangeField input {
@@ -383,7 +383,7 @@
   color: var(--color-text);
   padding: 0;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 500;
   outline: none;
 }
 

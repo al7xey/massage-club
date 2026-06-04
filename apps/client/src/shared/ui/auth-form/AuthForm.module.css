@@ -70,7 +70,7 @@
   gap: 10px;
   color: var(--color-text);
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .brandMark {
@@ -166,7 +166,7 @@
 .modalIntro h1 {
   font-size: clamp(28px, 4vw, 34px);
   line-height: 1.08;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .modalIntro p {
@@ -178,7 +178,7 @@
 .eyebrow {
   color: var(--color-primary);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
@@ -197,7 +197,7 @@
 .genderLabel {
   color: var(--color-text);
   font-size: var(--font-small);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .genderRow {
@@ -252,7 +252,7 @@
   gap: 10px;
   color: var(--color-muted);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .oauthDivider::before,
@@ -315,7 +315,7 @@
   color: var(--color-danger);
   padding: 10px 12px;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .note {
@@ -329,7 +329,7 @@
 
 .note a {
   color: var(--color-text);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 @media (max-width: 760px) {

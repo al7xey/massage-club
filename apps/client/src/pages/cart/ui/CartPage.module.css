@@ -50,9 +50,9 @@
 
 .meta,
 .summaryLabel {
-  color: var(--color-primary-hover);
+  color: var(--color-muted);
   font-size: 12px;
-  font-weight: 900;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -106,10 +106,10 @@
   border: 1px solid rgba(120, 152, 75, 0.12);
   border-radius: 999px;
   background: linear-gradient(90deg, rgba(236, 241, 228, 0.95) 0%, rgba(247, 248, 242, 0.95) 100%);
-  color: var(--color-primary-hover);
+  color: var(--color-text);
   padding: 13px 18px;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 500;
   line-height: 1.35;
 }
 
@@ -134,9 +134,10 @@
 }
 
 .cardSide strong {
-  color: var(--color-primary-hover);
+  color: #000000;
   max-width: 100%;
   font-size: clamp(25px, 2.4vw, 34px);
+  font-weight: 600;
   line-height: 1;
   letter-spacing: 0;
   text-align: right;
@@ -152,7 +153,7 @@
 .oldPrice {
   color: var(--color-subtle);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   text-decoration: line-through;
   text-decoration-thickness: 1px;
   text-decoration-color: rgba(32, 35, 42, 0.35);
@@ -184,13 +185,13 @@
 .discountPanel b {
   color: var(--color-text);
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 600;
 }
 
 .discountPanel p {
   color: var(--color-text);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .rowControls {
@@ -215,7 +216,7 @@
 .quantityControl span {
   color: var(--color-text);
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 600;
   text-align: center;
 }
 
@@ -266,9 +267,9 @@
 }
 
 .summary span {
-  color: var(--color-primary-hover);
+  color: var(--color-muted);
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .state {

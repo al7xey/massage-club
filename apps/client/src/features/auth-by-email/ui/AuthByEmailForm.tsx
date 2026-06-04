@@ -28,7 +28,7 @@ export function AuthByEmailForm() {
       });
       setError('');
     } catch (submitError) {
-      setError(getApiErrorMessage(submitError, 'Не удалось войти. Проверьте данные и попробуйте позже.'));
+      setError(mapLoginErrorMessage(getApiErrorMessage(submitError, 'Не удалось войти. Проверьте данные и попробуйте позже.')));
     }
   };
 
@@ -66,6 +66,32 @@ export function AuthByEmailForm() {
       </Button>
     </form>
   );
+}
+
+function mapLoginErrorMessage(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes('аккаунт с такими данными не найден') ||
+    normalized.includes('account not found') ||
+    normalized.includes('user not found')
+  ) {
+    return 'Аккаунт с такими данными не найден';
+  }
+
+  if (normalized.includes('неверный пароль') || normalized.includes('invalid password')) {
+    return 'Неверный пароль';
+  }
+
+  if (normalized.includes('invalid credentials') || normalized.includes('unauthorized')) {
+    return 'Неверная почта, телефон или пароль';
+  }
+
+  if (normalized.includes('network') || normalized.includes('failed to fetch')) {
+    return 'Ошибка сети. Проверьте интернет-соединение и попробуйте снова';
+  }
+
+  return message;
 }
 
 function PasswordToggle({ isVisible, onClick }: { isVisible: boolean; onClick: () => void }) {

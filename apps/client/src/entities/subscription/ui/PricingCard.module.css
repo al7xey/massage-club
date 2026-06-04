@@ -32,9 +32,9 @@
   margin: 0;
   color: var(--color-text);
   font-size: 22px;
-  font-weight: 900;
+  font-weight: 600;
   letter-spacing: 0;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .priceRow {
@@ -47,7 +47,7 @@
 .priceRow strong {
   color: var(--color-text);
   font-size: 30px;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1;
 }
 
@@ -90,7 +90,7 @@
 
 .features li:first-child {
   color: var(--color-text);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .features li:first-child::before {

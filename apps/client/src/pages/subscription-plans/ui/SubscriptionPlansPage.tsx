@@ -34,9 +34,9 @@ export function SubscriptionPlansPage() {
   const reviewCards = reviews.slice(0, 3).map(createReviewCardModel);
   const entryFeeText = entryFee
     ? entryFee.entryFeeEnabled
-      ? `Вступление в клуб ${entryFee.entryFeeRub.toLocaleString('ru-RU')} ₽ при покупке первой подписки.`
-      : `Акция: первое вступление в клуб 0 ₽ вместо ${entryFee.entryFeeRub.toLocaleString('ru-RU')} ₽.`
-    : 'Условия вступления загружаются из настроек клуба.';
+      ? `Разовый вступительный платёж: ${entryFee.entryFeeRub.toLocaleString('ru-RU')} ₽.`
+      : `Сейчас вступление бесплатно вместо ${entryFee.entryFeeRub.toLocaleString('ru-RU')} ₽.`
+    : 'Условия вступления загружаются.';
 
   return (
     <PageShell title="Тарифы">
@@ -48,7 +48,7 @@ export function SubscriptionPlansPage() {
             <span aria-hidden="true">✓</span>
             <div>
               <strong>Ваш тариф уже активен</strong>
-              <p>Сейчас нет подходящего апгрейда: все преимущества уже доступны.</p>
+              <p>Все доступные преимущества уже подключены.</p>
             </div>
           </section>
         )

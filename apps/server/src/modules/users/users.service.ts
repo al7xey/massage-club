@@ -33,11 +33,11 @@ export class UsersService {
     const nextAvatarUrl = dto.avatarUrl !== undefined ? dto.avatarUrl.trim() || null : user.avatarUrl ?? null;
 
     if (!nextFullName) {
-      throw new BadRequestException('Full name is required');
+      throw new BadRequestException('Введите имя и фамилию');
     }
 
     if (!nextEmail && !nextPhone) {
-      throw new BadRequestException('Email or phone is required');
+      throw new BadRequestException('Укажите телефон или email');
     }
 
     await this.ensureUniqueContacts(nextEmail, nextPhone, user.id);
@@ -53,7 +53,7 @@ export class UsersService {
   async findById(id: string): Promise<User> {
     const user = await this.usersRepository.findOne({ where: { id, isActive: true } });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Пользователь не найден');
     }
     return user;
   }
@@ -74,14 +74,14 @@ export class UsersService {
     if (email) {
       const existingByEmail = await this.usersRepository.findOne({ where: { email } });
       if (existingByEmail && existingByEmail.id !== currentUserId) {
-        throw new ConflictException('User with this email already exists');
+        throw new ConflictException('Пользователь с таким email уже зарегистрирован');
       }
     }
 
     if (phone) {
       const existingByPhone = await this.usersRepository.findOne({ where: { phone } });
       if (existingByPhone && existingByPhone.id !== currentUserId) {
-        throw new ConflictException('User with this phone already exists');
+        throw new ConflictException('Пользователь с таким телефоном уже зарегистрирован');
       }
     }
   }
