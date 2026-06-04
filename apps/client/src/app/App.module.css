@@ -136,7 +136,7 @@
   :global(html),
   :global(body),
   :global(#root) {
-    background: #6f8d4e;
+    background: #ffffff;
   }
 
   .app {
