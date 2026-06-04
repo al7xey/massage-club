@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
-import { pendingCartStorage, useAddCartItemMutation } from '@/entities/cart';
+import { pendingCartStorage, useAddCartItemMutation, useGetCartQuery } from '@/entities/cart';
 import { ServiceCard, type ServiceCardModel } from '@/entities/service';
 import { appRoutes } from '@/shared/routes';
 
@@ -12,8 +12,10 @@ export function BookableServiceCard({ service }: BookableServiceCardProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { data: cartItems = [] } = useGetCartQuery(undefined, { skip: !user });
   const [addCartItem, { isLoading }] = useAddCartItemMutation();
   const detailsPath = appRoutes.serviceDetails(service.id);
+  const cartCount = cartItems.filter((item) => item.service.id === service.id).length;
 
   const navigateToAuth = (action: 'book' | 'cart') => {
     navigate(appRoutes.login(), {
@@ -48,6 +50,7 @@ export function BookableServiceCard({ service }: BookableServiceCardProps) {
 
   return (
     <ServiceCard
+      cartCount={cartCount}
       isActionDisabled={isLoading}
       service={service}
       onAddToCart={handleAddToCart}

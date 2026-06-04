@@ -109,11 +109,7 @@ export function ServiceDetailsPage() {
   }
 
   return (
-    <PageShell title={title}>
-      <button className={styles.backButton} type="button" aria-label="Назад" onClick={() => navigate(-1)}>
-        <span aria-hidden="true">←</span>
-      </button>
-
+    <PageShell title={title} beforeTitle={<BackButton onClick={() => navigate(-1)} />}>
       <section className={styles.top}>
         <div className={styles.visual}>
           <div
@@ -193,6 +189,17 @@ export function ServiceDetailsPage() {
       <StudioShowcase title="Где пройти процедуру" actionLabel="Подробнее" studios={studioCards} />
       <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" actionLabel="Смотреть все" reviews={reviewCards} />
     </PageShell>
+  );
+}
+
+function BackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button className={styles.backButton} type="button" aria-label="Назад" onClick={onClick}>
+      <svg className={styles.backIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M19 12H5" />
+        <path d="m11 6-6 6 6 6" />
+      </svg>
+    </button>
   );
 }
 

@@ -544,9 +544,6 @@
   }
 
   .stageActions {
-    position: sticky;
-    z-index: 2;
-    bottom: 82px;
     border: 1px solid rgba(214, 222, 210, 0.72);
     border-radius: 24px;
     background: rgba(255, 255, 255, 0.92);
@@ -584,6 +581,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
     padding-top: 12px;
+  }
+
+  .sideSummary .stageActions {
+    grid-column: 1 / -1;
   }
 
   .sideSummary dd {

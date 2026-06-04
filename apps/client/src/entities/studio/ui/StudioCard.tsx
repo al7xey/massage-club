@@ -44,10 +44,10 @@ export function StudioCard({ studio, variant = 'full' }: StudioCardProps) {
         {showGalleryControls ? (
           <>
             <button className={styles.navButton} type="button" aria-label="Предыдущее фото" onClick={() => goToSlide(-1)}>
-              ‹
+              <ArrowIcon direction="left" />
             </button>
             <button className={`${styles.navButton} ${styles.navNext}`} type="button" aria-label="Следующее фото" onClick={() => goToSlide(1)}>
-              ›
+              <ArrowIcon direction="right" />
             </button>
             <div className={styles.dots} aria-label={`Фото ${activeIndex + 1} из ${slides.length}`}>
               {slides.map((slide, index) => (
@@ -74,5 +74,23 @@ export function StudioCard({ studio, variant = 'full' }: StudioCardProps) {
         </LinkButton>
       </div>
     </article>
+  );
+}
+
+function ArrowIcon({ direction }: { direction: 'left' | 'right' }) {
+  return (
+    <svg className={styles.navArrow} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      {direction === 'left' ? (
+        <>
+          <path d="M19 12H5" />
+          <path d="m11 6-6 6 6 6" />
+        </>
+      ) : (
+        <>
+          <path d="M5 12h14" />
+          <path d="m13 6 6 6-6 6" />
+        </>
+      )}
+    </svg>
   );
 }

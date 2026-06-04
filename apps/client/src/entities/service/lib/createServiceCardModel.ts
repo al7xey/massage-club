@@ -15,13 +15,19 @@ function getCategoryLabel(service: ServiceDto): string {
     return 'Массаж для мужчин';
   }
 
-  return toReadableCategory(service.category?.name ?? 'Услуга');
-}
+  if (slug === 'spa-programs') {
+    return 'СПА программа';
+  }
 
-function toReadableCategory(value: string) {
-  return value
-    .toLocaleLowerCase('ru-RU')
-    .replace(/(^|\s|-)./gu, (match) => match.toLocaleUpperCase('ru-RU'));
+  if (slug === 'face-care') {
+    return 'Уход за лицом';
+  }
+
+  if (slug === 'laser-hair-removal') {
+    return 'Лазерная эпиляция';
+  }
+
+  return service.category?.name ?? 'Услуга';
 }
 
 export function createServiceCardModel(service: ServiceDto): ServiceCardModel {

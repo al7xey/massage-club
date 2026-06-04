@@ -3,6 +3,7 @@ import { FormEvent, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
+import { buildYandexOAuthUrl } from '@/shared/lib/auth/yandexOAuth';
 import { appRoutes } from '@/shared/routes';
 import { Button, TextField } from '@/shared/ui';
 import styles from '@/shared/ui/auth-form/AuthForm.module.css';
@@ -28,6 +29,7 @@ export function LoginPage() {
     state?.denied ? 'Нет доступа к выбранному разделу. Войдите под аккаунтом с нужной ролью.' : '',
   );
   const [isLoading, setIsLoading] = useState(false);
+  const oauthReturnTo = resolveOAuthReturnPath(state);
 
   const submitLogin = async (nextIdentifier: string, nextPassword: string) => {
     setIsLoading(true);
@@ -97,6 +99,15 @@ export function LoginPage() {
             Войти
           </Button>
 
+          <div className={styles.oauthDivider}>
+            <span>или</span>
+          </div>
+
+          <a className={styles.oauthButton} href={buildYandexOAuthUrl(oauthReturnTo)}>
+            <YandexIcon />
+            Войти с Яндекс ID
+          </a>
+
           <p className={styles.note}>
             Нет аккаунта?{' '}
             <Link state={state} to={appRoutes.register()}>
@@ -106,6 +117,15 @@ export function LoginPage() {
         </form>
       </section>
     </main>
+  );
+}
+
+function YandexIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M13.8 6.6h-1.4c-2.3 0-3.7 1.2-3.7 3.1 0 1.4.7 2.4 2 2.9L8.2 17.4h2.1l2.2-4.4h1.3v4.4h1.9V6.6h-1.9Zm0 4.8h-1.2c-1.2 0-1.9-.6-1.9-1.7s.7-1.6 1.9-1.6h1.2v3.3Z" />
+    </svg>
   );
 }
 
@@ -227,4 +247,24 @@ function resolvePostAuthPath(state: AuthLocationState | null, role: PublicUserDt
   }
 
   return appRoutes.account();
+}
+
+function resolveOAuthReturnPath(state: AuthLocationState | null) {
+  if (!state) {
+    return appRoutes.account();
+  }
+
+  if (state.action === 'cart') {
+    return state.from ?? appRoutes.cart();
+  }
+
+  if (state.action === 'book' && state.serviceId) {
+    return `${appRoutes.booking()}?serviceId=${encodeURIComponent(state.serviceId)}`;
+  }
+
+  if (state.action === 'subscription') {
+    return state.planId ? appRoutes.subscriptionPurchase(state.planId) : state.from ?? appRoutes.subscriptions();
+  }
+
+  return state.from ?? appRoutes.account();
 }

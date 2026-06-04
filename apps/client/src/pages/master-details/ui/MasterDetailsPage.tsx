@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useGetMasterQuery } from '@/entities/master';
 import { createReviewCardModel, useGetReviewsQuery } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
@@ -16,6 +16,7 @@ import styles from './MasterDetailsPage.module.css';
 
 export function MasterDetailsPage() {
   const { id = '' } = useParams();
+  const navigate = useNavigate();
   const { data: master, isLoading } = useGetMasterQuery(id, { skip: !id });
   const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
   const { data: studios = [] } = useGetStudiosQuery();
@@ -65,7 +66,7 @@ export function MasterDetailsPage() {
   }
 
   return (
-    <PageShell title={fullName}>
+    <PageShell title={fullName} beforeTitle={<BackButton onClick={() => navigate(-1)} />}>
       <section className={styles.hero}>
         <div
           className={styles.portrait}
@@ -76,13 +77,13 @@ export function MasterDetailsPage() {
           {photos.length > 1 ? (
             <div className={styles.galleryControls}>
               <button type="button" aria-label="Предыдущее фото" onClick={() => setActivePhotoIndex((index) => (index === 0 ? photos.length - 1 : index - 1))}>
-                ←
+                <ArrowIcon direction="left" />
               </button>
               <span>
                 {activePhotoIndex + 1} / {photos.length}
               </span>
               <button type="button" aria-label="Следующее фото" onClick={() => setActivePhotoIndex((index) => (index + 1) % photos.length)}>
-                →
+                <ArrowIcon direction="right" />
               </button>
             </div>
           ) : null}
@@ -124,6 +125,35 @@ export function MasterDetailsPage() {
       {popularServices.length > 0 ? <ServiceShowcase title="Популярные услуги" actionLabel="Смотреть все" services={popularServices} /> : null}
       <StudioShowcase title="Наши студии" actionLabel="Подробнее" studios={studioCards} />
     </PageShell>
+  );
+}
+
+function BackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button className={styles.backButton} type="button" aria-label="Назад" onClick={onClick}>
+      <svg className={styles.backIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M19 12H5" />
+        <path d="m11 6-6 6 6 6" />
+      </svg>
+    </button>
+  );
+}
+
+function ArrowIcon({ direction }: { direction: 'left' | 'right' }) {
+  return (
+    <svg className={styles.arrowIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      {direction === 'left' ? (
+        <>
+          <path d="M19 12H5" />
+          <path d="m11 6-6 6 6 6" />
+        </>
+      ) : (
+        <>
+          <path d="M5 12h14" />
+          <path d="m13 6 6 6-6 6" />
+        </>
+      )}
+    </svg>
   );
 }
 

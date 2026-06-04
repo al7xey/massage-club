@@ -95,7 +95,7 @@ export function SubscriptionPurchasePage() {
             <p className={styles.successText}>Покупка завершена, подписка уже доступна в личном кабинете.</p>
             <div className={styles.metricGrid}>
               <Metric label="Статус" value={purchaseModeMeta[success.purchaseMode].label} />
-              <Metric label="К оплате" value={formatPrice(success.payment.amountRub)} />
+              <Metric label="Сумма" value={formatPrice(success.payment.amountRub)} />
               <Metric label="Доступно визитов" value={String(availableVisits)} />
             </div>
             <div className={styles.actions}>
@@ -170,16 +170,16 @@ export function SubscriptionPurchasePage() {
                 </div>
               </article>
 
-              <div className={styles.actions}>
-                <Button isLoading={isSubmitting} loadingText="Оформляем..." onClick={handleConfirm}>
-                  {purchaseMeta.submitLabel}
-                </Button>
-              </div>
             </div>
 
             <aside className={styles.sideSummary}>
               <span className={styles.kicker}>Итого</span>
               <strong>{formatPrice(plan.monthlyPriceRub)}</strong>
+              <div className={styles.actions}>
+                <Button isLoading={isSubmitting} loadingText="Оформляем..." onClick={handleConfirm}>
+                  {purchaseMeta.submitLabel}
+                </Button>
+              </div>
               <p>{displayedPeriodDays} дней доступа и все преимущества тарифа активируются после покупки.</p>
               <dl className={styles.summaryList}>
                 <InfoRow label="Тариф" value={planTitle} />

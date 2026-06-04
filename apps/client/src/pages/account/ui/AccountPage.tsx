@@ -47,7 +47,8 @@ export function AccountPage() {
   const nextAppointment = upcomingAppointments[0] ?? null;
   const userDisplayName = user ? formatUserDisplayName(user) : '';
   const accountInitial = (user?.fullName?.trim()?.[0] ?? 'Р').toUpperCase();
-  const daysLeft = subscription ? Math.max(0, Math.ceil((new Date(subscription.endsAt).getTime() - Date.now()) / 86400000)) : 0;
+  const nextPaymentDate = subscription ? getNextPaymentDate(subscription.startsAt, subscription.endsAt) : null;
+  const daysLeft = nextPaymentDate ? Math.max(0, Math.ceil((nextPaymentDate.getTime() - Date.now()) / 86400000)) : 0;
   const ringProgress = subscription ? Math.max(8, Math.min(100, Math.round((daysLeft / 30) * 100))) : 0;
 
   if (!user) {
@@ -84,27 +85,34 @@ export function AccountPage() {
           </div>
         </div>
 
-        <LinkButton
-          className={`${styles.settingsButton} ${styles.actionButton}`}
-          variant="secondary"
-          to={appRoutes.accountSettings()}
-        >
-          Настройки
-        </LinkButton>
+        <div className={styles.topbarActions}>
+          <LinkButton
+            className={`${styles.settingsButton} ${styles.actionButton}`}
+            variant="secondary"
+            to={appRoutes.accountSettings()}
+          >
+            Настройки
+          </LinkButton>
+        </div>
       </section>
 
       <section className={styles.subscriptionPanel}>
         <div className={styles.subscriptionBlock}>
           <div className={styles.sectionLead}>
-            <span className={styles.sectionLabel}>Подписка</span>
-            <Link to={appRoutes.accountSubscription()}>Подробнее</Link>
+            <LinkButton className={styles.actionButton} size="sm" to={appRoutes.accountSubscription()} variant="secondary">
+              Подробнее
+            </LinkButton>
           </div>
 
           {subscription ? (
             <div className={styles.subscriptionContent}>
               <div className={styles.subscriptionCopy}>
                 <h2>{getSubscriptionPlanTitle(subscription.plan.code, subscription.plan.name)}</h2>
-                <p>Активна до {formatDate(subscription.endsAt)}. Следите за остатком посещений и бронируйте удобные слоты заранее.</p>
+                <p>
+                  Активна до {formatDate(subscription.endsAt)}.
+                  {nextPaymentDate ? ` Следующий платеж ${formatDate(nextPaymentDate.toISOString())}.` : ''}
+                  {' '}Следите за остатком посещений и бронируйте удобные слоты заранее.
+                </p>
                 <div className={styles.subscriptionMeta}>
                   <InfoPill label="Посещений" value={String(remainingCredits)} />
                   <InfoPill label="Скидка" value={`${subscription.plan.discountPercent}%`} />
@@ -205,10 +213,11 @@ export function AccountPage() {
         <section className={styles.card}>
           <div className={styles.cardHeader}>
             <div>
-              <span className={styles.sectionLabel}>Услуги</span>
               <h3>Ваши визиты</h3>
             </div>
-            <Link to={appRoutes.accountAppointments()}>Открыть все</Link>
+            <LinkButton className={styles.actionButton} size="sm" to={appRoutes.accountAppointments()} variant="secondary">
+              Открыть все
+            </LinkButton>
           </div>
 
           {nextAppointment ? (
@@ -301,6 +310,23 @@ function VisitRow({ meta, status, title }: { meta: string; status: string; title
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('ru-RU').format(new Date(value));
+}
+
+function getNextPaymentDate(startsAt: string, endsAt: string) {
+  const start = new Date(startsAt);
+  const end = new Date(endsAt);
+  const now = new Date();
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return null;
+  }
+
+  const next = new Date(start);
+  while (next <= now && next < end) {
+    next.setDate(next.getDate() + 30);
+  }
+
+  return next < end ? next : end;
 }
 
 function formatDateTime(value: string) {

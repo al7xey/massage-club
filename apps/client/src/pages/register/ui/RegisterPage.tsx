@@ -3,6 +3,7 @@ import type { UserGender } from '@massage/shared';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/lib/api/getApiErrorMessage';
+import { buildYandexOAuthUrl } from '@/shared/lib/auth/yandexOAuth';
 import { appRoutes } from '@/shared/routes';
 import { Button, TextField } from '@/shared/ui';
 import styles from '@/shared/ui/auth-form/AuthForm.module.css';
@@ -169,6 +170,15 @@ export function RegisterPage() {
             Зарегистрироваться
           </Button>
 
+          <div className={styles.oauthDivider}>
+            <span>или</span>
+          </div>
+
+          <a className={styles.oauthButton} href={buildYandexOAuthUrl(successPath)}>
+            <YandexIcon />
+            Войти с Яндекс ID
+          </a>
+
           <p className={styles.note}>
             Уже есть аккаунт?{' '}
             <Link state={state} to={appRoutes.login()}>
@@ -178,6 +188,15 @@ export function RegisterPage() {
         </form>
       </section>
     </main>
+  );
+}
+
+function YandexIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M13.8 6.6h-1.4c-2.3 0-3.7 1.2-3.7 3.1 0 1.4.7 2.4 2 2.9L8.2 17.4h2.1l2.2-4.4h1.3v4.4h1.9V6.6h-1.9Zm0 4.8h-1.2c-1.2 0-1.9-.6-1.9-1.7s.7-1.6 1.9-1.6h1.2v3.3Z" />
+    </svg>
   );
 }
 

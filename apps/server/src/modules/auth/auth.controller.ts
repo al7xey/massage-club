@@ -1,5 +1,6 @@
-﻿import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -28,5 +29,16 @@ export class AuthController {
   @Post('logout')
   logout() {
     return this.authService.logout();
+  }
+
+  @Get('yandex')
+  yandex(@Query('returnTo') returnTo: string | undefined, @Res() response: Response) {
+    response.redirect(this.authService.getYandexAuthorizationUrl(returnTo));
+  }
+
+  @Get('yandex/callback')
+  async yandexCallback(@Query('code') code: string | undefined, @Query('state') state: string | undefined, @Res() response: Response) {
+    const authResponse = await this.authService.loginWithYandexCode(code);
+    response.type('html').send(this.authService.buildOAuthCallbackHtml(authResponse, state));
   }
 }

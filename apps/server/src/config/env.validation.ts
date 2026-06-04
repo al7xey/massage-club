@@ -17,6 +17,11 @@ export interface AppEnvironment {
   JWT_REFRESH_EXPIRES_IN: string;
   BCRYPT_ROUNDS: number;
   APP_ENCRYPTION_KEY?: string;
+  PUBLIC_APP_URL?: string;
+  PUBLIC_API_BASE_URL?: string;
+  YANDEX_CLIENT_ID?: string;
+  YANDEX_CLIENT_SECRET?: string;
+  YANDEX_REDIRECT_URI?: string;
   REQUEST_RATE_LIMIT_WINDOW_MS: number;
   REQUEST_RATE_LIMIT_MAX: number;
   AUTH_RATE_LIMIT_WINDOW_MS: number;
@@ -45,6 +50,11 @@ export function validateEnv(config: Record<string, unknown>): AppEnvironment {
     JWT_REFRESH_EXPIRES_IN: readString(config, 'JWT_REFRESH_EXPIRES_IN', '7d'),
     BCRYPT_ROUNDS: readNumber(config, 'BCRYPT_ROUNDS', 12),
     APP_ENCRYPTION_KEY: readOptionalString(config, 'APP_ENCRYPTION_KEY'),
+    PUBLIC_APP_URL: readOptionalString(config, 'PUBLIC_APP_URL'),
+    PUBLIC_API_BASE_URL: readOptionalString(config, 'PUBLIC_API_BASE_URL'),
+    YANDEX_CLIENT_ID: readOptionalString(config, 'YANDEX_CLIENT_ID'),
+    YANDEX_CLIENT_SECRET: readOptionalString(config, 'YANDEX_CLIENT_SECRET'),
+    YANDEX_REDIRECT_URI: readOptionalString(config, 'YANDEX_REDIRECT_URI'),
     REQUEST_RATE_LIMIT_WINDOW_MS: readNumber(config, 'REQUEST_RATE_LIMIT_WINDOW_MS', 60_000),
     REQUEST_RATE_LIMIT_MAX: readNumber(config, 'REQUEST_RATE_LIMIT_MAX', 300),
     AUTH_RATE_LIMIT_WINDOW_MS: readNumber(config, 'AUTH_RATE_LIMIT_WINDOW_MS', 15 * 60_000),

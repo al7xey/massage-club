@@ -72,13 +72,6 @@
   margin: 0;
 }
 
-.role {
-  color: var(--color-primary);
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
 .meta h3 {
   color: var(--color-text);
   font-size: 18px;
@@ -115,6 +108,13 @@
 
 .detailsArrow {
   display: none;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 @media (max-width: 760px) {
@@ -131,11 +131,7 @@
   .meta {
     gap: 3px;
     min-height: 106px;
-    padding: 9px 60px 14px 10px;
-  }
-
-  .role {
-    font-size: 10px;
+    padding: 9px 10px 14px;
   }
 
   .meta h3 {
@@ -153,12 +149,7 @@
   }
 
   .actions {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-    z-index: 2;
-    display: block;
-    padding: 0;
+    display: none;
   }
 
   .actions > * {
@@ -194,8 +185,7 @@
   }
 
   .detailsArrow {
-    display: inline-block;
-    font-size: 18px;
-    line-height: 1;
+    display: block;
+    flex: 0 0 auto;
   }
 }

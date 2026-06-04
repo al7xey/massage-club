@@ -4,9 +4,11 @@ import {
   buildTariffs,
   type TariffItem,
   useGetMembershipEntryFeeQuery,
+  useGetMySubscriptionQuery,
   useGetSubscriptionPlansQuery,
 } from '@/entities/subscription';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
+import { useAuth } from '@/features/auth';
 import { PageShell } from '@/shared/ui/page-shell/PageShell';
 import { PlansCarousel } from '@/widgets/plans-carousel';
 import { ReviewsShowcase } from '@/widgets/reviews-showcase';
@@ -15,13 +17,16 @@ import { StudioShowcase } from '@/widgets/studio-showcase';
 import styles from './SubscriptionPlansPage.module.css';
 
 export function SubscriptionPlansPage() {
+  const { user } = useAuth();
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
+  const { data: activeSubscription } = useGetMySubscriptionQuery(undefined, { skip: !user });
   const { data: entryFee } = useGetMembershipEntryFeeQuery();
   const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
   const { data: studios = [] } = useGetStudiosQuery();
   const { data: reviews = [] } = useGetReviewsQuery();
 
   const tariffs = buildTariffs(plans);
+  const userTariffs = user ? pickTariffs(tariffs, getAvailableTariffCodes(user.gender, activeSubscription?.plan.code)) : [];
   const womenTariffs = pickTariffs(tariffs, ['LADY', 'LADY_SUPER', 'FAMILY', 'FAMILY_SUPER']);
   const menTariffs = pickTariffs(tariffs, ['MISTER', 'MISTER_SUPER', 'FAMILY', 'FAMILY_SUPER']);
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
@@ -35,8 +40,24 @@ export function SubscriptionPlansPage() {
 
   return (
     <PageShell title="Тарифы">
-      {womenTariffs.length > 0 ? <PlansCarousel title="Для женщин" items={womenTariffs} dotIdPrefix="plans-page-women" /> : null}
-      {menTariffs.length > 0 ? <PlansCarousel title="Для мужчин" items={menTariffs} dotIdPrefix="plans-page-men" /> : null}
+      {user ? (
+        userTariffs.length > 0 ? (
+          <PlansCarousel title="Рекомендуемые тарифы" items={userTariffs} dotIdPrefix="plans-page-recommended" />
+        ) : (
+          <section className={styles.promo}>
+            <span aria-hidden="true">✓</span>
+            <div>
+              <strong>Ваш тариф уже активен</strong>
+              <p>Сейчас нет подходящего апгрейда: все преимущества уже доступны.</p>
+            </div>
+          </section>
+        )
+      ) : (
+        <>
+          {womenTariffs.length > 0 ? <PlansCarousel title="Для женщин" items={womenTariffs} dotIdPrefix="plans-page-women" /> : null}
+          {menTariffs.length > 0 ? <PlansCarousel title="Для мужчин" items={menTariffs} dotIdPrefix="plans-page-men" /> : null}
+        </>
+      )}
 
       <section className={styles.promo}>
         <span aria-hidden="true">%</span>
@@ -56,4 +77,19 @@ export function SubscriptionPlansPage() {
 function pickTariffs(tariffs: TariffItem[], codes: string[]) {
   const byCode = new Map(tariffs.map((tariff) => [tariff.code, tariff]));
   return codes.map((code) => byCode.get(code)).filter((tariff): tariff is TariffItem => Boolean(tariff));
+}
+
+function getAvailableTariffCodes(gender: string, activeCode?: string) {
+  if (activeCode?.startsWith('FAMILY')) {
+    return activeCode === 'FAMILY' ? ['FAMILY_SUPER'] : [];
+  }
+
+  const personalCodes = gender === 'MALE' ? ['MISTER', 'MISTER_SUPER'] : ['LADY', 'LADY_SUPER'];
+
+  if (!activeCode) {
+    return [...personalCodes, 'FAMILY', 'FAMILY_SUPER'];
+  }
+
+  const upgradeCodes = activeCode.endsWith('_SUPER') ? [] : [personalCodes[1]];
+  return [...upgradeCodes, 'FAMILY', 'FAMILY_SUPER'].filter((code) => code !== activeCode);
 }

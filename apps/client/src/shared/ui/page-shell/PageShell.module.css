@@ -15,6 +15,10 @@
   min-width: 0;
 }
 
+.beforeTitle {
+  display: flex;
+}
+
 .title {
   margin: 0;
   font-size: var(--font-h1);
@@ -71,5 +75,11 @@
 @media (max-width: 480px) {
   .actions > * {
     width: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .beforeTitle {
+    margin-bottom: 18px;
   }
 }

@@ -51,11 +51,20 @@
   border-radius: var(--radius-round);
   background: rgba(255, 255, 255, 0.82);
   color: var(--color-text);
-  font-size: 24px;
-  line-height: 1;
   box-shadow: 0 6px 14px rgba(32, 35, 42, 0.08);
   transform: translateY(-50%);
   transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.navArrow {
+  display: block;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .navNext {

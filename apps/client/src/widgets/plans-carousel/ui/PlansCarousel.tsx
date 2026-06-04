@@ -1,6 +1,7 @@
-import { type ReactNode } from 'react';
+import { cloneElement, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { PricingCard, type TariffItem } from '@/entities/subscription';
 import { ChooseSubscriptionButton } from '@/features/choose-subscription';
+import { cx } from '@/shared/ui';
 import styles from './PlansCarousel.module.css';
 
 interface PlansCarouselProps {
@@ -31,7 +32,7 @@ export function PlansCarousel({
           <TitleTag className={titleLevel === 'h1' ? styles.titlePage : styles.title}>{title}</TitleTag>
           {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
         </div>
-        {topAction ? <div className={styles.actions}>{topAction}</div> : null}
+        {topAction ? <div className={styles.actions}>{renderTopAction(topAction)}</div> : null}
       </div>
 
       <div className={styles.track}>
@@ -44,5 +45,33 @@ export function PlansCarousel({
         ))}
       </div>
     </section>
+  );
+}
+
+function renderTopAction(action: ReactNode) {
+  if (!isValidElement(action)) {
+    return action;
+  }
+
+  const element = action as ReactElement<{ className?: string; children?: ReactNode }>;
+
+  return cloneElement(
+    element,
+    {
+      className: cx(element.props.className, styles.compactAction),
+    },
+    <>
+      <span className={styles.actionText}>{element.props.children}</span>
+      <ActionArrow />
+    </>,
+  );
+}
+
+function ActionArrow() {
+  return (
+    <svg className={styles.actionArrow} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
   );
 }

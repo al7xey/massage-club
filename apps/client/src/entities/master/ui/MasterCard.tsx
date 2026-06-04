@@ -20,22 +20,30 @@ export function MasterCard({ master }: MasterCardProps) {
           <img src={photoUrl} alt="" loading="lazy" />
         </div>
         <div className={styles.meta}>
-          <span className={styles.role}>Мастер</span>
           <h3>{master.fullName}</h3>
           <p>
-            <span className={styles.stars}>★★★★★</span> <strong>{master.rating}</strong> ({master.reviewsCount} отзывов)
+            <strong>{master.rating}</strong> <span className={styles.stars}>★★★★★</span> ({master.reviewsCount} отзывов)
           </p>
         </div>
       </Link>
       <div className={styles.actions}>
         <LinkButton className={styles.detailsAction} size="sm" variant="secondary" to={appRoutes.masterDetails(master.id)} aria-label={`Подробнее о мастере ${master.fullName}`}>
           <span className={styles.detailsText}>Подробнее</span>
-          <span className={styles.detailsArrow} aria-hidden="true">→</span>
+          <ActionArrow />
         </LinkButton>
         <LinkButton size="sm" to={`${appRoutes.booking()}?masterId=${master.id}`}>
           Записаться
         </LinkButton>
       </div>
     </article>
+  );
+}
+
+function ActionArrow() {
+  return (
+    <svg className={styles.detailsArrow} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
   );
 }

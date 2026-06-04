@@ -1,13 +1,13 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { pendingCartStorage, useAddCartItemMutation, useGetCartQuery } from '@/entities/cart';
 import { useAuth } from '@/features/auth';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
-import { BrandMark, LinkButton } from '@/shared/ui';
+import { BrandMark, Button, LinkButton } from '@/shared/ui';
 import styles from './MainLayout.module.css';
 
-type MobileIconName = 'bag' | 'cart' | 'credit-card' | 'gift' | 'home' | 'login' | 'user' | 'user-circle';
+type MobileIconName = 'bag' | 'cart' | 'credit-card' | 'gift' | 'hands' | 'home' | 'login' | 'sparkles' | 'tariff' | 'user-circle';
 
 const links = [
   [appRoutes.services(), 'Услуги'],
@@ -19,29 +19,30 @@ const links = [
 
 const guestBottomLinks = [
   { icon: 'home' as const, label: 'Главная', to: appRoutes.home(), match: (path: string) => path === '/' },
-  { icon: 'bag' as const, label: 'Услуги', to: appRoutes.services(), match: (path: string) => path.startsWith('/services') },
-  { icon: 'credit-card' as const, label: 'Тарифы', to: appRoutes.subscriptions(), match: (path: string) => path.startsWith('/subscriptions') },
+  { icon: 'sparkles' as const, label: 'Услуги', to: appRoutes.services(), match: (path: string) => path.startsWith('/services') },
+  { icon: 'tariff' as const, label: 'Тарифы', to: appRoutes.subscriptions(), match: (path: string) => path.startsWith('/subscriptions') },
   { icon: 'gift' as const, label: 'Сертификаты', to: appRoutes.certificates(), match: (path: string) => path.startsWith('/certificates') },
   { icon: 'user-circle' as const, label: 'Войти', to: appRoutes.login(), match: (path: string) => path.startsWith('/login') },
 ] as const;
 
 const userBottomLinks = [
   { icon: 'home' as const, label: 'Главная', to: appRoutes.home(), match: (path: string) => path === '/' },
-  { icon: 'bag' as const, label: 'Услуги', to: appRoutes.services(), match: (path: string) => path.startsWith('/services') },
+  { icon: 'sparkles' as const, label: 'Услуги', to: appRoutes.services(), match: (path: string) => path.startsWith('/services') },
   { icon: 'cart' as const, label: 'Корзина', to: appRoutes.cart(), match: (path: string) => path.startsWith('/cart') },
-  { icon: 'user' as const, label: 'Мастера', to: appRoutes.masters(), match: (path: string) => path.startsWith('/masters') },
+  { icon: 'hands' as const, label: 'Мастера', to: appRoutes.masters(), match: (path: string) => path.startsWith('/masters') },
   { icon: 'user-circle' as const, label: 'Профиль', to: appRoutes.account(), match: (path: string) => path.startsWith('/account') },
 ] as const;
 
 export function MainLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const mobileMenuId = useId();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isFlushingPendingCart = useRef(false);
-  const { isAuthLoading, user } = useAuth();
+  const { isAuthLoading, logout, user } = useAuth();
   const { data: cartItems = [] } = useGetCartQuery(undefined, { skip: !user });
   const [addCartItem] = useAddCartItemMutation();
-  const logoRoute = user ? appRoutes.account() : appRoutes.home();
+  const logoRoute = appRoutes.home();
   const accountInitial = (user?.fullName?.trim()?.[0] ?? 'Р').toUpperCase();
   const authState = { from: `${location.pathname}${location.search}` };
   const bottomLinks = user ? userBottomLinks : guestBottomLinks;
@@ -75,6 +76,12 @@ export function MainLayout() {
         isFlushingPendingCart.current = false;
       });
   }, [addCartItem, user]);
+
+  const handleLogout = async () => {
+    setIsMobileMenuOpen(false);
+    await logout();
+    navigate(appRoutes.home(), { replace: true });
+  };
 
   return (
     <div className={styles.shell}>
@@ -179,6 +186,9 @@ export function MainLayout() {
                       Админ-панель
                     </LinkButton>
                   ) : null}
+                  <Button variant="danger" fullWidth onClick={() => void handleLogout()}>
+                    Выйти
+                  </Button>
                 </>
               ) : null}
             </div>
@@ -247,9 +257,11 @@ function MobileNavIcon({ name }: { name: MobileIconName }) {
     cart: ['M6 7h13l-1.4 7.5H8L6.8 4.5H4', 'M9 19a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM17 19a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z'],
     'credit-card': ['M4.5 7.5h15v10h-15v-10Z', 'M4.5 10.5h15', 'M7 15h4'],
     gift: ['M5 10h14v10H5V10Z', 'M12 10v10M4 10h16', 'M8.5 7.5C6 7.5 6 4 8.5 4 11 4 12 8 12 8s1-4 3.5-4S18 7.5 15.5 7.5H8.5Z'],
+    hands: ['M7.5 9.5c1.2-1.4 2.5-2.1 4.5-2.1s3.3.7 4.5 2.1', 'M5 13.5c1.6 2.1 3.9 3.2 7 3.2s5.4-1.1 7-3.2', 'M8.5 12.5c.8.8 1.9 1.2 3.5 1.2s2.7-.4 3.5-1.2', 'M4.8 10.7c-.8 1.1-.6 2.4.4 3.1M19.2 10.7c.8 1.1.6 2.4-.4 3.1'],
     home: ['M4.5 11.5 12 5l7.5 6.5', 'M6.5 10.5V20h4.2v-5.2h2.6V20h4.2v-9.5'],
     login: ['M14 5h3.5A1.5 1.5 0 0 1 19 6.5v11a1.5 1.5 0 0 1-1.5 1.5H14', 'M5 12h9', 'M11 8.5 14.5 12 11 15.5'],
-    user: ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z', 'M5 20c1.3-3.3 3.6-5 7-5s5.7 1.7 7 5'],
+    sparkles: ['M12 3.5 13.7 8l4.8 1.7-4.8 1.7L12 16l-1.7-4.6-4.8-1.7L10.3 8 12 3.5Z', 'M18.5 14.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1Z', 'M5.5 14.5l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7.7-1.6Z'],
+    tariff: ['M12 4.5 18.5 8v7.8L12 20l-6.5-4.2V8L12 4.5Z', 'M9 10.2h6', 'M9.5 13.4h5', 'M12 7.8v8.6'],
     'user-circle': ['M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z', 'M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z', 'M6.8 18c1.2-2.6 3-4 5.2-4s4 1.4 5.2 4'],
   };
 

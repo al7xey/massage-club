@@ -65,6 +65,8 @@ export function CartPage() {
   const groupedRows = useMemo(() => buildCartRows(cartItems, previewByItemId), [cartItems, previewByItemId]);
   const baseAmountRub = cartItems.reduce((sum, item) => sum + item.service.priceRub, 0);
   const savedAmountRub = baseAmountRub - pricingPreview.totalAmountRub;
+  const potentialSuperTotalRub = getSuperPrice(baseAmountRub);
+  const potentialSuperSavingRub = Math.max(0, baseAmountRub - potentialSuperTotalRub);
   const isMutating = isAdding || isRemoving;
 
   const addSameService = (serviceId: string) => {
@@ -76,6 +78,10 @@ export function CartPage() {
     if (lastItem) {
       void removeCartItem(lastItem.id);
     }
+  };
+
+  const removeAll = (items: CartItemDto[]) => {
+    void Promise.all(items.map((item) => removeCartItem(item.id).unwrap().catch(() => undefined)));
   };
 
   return (
@@ -111,16 +117,24 @@ export function CartPage() {
               </div>
 
               <div className={styles.cardSide}>
-                <strong className={row.hasIncludedCredit ? styles.includedPrice : undefined}>
-                  {row.hasIncludedCredit && row.totalRub === 0 ? 'В подписке' : formatPrice(row.totalRub)}
-                </strong>
-                <div className={styles.quantityControl} aria-label={`Количество: ${row.items.length}`}>
-                  <button className={styles.quantityButton} type="button" disabled={isMutating} aria-label="Уменьшить количество" onClick={() => removeOne(row.items)}>
-                    −
-                  </button>
-                  <span>{row.items.length}</span>
-                  <button className={styles.quantityButton} type="button" disabled={isMutating} aria-label="Увеличить количество" onClick={() => addSameService(row.service.id)}>
-                    +
+                <div className={styles.priceBlock}>
+                  <strong className={row.hasIncludedCredit ? styles.includedPrice : undefined}>
+                    {row.hasIncludedCredit && row.totalRub === 0 ? 'В подписке' : formatPrice(row.totalRub)}
+                  </strong>
+                  {row.savedRub > 0 ? <span className={styles.oldPrice}>{formatPrice(row.baseRub)}</span> : null}
+                </div>
+                <div className={styles.rowControls}>
+                  <div className={styles.quantityControl} aria-label={`Количество: ${row.items.length}`}>
+                    <button className={styles.quantityButton} type="button" disabled={isMutating} aria-label="Уменьшить количество" onClick={() => removeOne(row.items)}>
+                      −
+                    </button>
+                    <span>{row.items.length}</span>
+                    <button className={styles.quantityButton} type="button" disabled={isMutating} aria-label="Увеличить количество" onClick={() => addSameService(row.service.id)}>
+                      +
+                    </button>
+                  </div>
+                  <button className={styles.deleteButton} type="button" disabled={isMutating} aria-label={`Удалить ${row.service.title} из корзины`} onClick={() => removeAll(row.items)}>
+                    <TrashIcon />
                   </button>
                 </div>
               </div>
@@ -134,12 +148,19 @@ export function CartPage() {
             <strong>{formatPrice(pricingPreview.totalAmountRub)}</strong>
             <span>{formatServiceCount(cartItems.length)}</span>
             {activeSubscription ? (
-              <p>
-                {getSubscriptionPlanTitle(activeSubscription.plan.code, activeSubscription.plan.name)}: {pricingPreview.subscriptionCreditsUsed} по подписке,
-                экономия {formatPrice(savedAmountRub)}.
-              </p>
+              <div className={styles.discountPanel}>
+                <b>{getSubscriptionPlanTitle(activeSubscription.plan.code, activeSubscription.plan.name)}</b>
+                <p>
+                  {savedAmountRub > 0
+                    ? `Скидка уже учтена: ${pricingPreview.subscriptionCreditsUsed} по подписке, экономия ${formatPrice(savedAmountRub)}.`
+                    : `Активная подписка применится к подходящим услугам. Доступно визитов: ${remainingCredits}.`}
+                </p>
+              </div>
             ) : (
-              <p>С Super тарифом итог был бы {formatPrice(getSuperPrice(baseAmountRub))}.</p>
+              <div className={styles.discountPanel}>
+                <b>Возможная скидка по подписке</b>
+                <p>С Super тарифом −30%: итог {formatPrice(potentialSuperTotalRub)}, экономия {formatPrice(potentialSuperSavingRub)}.</p>
+              </div>
             )}
             <LinkButton to={appRoutes.booking()}>Оформить</LinkButton>
           </aside>
@@ -154,8 +175,10 @@ function buildCartRows(cartItems: CartItemDto[], previewByItemId: Map<string, { 
     string,
     {
       hasIncludedCredit: boolean;
+      baseRub: number;
       items: CartItemDto[];
       service: CartItemDto['service'];
+      savedRub: number;
       totalRub: number;
     }
   >();
@@ -164,13 +187,17 @@ function buildCartRows(cartItems: CartItemDto[], previewByItemId: Map<string, { 
     const preview = previewByItemId.get(item.id);
     const row = rows.get(item.service.id) ?? {
       hasIncludedCredit: false,
+      baseRub: 0,
       items: [],
       service: item.service,
+      savedRub: 0,
       totalRub: 0,
     };
 
     row.items.push(item);
+    row.baseRub += item.service.priceRub;
     row.totalRub += preview?.finalPriceRub ?? item.service.priceRub;
+    row.savedRub = Math.max(0, row.baseRub - row.totalRub);
     row.hasIncludedCredit = row.hasIncludedCredit || Boolean(preview?.paidBySubscriptionCredit);
     rows.set(item.service.id, row);
   }
@@ -191,4 +218,16 @@ function getSuperPrice(priceRub: number) {
 function getServiceImageUrl(service: { category?: { slug?: string } | null; galleryUrls?: string[] | null; imageUrl?: string | null }) {
   const uploadedUrl = resolveMediaUrl(service.imageUrl ?? service.galleryUrls?.[0]);
   return uploadedUrl || getFallbackImage('services', service.category?.slug ?? 'service');
+}
+
+function TrashIcon() {
+  return (
+    <svg className={styles.trashIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M4 7h16" />
+      <path d="M9 7V5h6v2" />
+      <path d="m6.5 7 .9 13h9.2l.9-13" />
+      <path d="M10 11v5" />
+      <path d="M14 11v5" />
+    </svg>
+  );
 }

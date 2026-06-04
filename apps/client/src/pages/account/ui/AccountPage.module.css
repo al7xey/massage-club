@@ -31,6 +31,12 @@
   gap: 18px;
 }
 
+.topbarActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .profileBadge {
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
@@ -79,6 +85,10 @@
 
 .settingsButton {
   justify-self: end;
+}
+
+.logoutButton {
+  min-width: 112px;
 }
 
 .subscriptionPanel {
@@ -161,7 +171,6 @@
 }
 
 .subscriptionBlock .sectionLabel,
-.subscriptionBlock .sectionLead a,
 .subscriptionBlock .subscriptionCopy h2,
 .subscriptionBlock .subscriptionCopy p,
 .subscriptionBlock .subscriptionRing strong,
@@ -169,6 +178,11 @@
 .subscriptionBlock .infoPill span,
 .subscriptionBlock .infoPill strong {
   color: var(--color-on-primary);
+}
+
+.sectionLead .actionButton,
+.cardHeader .actionButton {
+  color: var(--color-primary-hover);
 }
 
 .subscriptionMeta {
@@ -575,16 +589,19 @@
   }
 
   .cardHeader a {
-    border-color: var(--color-line);
-    background: var(--color-soft);
-    color: var(--color-primary-hover);
+    border-color: var(--color-text);
+    background: #ffffff;
+    color: var(--color-text);
   }
 
   .sectionLead a::before,
   .cardHeader a::before {
-    content: "\2192";
-    font-size: 22px;
-    line-height: 1;
+    width: 22px;
+    height: 22px;
+    background: currentColor;
+    content: "";
+    -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
   }
 
   .tiles {
@@ -641,10 +658,16 @@
   }
 
   .settingsButton,
+  .logoutButton,
   .subscriptionActions > *,
   .formActions > *,
   .inlineActions > * {
     width: 100%;
+  }
+
+  .topbarActions {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .cardHeader,

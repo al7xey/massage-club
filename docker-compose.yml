@@ -26,13 +26,14 @@ services:
       NODE_ENV: ${DOCKER_NODE_ENV:-docker}
       SERVER_PORT: 3000
       API_PREFIX: api
-      CORS_ORIGIN: ${DOCKER_CORS_ORIGIN:-http://localhost:8080,http://127.0.0.1:8080}
+      CORS_ORIGIN: ${DOCKER_CORS_ORIGIN:-https://relaxup.ru,https://www.relaxup.ru}
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       POSTGRES_DB: ${POSTGRES_DB:-massage_subscriptions}
       POSTGRES_USER: ${POSTGRES_USER:-massage_app}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-massage_password}
       DATABASE_SYNCHRONIZE: ${DOCKER_DATABASE_SYNCHRONIZE:-true}
+      SEED_DATABASE_SYNCHRONIZE: ${SEED_DATABASE_SYNCHRONIZE:-true}
       DATABASE_LOGGING: ${DATABASE_LOGGING:-false}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT_ACCESS_SECRET is required and must be at least 32 characters}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET is required and must be at least 32 characters}
@@ -40,6 +41,11 @@ services:
       JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
       BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
       APP_ENCRYPTION_KEY: ${APP_ENCRYPTION_KEY:-}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-https://relaxup.ru}
+      PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:-https://relaxup.ru/api}
+      YANDEX_CLIENT_ID: ${YANDEX_CLIENT_ID:-}
+      YANDEX_CLIENT_SECRET: ${YANDEX_CLIENT_SECRET:-}
+      YANDEX_REDIRECT_URI: ${YANDEX_REDIRECT_URI:-https://relaxup.ru/api/auth/yandex/callback}
       REQUEST_RATE_LIMIT_WINDOW_MS: ${REQUEST_RATE_LIMIT_WINDOW_MS:-60000}
       REQUEST_RATE_LIMIT_MAX: ${REQUEST_RATE_LIMIT_MAX:-300}
       AUTH_RATE_LIMIT_WINDOW_MS: ${AUTH_RATE_LIMIT_WINDOW_MS:-900000}
@@ -103,6 +109,21 @@ services:
         condition: service_healthy
     ports:
       - "${WEB_PORT:-8080}:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.5.2
+    restart: unless-stopped
+    profiles:
+      - tunnel
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      web:
+        condition: service_healthy
 
 volumes:
   postgres_data:

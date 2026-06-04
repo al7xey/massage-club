@@ -104,6 +104,20 @@ export function BookingDraftForm() {
   const isMasterSelected = Boolean(selectedMasterId);
   const isReadyForSubmit = cartItems.length > 0 && Boolean(studioId) && Boolean(date) && isTimeSelected && isMasterSelected;
 
+  const scrollToFormTop = useCallback(() => {
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }, []);
+
+  const setActiveStepWithScroll = useCallback(
+    (stepId: StepId) => {
+      setActiveStep(stepId);
+      scrollToFormTop();
+    },
+    [scrollToFormTop],
+  );
+
   const resetSchedule = useCallback(() => {
     setStartsAt('');
     setSelectedMasterId('');
@@ -137,7 +151,7 @@ export function BookingDraftForm() {
     const currentIndex = getStepIndex(activeStep);
 
     if (requestedIndex <= currentIndex || canEnterStep(stepId, { isMasterSelected, isTimeSelected, cartItems, date, studioId })) {
-      setActiveStep(stepId);
+      setActiveStepWithScroll(stepId);
       setError('');
       return;
     }
@@ -269,11 +283,16 @@ export function BookingDraftForm() {
               subscriptionCreditsUsed={pricingPreview.subscriptionCreditsUsed}
             />
           ) : null}
+        </div>
 
+        <aside className={styles.sideSummary}>
+          <span className={styles.kicker}>Итого</span>
+          <strong>{formatPrice(pricingPreview.totalAmountRub)}</strong>
+          <p>{formatServiceCount(cartItems.length)} · {pricingPreview.subscriptionCreditsUsed} по подписке</p>
           {cartItems.length > 0 ? (
             <div className={styles.stageActions}>
               {activeStep !== 'services' ? (
-                <Button variant="secondary" onClick={() => setActiveStep(steps[Math.max(0, getStepIndex(activeStep) - 1)].id)}>
+                <Button variant="secondary" onClick={() => setActiveStepWithScroll(steps[Math.max(0, getStepIndex(activeStep) - 1)].id)}>
                   Назад
                 </Button>
               ) : (
@@ -291,12 +310,6 @@ export function BookingDraftForm() {
               )}
             </div>
           ) : null}
-        </div>
-
-        <aside className={styles.sideSummary}>
-          <span className={styles.kicker}>Итого</span>
-          <strong>{formatPrice(pricingPreview.totalAmountRub)}</strong>
-          <p>{formatServiceCount(cartItems.length)} · {pricingPreview.subscriptionCreditsUsed} по подписке</p>
           <dl>
             <div>
               <dt>Студия</dt>

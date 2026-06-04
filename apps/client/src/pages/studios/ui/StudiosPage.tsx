@@ -157,6 +157,7 @@ function StudioGallery({
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const activePhoto = photos[activeIndex] ?? photos[0];
+  const hasMultiplePhotos = photos.length > 1;
 
   const showPrevious = () => {
     setActiveIndex((index) => (index === 0 ? photos.length - 1 : index - 1));
@@ -174,29 +175,51 @@ function StudioGallery({
         aria-label={`${studioTitle}, фото ${activeIndex + 1}`}
         style={activePhoto?.url ? { backgroundImage: `url("${activePhoto.url}")` } : undefined}
       />
-      <div className={styles.galleryControls}>
-        <button type="button" aria-label="Предыдущее фото" onClick={showPrevious}>
-          ←
-        </button>
-        <span>
-          {activeIndex + 1} / {photos.length}
-        </span>
-        <button type="button" aria-label="Следующее фото" onClick={showNext}>
-          →
-        </button>
-      </div>
-      <div className={styles.galleryDots}>
-        {photos.map((photo, index) => (
-          <button
-            key={`${photo.label}-${index}`}
-            type="button"
-            aria-label={`Показать фото ${index + 1}`}
-            aria-pressed={index === activeIndex}
-            onClick={() => setActiveIndex(index)}
-          />
-        ))}
-      </div>
+      {hasMultiplePhotos ? (
+        <>
+          <div className={styles.galleryControls}>
+            <button type="button" aria-label="Предыдущее фото" onClick={showPrevious}>
+              <ArrowIcon direction="left" />
+            </button>
+            <span>
+              {activeIndex + 1} / {photos.length}
+            </span>
+            <button type="button" aria-label="Следующее фото" onClick={showNext}>
+              <ArrowIcon direction="right" />
+            </button>
+          </div>
+          <div className={styles.galleryDots}>
+            {photos.map((photo, index) => (
+              <button
+                key={`${photo.label}-${index}`}
+                type="button"
+                aria-label={`Показать фото ${index + 1}`}
+                aria-pressed={index === activeIndex}
+                onClick={() => setActiveIndex(index)}
+              />
+            ))}
+          </div>
+        </>
+      ) : null}
     </div>
+  );
+}
+
+function ArrowIcon({ direction }: { direction: 'left' | 'right' }) {
+  return (
+    <svg className={styles.arrowIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      {direction === 'left' ? (
+        <>
+          <path d="M19 12H5" />
+          <path d="m11 6-6 6 6 6" />
+        </>
+      ) : (
+        <>
+          <path d="M5 12h14" />
+          <path d="m13 6 6 6-6 6" />
+        </>
+      )}
+    </svg>
   );
 }
 

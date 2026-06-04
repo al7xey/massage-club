@@ -52,6 +52,17 @@
   padding-inline: 16px;
 }
 
+.actionArrow {
+  display: none;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
 .track {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(var(--catalog-card-min-width), 1fr));
@@ -87,8 +98,9 @@
     grid-template-columns: none;
     overflow-x: auto;
     overscroll-behavior-x: contain;
-    padding-bottom: 6px;
-    scroll-padding-inline: 0;
+    margin: -8px -12px -18px;
+    padding: 8px 12px 18px;
+    scroll-padding-inline: 12px;
     scroll-snap-type: x proximity;
   }
 
@@ -96,14 +108,14 @@
     flex: 0 0 auto;
   }
 
-  .actions > * {
+  .compactAction {
     width: 52px !important;
     max-width: 52px;
     min-width: 52px;
     height: 52px;
     min-height: 52px;
     flex: 0 0 52px;
-    border-color: rgba(111, 141, 78, 0.18);
+    border-color: var(--color-text);
     border-radius: var(--radius-round);
     background: #ffffff;
     color: var(--color-text) !important;
@@ -112,10 +124,13 @@
     box-shadow: 0 10px 20px rgba(31, 41, 55, 0.04);
   }
 
-  .actions > *::before {
-    content: "\2192";
-    font-size: 24px;
-    line-height: 1;
+  .actionText {
+    display: none;
+  }
+
+  .actionArrow {
+    display: block;
+    flex: 0 0 auto;
   }
 
   .slide {

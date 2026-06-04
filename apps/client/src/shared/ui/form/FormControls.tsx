@@ -32,7 +32,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(({ classNa
 
   return (
     <label className={styles.field} htmlFor={controlId}>
-      <span className={styles.label}>{label}</span>
+      {label.trim() ? <span className={styles.label}>{label}</span> : null}
       {endAdornment ? (
         <span className={styles.controlWrap}>
           {input}
@@ -55,7 +55,7 @@ export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(({ ch
 
   return (
     <label className={styles.field} htmlFor={controlId}>
-      <span className={styles.label}>{label}</span>
+      {label.trim() ? <span className={styles.label}>{label}</span> : null}
       <select
         ref={ref}
         aria-describedby={error || helperText ? messageId : undefined}
@@ -80,7 +80,7 @@ export const TextAreaField = forwardRef<HTMLTextAreaElement, TextAreaFieldProps>
 
   return (
     <label className={styles.field} htmlFor={controlId}>
-      <span className={styles.label}>{label}</span>
+      {label.trim() ? <span className={styles.label}>{label}</span> : null}
       <textarea
         ref={ref}
         aria-describedby={error || helperText ? messageId : undefined}

@@ -31,6 +31,9 @@ export class User {
   @Column({ name: 'avatar_url', type: 'text', nullable: true })
   avatarUrl?: string | null;
 
+  @Column({ name: 'yandex_id', type: 'text', unique: true, nullable: true })
+  yandexId?: string | null;
+
   @Column({ type: 'enum', enum: UserRole, default: UserRole.CLIENT })
   role: UserRole;
 

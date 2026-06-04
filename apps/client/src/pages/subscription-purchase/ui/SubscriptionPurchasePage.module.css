@@ -140,6 +140,14 @@
   justify-content: start;
 }
 
+.sideSummary .actions {
+  grid-template-columns: 1fr;
+}
+
+.sideSummary .actions > * {
+  width: 100%;
+}
+
 .sideSummary {
   position: sticky;
   top: 92px;

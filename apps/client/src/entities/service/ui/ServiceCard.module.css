@@ -50,6 +50,32 @@
   stroke-width: 1.8;
 }
 
+.cartAction {
+  position: relative;
+}
+
+.cartActionActive {
+  color: var(--color-on-primary);
+}
+
+.cartCountBadge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: inline-grid;
+  min-width: 19px;
+  height: 19px;
+  place-items: center;
+  border-radius: var(--radius-round);
+  background: var(--color-primary-hover);
+  color: #dcefc8;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
 .media {
   position: relative;
   flex: 0 0 auto;
@@ -155,8 +181,8 @@
   }
 
   .card h3 {
-    min-height: 40px;
-    font-size: 13px;
+    min-height: 42px;
+    font-size: 15px;
     line-height: 1.18;
     -webkit-line-clamp: 3;
   }
@@ -199,7 +225,6 @@
   }
 
   .body {
-    padding-right: 60px;
     padding-bottom: 14px;
   }
 
@@ -209,5 +234,8 @@
 
   .priceRow {
     margin-top: 0;
+    min-height: 44px;
+    align-content: center;
+    padding-right: 56px;
   }
 }

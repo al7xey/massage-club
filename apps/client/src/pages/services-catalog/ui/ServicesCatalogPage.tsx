@@ -128,19 +128,19 @@ export function ServicesCatalogPage() {
   };
 
   const updateMinPrice = (value: number) => {
-    setMinPrice(Math.min(value, maxPrice - priceStep));
+    setMinPrice(clampRangeValue(value, priceMin, maxPrice - priceStep));
   };
 
   const updateMaxPrice = (value: number) => {
-    setMaxPrice(Math.max(value, minPrice + priceStep));
+    setMaxPrice(clampRangeValue(value, minPrice + priceStep, priceMax));
   };
 
   const updateMinDuration = (value: number) => {
-    setMinDuration(Math.min(value, maxDuration - durationStep));
+    setMinDuration(clampRangeValue(value, durationMin, maxDuration - durationStep));
   };
 
   const updateMaxDuration = (value: number) => {
-    setMaxDuration(Math.max(value, minDuration + durationStep));
+    setMaxDuration(clampRangeValue(value, minDuration + durationStep, durationMax));
   };
 
   return (
@@ -241,8 +241,32 @@ export function ServicesCatalogPage() {
                   />
                 </div>
                 <div className={styles.rangeFields}>
-                  <span>от {minPrice.toLocaleString('ru-RU')} ₽</span>
-                  <span>до {maxPrice.toLocaleString('ru-RU')} ₽</span>
+                  <label className={styles.rangeField}>
+                    <span>от</span>
+                    <input
+                      aria-label="Стоимость от"
+                      inputMode="numeric"
+                      min={priceMin}
+                      max={priceMax}
+                      step={priceStep}
+                      type="number"
+                      value={minPrice}
+                      onChange={(event) => updateMinPrice(Number(event.target.value))}
+                    />
+                  </label>
+                  <label className={styles.rangeField}>
+                    <span>до</span>
+                    <input
+                      aria-label="Стоимость до"
+                      inputMode="numeric"
+                      min={priceMin}
+                      max={priceMax}
+                      step={priceStep}
+                      type="number"
+                      value={maxPrice}
+                      onChange={(event) => updateMaxPrice(Number(event.target.value))}
+                    />
+                  </label>
                 </div>
               </div>
 
@@ -271,8 +295,34 @@ export function ServicesCatalogPage() {
                   />
                 </div>
                 <div className={styles.rangeFields}>
-                  <span>от {minDuration} мин</span>
-                  <span>до {maxDuration} мин</span>
+                  <label className={styles.rangeField}>
+                    <span>от</span>
+                    <input
+                      aria-label="Длительность от"
+                      inputMode="numeric"
+                      min={durationMin}
+                      max={durationMax}
+                      step={durationStep}
+                      type="number"
+                      value={minDuration}
+                      onChange={(event) => updateMinDuration(Number(event.target.value))}
+                    />
+                    <em>мин</em>
+                  </label>
+                  <label className={styles.rangeField}>
+                    <span>до</span>
+                    <input
+                      aria-label="Длительность до"
+                      inputMode="numeric"
+                      min={durationMin}
+                      max={durationMax}
+                      step={durationStep}
+                      type="number"
+                      value={maxDuration}
+                      onChange={(event) => updateMaxDuration(Number(event.target.value))}
+                    />
+                    <em>мин</em>
+                  </label>
                 </div>
               </div>
             </aside>
@@ -332,4 +382,9 @@ function getRangeStyle(currentMin: number, currentMax: number, min: number, max:
     '--range-start': `${((currentMin - min) / (max - min)) * 100}%`,
     '--range-end': `${100 - ((currentMax - min) / (max - min)) * 100}%`,
   } as CSSProperties;
+}
+
+function clampRangeValue(value: number, min: number, max: number) {
+  const normalizedValue = Number.isFinite(value) ? value : min;
+  return Math.min(max, Math.max(min, normalizedValue));
 }

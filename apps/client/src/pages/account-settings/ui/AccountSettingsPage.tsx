@@ -118,7 +118,7 @@ export function AccountSettingsPage() {
             <Button isLoading={isSaving || uploadState.isLoading} loadingText="Сохраняем..." type="submit">
               Сохранить
             </Button>
-            <Button variant="secondary" onClick={handleLogout}>
+            <Button variant="danger" onClick={handleLogout}>
               Выйти
             </Button>
           </div>

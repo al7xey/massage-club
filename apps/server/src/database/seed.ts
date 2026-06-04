@@ -41,12 +41,12 @@ async function findOrCreate<T extends { id: string }>(
 }
 
 const categorySeeds = [
-  ['spa-programs', 'СПА ПРОГРАММЫ', 'SPA-ритуалы и комплексные программы ухода.'],
-  ['massage', 'МАССАЖ', 'Классические, расслабляющие и восстановительные массажи.'],
-  ['massage-men', 'МАССАЖ ДЛЯ МУЖЧИН', 'Массажные услуги для мужчин.'],
-  ['body-correction-wraps', 'КОРРЕКЦИЯ ФИГУРЫ/ОБЕРТЫВАНИЯ', 'Коррекция фигуры и обертывания.'],
-  ['face-care', 'УХОДЫ ЗА ЛИЦОМ', 'Уходовые процедуры и массажи лица.'],
-  ['laser-hair-removal', 'ЛАЗЕРНАЯ ЭПИЛЯЦИЯ', 'Лазерная эпиляция по зонам.'],
+  ['spa-programs', 'СПА программа', 'SPA-ритуалы и комплексные программы ухода.'],
+  ['massage', 'Массаж', 'Классические, расслабляющие и восстановительные массажи.'],
+  ['massage-men', 'Массаж для мужчин', 'Массажные услуги для мужчин.'],
+  ['body-correction-wraps', 'Коррекция фигуры и обертывания', 'Коррекция фигуры и обертывания.'],
+  ['face-care', 'Уход за лицом', 'Уходовые процедуры и массажи лица.'],
+  ['laser-hair-removal', 'Лазерная эпиляция', 'Лазерная эпиляция по зонам.'],
 ] as const;
 
 const serviceSeeds: ServiceSeed[] = [
@@ -274,12 +274,12 @@ const serviceSeeds: ServiceSeed[] = [
     durationMinutes: Number(durationMinutes),
   })),
   ...[
-    ['Классический, 60 мин', 3000, 60],
-    ['Классический, 90 мин', 4500, 90],
+    ['Классический', 3000, 60],
+    ['Классический', 4500, 90],
     ['Power (силовой)', 3000, 60],
     ['Расслабляющий', 3000, 60],
-    ['Оздоровительный массаж спины и ШВЗ, 30 мин', 1600, 30],
-    ['Оздоровительный массаж спины и ШВЗ, 60 мин', 3000, 60],
+    ['Оздоровительный массаж спины и ШВЗ', 1600, 30],
+    ['Оздоровительный массаж спины и ШВЗ', 3000, 60],
     ['Массаж головы', 1000, 20],
     ['Массаж стоп', 1000, 20],
   ].map(([title, priceRub, durationMinutes]) => ({
@@ -494,6 +494,36 @@ function getServiceImage(categorySlug: string, index: number): string {
   return images[index % images.length];
 }
 
+function normalizeServiceTitle(title: string, categorySlug: string): string {
+  const withoutServiceNoise = title
+    .replace(/^СПА-программа\s*/iu, '')
+    .replace(/^"(.+?)"(.*)$/u, '$1$2')
+    .replace(/\s*[,–—-]?\s*\d+\s*(?:минут(?:ы|а)?|мин\.?|min)\b\.?/giu, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([,.!?:;])/g, '$1')
+    .trim();
+
+  const normalizedTitle = categorySlug === 'spa-programs' ? sentenceCase(withoutServiceNoise) : withoutServiceNoise;
+  return normalizedTitle === 'Новая я!' ? 'Новая я' : normalizedTitle;
+}
+
+function sentenceCase(value: string): string {
+  const normalized = value
+    .toLocaleLowerCase('ru-RU')
+    .replace(/\bспа\b/giu, 'СПА')
+    .replace(/\bnew body\b/giu, 'NEW BODY')
+    .replace(/\brelax beauty\b/giu, 'Relax Beauty');
+
+  return normalized.replace(/^./u, (firstLetter) => firstLetter.toLocaleUpperCase('ru-RU'));
+}
+
+const masterPhotoUrls = [
+  'https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=1200&q=80',
+];
+
 const planSeeds = [
   {
     code: 'LADY',
@@ -696,25 +726,35 @@ async function seed() {
     const slug = `${item.categorySlug}-${slugify(item.title)}-${index + 1}`;
     activeServiceSlugs.push(slug);
     const imageUrl = getServiceImage(item.categorySlug, index);
+    const title = normalizeServiceTitle(item.title, item.categorySlug);
     const service = await findOrCreate(services, { slug } as Partial<Service>, () => ({
-      title: item.title,
+      title,
       slug,
-      description: item.composition || item.title,
+      description: item.composition || title,
       durationMinutes: item.durationMinutes,
       durationLabel: item.durationLabel,
       composition: item.composition,
       priceRub: item.priceRub,
       category,
       imageUrl,
+      galleryUrls: [imageUrl],
       externalSource: 'seed',
       externalId: `${item.categorySlug}-${index + 1}`,
       isActive: true,
     }));
-    // Ensure imageUrl is set for all services
-    if (!service.imageUrl) {
-      service.imageUrl = imageUrl;
-      await services.save(service);
-    }
+    service.title = title;
+    service.description = item.composition || title;
+    service.durationMinutes = item.durationMinutes;
+    service.durationLabel = item.durationLabel;
+    service.composition = item.composition;
+    service.priceRub = item.priceRub;
+    service.category = category;
+    service.imageUrl = imageUrl;
+    service.galleryUrls = [imageUrl];
+    service.externalSource = 'seed';
+    service.externalId = `${item.categorySlug}-${index + 1}`;
+    service.isActive = true;
+    await services.save(service);
     savedServices.push(service);
   }
 
@@ -727,21 +767,32 @@ async function seed() {
 
   await masters.createQueryBuilder().update(Master).set({ isActive: false }).execute();
 
-  for (const masterSeed of [
+  for (const [masterIndex, masterSeed] of [
     ['Екатерина', 'Реснянская'],
     ['Фадиля', 'Каримова'],
     ['Ирина', 'Строкова', 'Александровна'],
     ['Анастасия', 'Афонина', 'Олеговна'],
-  ] as const) {
+  ].entries()) {
     const [firstName, lastName, patronymic] = masterSeed;
-    await findOrCreate(masters, { firstName, lastName } as Partial<Master>, () => ({
+    const photoUrl = masterPhotoUrls[masterIndex % masterPhotoUrls.length];
+    const bio = `${[firstName, patronymic, lastName].filter(Boolean).join(' ')}. Мастер массажа и SPA.`;
+    const master = await findOrCreate(masters, { firstName, lastName } as Partial<Master>, () => ({
       firstName,
       lastName,
-      bio: `${[firstName, patronymic, lastName].filter(Boolean).join(' ')}. Мастер массажа и SPA.`,
+      bio,
       studio: studioCenter,
       services: savedServices,
+      photoUrl,
+      photoUrls: [photoUrl],
       isActive: true,
     }));
+    master.bio = bio;
+    master.studio = studioCenter;
+    master.services = savedServices;
+    master.photoUrl = photoUrl;
+    master.photoUrls = [photoUrl];
+    master.isActive = true;
+    await masters.save(master);
   }
 
   await seedMasterShifts(masters, shifts, 14);

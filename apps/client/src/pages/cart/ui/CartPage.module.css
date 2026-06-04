@@ -122,6 +122,12 @@
   padding: 4px 0;
 }
 
+.priceBlock {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+}
+
 .cardSide strong,
 .summary strong {
   font-size: 22px;
@@ -143,6 +149,14 @@
   letter-spacing: 0;
 }
 
+.oldPrice {
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
 .summary {
   position: sticky;
   top: 96px;
@@ -150,51 +164,90 @@
   gap: 8px;
 }
 
+.discountPanel {
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(111, 141, 78, 0.16);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(245, 247, 242, 0.96), #ffffff);
+  padding: 12px;
+}
+
+.discountPanel b {
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.discountPanel p {
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.rowControls {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .quantityControl {
   display: grid;
-  grid-template-columns: 38px 38px 38px;
+  grid-template-columns: 26px 24px 26px;
   align-items: center;
-  gap: 4px;
-  border: 1px solid rgba(111, 141, 78, 0.2);
+  gap: 0;
+  border: 1px solid var(--color-line);
   border-radius: 999px;
   background: #ffffff;
-  padding: 5px;
-  box-shadow: 0 10px 24px rgba(31, 41, 55, 0.07);
+  padding: 3px;
+  box-shadow: none;
 }
 
 .quantityControl span {
   color: var(--color-text);
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 900;
   text-align: center;
 }
 
-.quantityButton {
+.quantityButton,
+.deleteButton {
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 26px;
+  height: 26px;
   place-items: center;
-  border: 1px solid rgba(111, 141, 78, 0.16);
+  border: 0;
   border-radius: 999px;
-  background: var(--color-surface-soft);
-  color: var(--color-primary-hover);
+  background: transparent;
+  color: var(--color-text);
   padding: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 900;
   line-height: 1;
-  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.quantityButton:hover:not(:disabled) {
-  border-color: var(--color-primary);
-  background: var(--color-soft);
-  color: var(--color-primary);
-  transform: translateY(-1px);
-}
-
-.quantityButton:disabled {
+.quantityButton:disabled,
+.deleteButton:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+.deleteButton {
+  background: #ffffff;
+  color: var(--color-muted);
+  border: 1px solid var(--color-line);
+}
+
+.trashIcon {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
 }
 
 .superHint {
@@ -237,15 +290,23 @@
 
   .cardSide {
     grid-column: 1 / -1;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    justify-items: start;
+    justify-items: stretch;
     padding-top: 0;
-    gap: 10px;
+    gap: 8px;
   }
 
   .cardSide strong {
     text-align: left;
+  }
+
+  .priceBlock {
+    justify-items: start;
+  }
+
+  .rowControls {
+    justify-content: end;
   }
 
   .imageWrap {
@@ -282,14 +343,14 @@
   }
 
   .quantityControl {
-    grid-template-columns: 40px 36px 40px;
-    justify-self: start;
+    grid-template-columns: 26px 24px 26px;
+    justify-self: end;
     max-width: 100%;
-    padding: 4px;
+    padding: 3px;
   }
 
   .quantityButton {
-    width: 40px;
-    height: 40px;
+    width: 26px;
+    height: 26px;
   }
 }

@@ -53,10 +53,18 @@
   border-radius: var(--radius-round);
   background: var(--color-primary);
   color: var(--color-on-primary);
-  font-size: 18px;
-  font-weight: 900;
-  line-height: 1;
   cursor: pointer;
+}
+
+.arrowIcon {
+  display: block;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .galleryControls span {
@@ -402,10 +410,9 @@
     min-width: 52px;
     height: 52px;
     min-height: 52px;
-    border: 1px solid rgba(111, 141, 78, 0.18);
+    border: 1px solid var(--color-text);
     background: #ffffff;
     color: var(--color-text);
-    font-size: 24px;
     box-shadow: 0 10px 20px rgba(31, 41, 55, 0.08);
   }
 

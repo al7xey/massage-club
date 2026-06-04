@@ -4,7 +4,13 @@
 :global(body),
 :global(#root) {
   margin: 0;
+  min-height: 100%;
   background: #ffffff;
+  color-scheme: light;
+}
+
+:global(body) {
+  overflow-x: hidden;
 }
 
 .app {
@@ -59,9 +65,7 @@
   --mobile-icon-action-size: 36px;
   --mobile-listing-control-height: 34px;
   --mobile-listing-button-font: 11px;
-  position: fixed;
-  inset: 0;
-  overflow: auto;
+  min-height: 100%;
   overflow-x: hidden;
   scrollbar-gutter: stable;
   margin: 0;

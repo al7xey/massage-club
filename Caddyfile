@@ -1,0 +1,5 @@
+relaxup.ru, www.relaxup.ru {
+  encode zstd gzip
+
+  reverse_proxy web:80
+}

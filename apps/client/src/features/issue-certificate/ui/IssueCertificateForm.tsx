@@ -142,7 +142,7 @@ export function IssueCertificateForm() {
             </Button>
           </div>
         ) : (
-          <SelectField label="Услуга" value={serviceId} onChange={(event) => setServiceId(event.target.value)}>
+          <SelectField aria-label="Выберите услугу" label="" value={serviceId} onChange={(event) => setServiceId(event.target.value)}>
             <option value="">Выберите услугу</option>
             {services.map((service) => (
               <option key={service.id} value={service.id}>
@@ -174,7 +174,7 @@ export function IssueCertificateForm() {
             onClick={() => setFormat('email')}
           >
             <strong>Электронный</strong>
-            <span>Придет на почту сразу после оплаты</span>
+            <span>Придет на почту сразу после оформления</span>
           </button>
           <button
             className={`${styles.optionCard} ${format === 'paper' ? styles.optionActive : ''}`}
@@ -201,18 +201,18 @@ export function IssueCertificateForm() {
 
       <div className={styles.total}>
         <div className={styles.totalTop}>
-          <h3>Итого к оплате</h3>
+        <h3>Итого</h3>
           <strong>{resolvedAmount.toLocaleString('ru-RU')} ₽</strong>
         </div>
         <div className={styles.totalMeta}>
-          <span>Безопасная оплата</span>
+          <span>Оформление без оплаты</span>
           <span>Действует 1 год</span>
           <span>{format === 'paper' ? 'Бумажный формат' : 'Мгновенная доставка'}</span>
         </div>
         {error ? <p className={styles.error}>{error}</p> : null}
         {success ? <p className={styles.success}>{success}</p> : null}
         <Button fullWidth isLoading={isLoading} loadingText="Оформляем..." type="submit">
-          Оплатить
+          Оформить сертификат
         </Button>
       </div>
     </form>
