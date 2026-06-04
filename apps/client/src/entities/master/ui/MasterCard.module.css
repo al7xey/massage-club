@@ -119,29 +119,36 @@
 
 @media (max-width: 760px) {
   .card {
-    min-height: 224px;
+    min-height: 238px;
     border-radius: var(--radius-card);
   }
 
   .media {
     min-height: 0;
-    aspect-ratio: 1 / 0.9;
+    aspect-ratio: 1 / 0.94;
   }
 
   .meta {
-    gap: 4px;
-    min-height: 70px;
-    padding: 10px 11px 12px;
+    gap: 8px;
+    min-height: 82px;
+    padding: 11px 12px 15px;
   }
 
   .meta h3 {
-    display: -webkit-box;
+    display: block;
     overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
     font-size: 16px;
     min-height: 0;
     line-height: 1.12;
+  }
+
+  .firstName,
+  .lastName {
+    display: block;
+  }
+
+  .lastName {
+    margin-top: 1px;
   }
 
   .meta p {

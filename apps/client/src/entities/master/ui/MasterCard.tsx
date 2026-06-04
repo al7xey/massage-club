@@ -12,6 +12,8 @@ interface MasterCardProps {
 
 export function MasterCard({ master }: MasterCardProps) {
   const photoUrl = resolveMediaUrl(master.photoUrl) || getFallbackImage('masters', master.id);
+  const [firstName, ...lastNameParts] = master.fullName.trim().split(/\s+/);
+  const lastName = lastNameParts.join(' ');
 
   return (
     <article className={styles.card}>
@@ -20,7 +22,10 @@ export function MasterCard({ master }: MasterCardProps) {
           <img src={photoUrl} alt="" loading="lazy" />
         </div>
         <div className={styles.meta}>
-          <h3>{master.fullName}</h3>
+          <h3>
+            <span className={styles.firstName}>{firstName}</span>
+            {lastName ? <span className={styles.lastName}>{lastName}</span> : null}
+          </h3>
           <p>
             <strong>{master.rating}</strong> <span className={styles.stars}>★★★★★</span> ({master.reviewsCount} отзывов)
           </p>
