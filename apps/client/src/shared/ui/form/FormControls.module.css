@@ -27,6 +27,23 @@
   color: var(--color-subtle);
 }
 
+.control::-webkit-outer-spin-button,
+.control::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='password']::placeholder {
+  color: var(--color-subtle);
+}
+
+input[type='password'] {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  -webkit-text-security: disc;
+}
+
 .control:hover:not(:disabled) {
   border-color: var(--color-line-strong);
 }
