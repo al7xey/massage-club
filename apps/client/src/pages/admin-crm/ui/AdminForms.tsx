@@ -37,26 +37,33 @@ export function MasterForm({
     setValues(masterFormValues(master, studios));
   }, [master, studios]);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const saveValues = async (nextValues: ReturnType<typeof masterFormValues>, successMessage: string) => {
     setMessage('');
-    const photoUrl = values.photoUrl.trim();
 
     try {
-      await onSubmit({
-        fullName: values.fullName.trim(),
-        phone: values.phone.trim(),
-        description: values.description.trim(),
-        specialization: values.specialization.trim(),
-        experienceYears: Number(values.experienceYears) || 0,
-        photoUrl,
-        photoUrls: photoUrl ? [photoUrl] : [],
-        studioIds: values.studioIds,
-        serviceIds: values.serviceIds,
-      });
-      setMessage('Сохранено');
+      await onSubmit(toMasterPayload(nextValues));
+      setMessage(successMessage);
     } catch (error) {
       setMessage(getErrorText(error));
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      await saveValues(values, 'Сохранено');
+    } catch {
+      // saveValues already renders the API error in the form.
+    }
+  };
+
+  const handlePhotoChange = async (photoUrl: string) => {
+    const nextValues = { ...values, photoUrl };
+    setValues(nextValues);
+
+    if (master) {
+      await saveValues(nextValues, photoUrl ? 'Фото сохранено' : 'Фото удалено');
     }
   };
 
@@ -86,7 +93,7 @@ export function MasterForm({
       <ImageUploadField
         label="Фото мастера"
         value={values.photoUrl}
-        onChange={(photoUrl) => setValues((current) => ({ ...current, photoUrl }))}
+        onChange={handlePhotoChange}
       />
 
       <div className={`${styles.formSection} ${styles.formFieldFull}`}>
@@ -240,23 +247,33 @@ export function StudioForm({
     setValues(studioFormValues(studio));
   }, [studio]);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const saveValues = async (nextValues: ReturnType<typeof studioFormValues>, successMessage: string) => {
     setMessage('');
-    const photoUrl = values.photoUrl.trim();
 
     try {
-      await onSubmit({
-        name: values.name.trim(),
-        city: values.city.trim(),
-        address: values.address.trim(),
-        phone: values.phone.trim(),
-        photoUrl,
-        photoUrls: photoUrl ? [photoUrl] : [],
-      });
-      setMessage('Сохранено');
+      await onSubmit(toStudioPayload(nextValues));
+      setMessage(successMessage);
     } catch (error) {
       setMessage(getErrorText(error));
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      await saveValues(values, 'Сохранено');
+    } catch {
+      // saveValues already renders the API error in the form.
+    }
+  };
+
+  const handlePhotoChange = async (photoUrl: string) => {
+    const nextValues = { ...values, photoUrl };
+    setValues(nextValues);
+
+    if (studio) {
+      await saveValues(nextValues, photoUrl ? 'Фото сохранено' : 'Фото удалено');
     }
   };
 
@@ -281,7 +298,7 @@ export function StudioForm({
       <ImageUploadField
         label="Фото студии"
         value={values.photoUrl}
-        onChange={(photoUrl) => setValues((current) => ({ ...current, photoUrl }))}
+        onChange={handlePhotoChange}
       />
       <div className={styles.formActions}>
         <Button isLoading={isSubmitting} type="submit">
@@ -300,7 +317,7 @@ function ImageUploadField({
 }: {
   label: string;
   value?: string;
-  onChange: (value: string) => void;
+  onChange: (value: string) => Promise<void> | void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploadImage, state] = useUploadAdminImageMutation();
@@ -320,7 +337,7 @@ function ImageUploadField({
 
     try {
       const result = await uploadImage(file).unwrap();
-      onChange(result.url);
+      await onChange(result.url);
       setMessage('Фото загружено');
     } catch (error) {
       setMessage(getErrorText(error, 'Не удалось загрузить фото'));
@@ -328,6 +345,17 @@ function ImageUploadField({
       if (inputRef.current) {
         inputRef.current.value = '';
       }
+    }
+  };
+
+  const clearPhoto = async () => {
+    setMessage('');
+
+    try {
+      await onChange('');
+      setMessage('Фото удалено');
+    } catch (error) {
+      setMessage(getErrorText(error, 'Не удалось удалить фото'));
     }
   };
 
@@ -346,7 +374,7 @@ function ImageUploadField({
               {value ? 'Заменить фото' : 'Выбрать фото'}
             </Button>
             {value ? (
-              <Button size="sm" type="button" variant="ghost" onClick={() => onChange('')}>
+              <Button size="sm" type="button" variant="ghost" onClick={() => void clearPhoto()}>
                 Убрать
               </Button>
             ) : null}
@@ -472,6 +500,35 @@ function validateImageFile(file: File) {
   }
 
   return '';
+}
+
+function toMasterPayload(values: ReturnType<typeof masterFormValues>): UpsertMasterPayload {
+  const photoUrl = values.photoUrl.trim();
+
+  return {
+    fullName: values.fullName.trim(),
+    phone: values.phone.trim(),
+    description: values.description.trim(),
+    specialization: values.specialization.trim(),
+    experienceYears: Number(values.experienceYears) || 0,
+    photoUrl,
+    photoUrls: photoUrl ? [photoUrl] : [],
+    studioIds: values.studioIds,
+    serviceIds: values.serviceIds,
+  };
+}
+
+function toStudioPayload(values: ReturnType<typeof studioFormValues>): UpsertStudioPayload {
+  const photoUrl = values.photoUrl.trim();
+
+  return {
+    name: values.name.trim(),
+    city: values.city.trim(),
+    address: values.address.trim(),
+    phone: values.phone.trim(),
+    photoUrl,
+    photoUrls: photoUrl ? [photoUrl] : [],
+  };
 }
 
 function masterFormValues(master: MasterDto | undefined, studios: StudioDto[]) {
