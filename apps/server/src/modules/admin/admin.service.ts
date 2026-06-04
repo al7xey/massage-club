@@ -357,7 +357,7 @@ export class AdminService {
     const master = await this.findMaster(id);
     await this.ensureActorCanAccessMaster(master, actor);
     const before = snapshotMaster(master);
-    master.photoUrl = photoUrl?.trim() || null;
+    master.photoUrl = photoUrl ? photoUrl.trim() : null;
     master.photoUrls = normalizePhotoUrls(master.photoUrls, master.photoUrl);
     const saved = await this.mastersRepository.save(master);
     await this.audit(actor, 'UPDATE_MASTER_PHOTO', 'master', saved.id, before, snapshotMaster(saved));
@@ -1077,9 +1077,9 @@ export class AdminService {
     if (dto.phone !== undefined) master.phone = dto.phone.trim() || null;
     if (dto.specialization !== undefined) master.specialization = dto.specialization.trim() || null;
     if (dto.experienceYears !== undefined) master.experienceYears = dto.experienceYears;
-    if (dto.photoUrl !== undefined) master.photoUrl = dto.photoUrl.trim() || null;
+    if (dto.photoUrl !== undefined) master.photoUrl = dto.photoUrl ? dto.photoUrl.trim() : null;
     if (dto.photoUrls !== undefined || dto.photoUrl !== undefined) {
-      master.photoUrls = normalizePhotoUrls(dto.photoUrls ?? master.photoUrls, dto.photoUrl ?? master.photoUrl);
+      master.photoUrls = normalizePhotoUrls(dto.photoUrls ?? master.photoUrls, dto.photoUrl ? dto.photoUrl.trim() : master.photoUrl);
     }
     if (isCreate && master.isActive === undefined) master.isActive = true;
 
