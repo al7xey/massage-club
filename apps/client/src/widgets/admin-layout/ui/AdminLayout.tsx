@@ -49,7 +49,13 @@ const superAdminNav: AdminNavItem[] = [
   { icon: 'cart', label: 'Услуги', to: '/super-admin/services', roles: ['SUPER_ADMIN'] as UserRole[] },
   { icon: 'user', label: 'Мастера', to: '/super-admin/masters', roles: ['SUPER_ADMIN'] as UserRole[] },
   { icon: 'credit-card', label: 'Тарифы', to: '/super-admin/tariffs', roles: ['SUPER_ADMIN'] as UserRole[] },
+  { icon: 'repeat', label: 'Подписки', to: '/super-admin/subscriptions', roles: ['SUPER_ADMIN'] as UserRole[] },
+  { icon: 'wallet', label: 'Платежи', to: '/super-admin/payments', roles: ['SUPER_ADMIN'] as UserRole[] },
   { icon: 'gift', label: 'Сертификаты', to: '/super-admin/certificates', roles: ['SUPER_ADMIN'] as UserRole[] },
+  { icon: 'clipboard', label: 'Обращения', to: '/super-admin/requests', roles: ['SUPER_ADMIN'] as UserRole[] },
+  { icon: 'chart', label: 'Аналитика', to: '/super-admin/analytics', roles: ['SUPER_ADMIN'] as UserRole[] },
+  { icon: 'settings', label: 'Настройки', to: '/super-admin/settings', roles: ['SUPER_ADMIN'] as UserRole[] },
+  { icon: 'clipboard', label: 'Журнал', to: '/super-admin/audit-log', roles: ['SUPER_ADMIN'] as UserRole[] },
 ];
 
 export function AdminLayout({ mode }: { mode: AdminLayoutMode }) {

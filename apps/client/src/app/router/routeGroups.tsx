@@ -13,13 +13,18 @@ import {
   AdminServicesPage,
   AdminStudiosPage,
   SuperAdminAppointmentsPage,
+  SuperAdminAnalyticsPage,
+  SuperAdminAuditLogPage,
   SuperAdminCertificatesPage,
   SuperAdminDashboardPage,
   SuperAdminMastersPage,
+  SuperAdminPaymentsPage,
   SuperAdminRequestsPage,
   SuperAdminSchedulePage,
   SuperAdminServiceDetailsPage,
   SuperAdminServicesPage,
+  SuperAdminSettingsPage,
+  SuperAdminSubscriptionsPage,
   SuperAdminTariffsPage,
   SuperAdminUsersPage,
 } from '@/pages/admin-crm';
@@ -103,6 +108,11 @@ export const superAdminRoutes: AppRouteConfig[] = [
   { path: 'certificates', element: <SuperAdminCertificatesPage /> },
   { path: 'requests', element: <SuperAdminRequestsPage /> },
   { path: 'users', element: <SuperAdminUsersPage /> },
+  { path: 'subscriptions', element: <SuperAdminSubscriptionsPage /> },
+  { path: 'payments', element: <SuperAdminPaymentsPage /> },
+  { path: 'analytics', element: <SuperAdminAnalyticsPage /> },
+  { path: 'settings', element: <SuperAdminSettingsPage /> },
+  { path: 'audit-log', element: <SuperAdminAuditLogPage /> },
 ];
 
 export { LoginPage, RegisterPage };
