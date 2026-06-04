@@ -154,12 +154,12 @@
 
 @media (max-width: 760px) {
   .card {
-    min-height: 244px;
+    min-height: 218px;
     border-radius: var(--radius-card);
   }
 
   .media {
-    aspect-ratio: 1 / 0.9;
+    aspect-ratio: 1 / 0.72;
   }
 
   .timeBadge {
@@ -170,22 +170,22 @@
   }
 
   .body {
-    min-height: 96px;
-    gap: 5px;
-    padding: 9px 10px 10px;
+    min-height: 82px;
+    gap: 4px;
+    padding: 8px 10px 9px;
   }
 
   .category {
-    font-size: 13px;
-    line-height: 1.2;
+    font-size: 11px;
+    line-height: 1.15;
   }
 
   .card h3 {
-    min-height: 53px;
-    max-height: 53px;
-    font-size: 16px;
-    line-height: 1.18;
-    -webkit-line-clamp: 3;
+    min-height: 33px;
+    max-height: 33px;
+    font-size: 14px;
+    line-height: 1.16;
+    -webkit-line-clamp: 2;
   }
 
   .actionWrap {
