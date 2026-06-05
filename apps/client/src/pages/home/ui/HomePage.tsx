@@ -27,14 +27,14 @@ export function HomePage() {
       <section className={styles.hero}>
         <div className={styles.heroContent}>
           <h1>
-            <span className={styles.heroTitleLine}>Время для себя</span>
+            <span className={styles.heroTitleLine}>Релакс и восстановление</span>
             <span className={styles.heroTitleLine}>каждый месяц</span>
           </h1>
-          <p>Позаботьтесь о своем теле и ментальном здоровье в атмосфере спокойствия. Массаж, SPA и уход по единой подписке.</p>
+          <p>Массажи и скидки на услуги по единой подписке.</p>
           <div className={styles.heroActions}>
             <LinkButton to={appRoutes.subscriptions()}>Выбрать тариф</LinkButton>
             <LinkButton to={appRoutes.services()} variant="secondary">
-              Наши услуги
+              Посмотреть услуги
             </LinkButton>
           </div>
         </div>
@@ -61,8 +61,8 @@ export function HomePage() {
 
       <section className={styles.giftBanner}>
         <div>
-          <h2>Подарите время для себя своим близким</h2>
-          <p>Электронные и бумажные сертификаты на любую сумму или конкретную услугу.</p>
+          <h2>Подарите больше, чем просто подарок</h2>
+          <p>Электронные и бумажные сертификаты на любую сумму или услугу для отдыха, восстановления и заботе о ваших близких.</p>
           <LinkButton to={appRoutes.certificates()}>Оформить сертификат</LinkButton>
         </div>
         <div className={styles.giftArt} aria-hidden="true">
