@@ -61,7 +61,7 @@ export function SubscriptionDetailsPage() {
   const periodDays = plan.periodDays > 0 ? plan.periodDays : 30;
 
   return (
-    <PageShell title={title} beforeTitle={<BackButton onClick={() => navigate(-1)} />}>
+    <PageShell title={title} hideTitle beforeTitle={<BackButton onClick={() => navigate(-1)} />}>
       <section className={styles.detailsCard}>
         <div className={styles.heading}>
           <h2>{title}</h2>
