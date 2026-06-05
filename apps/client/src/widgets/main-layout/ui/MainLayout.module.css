@@ -56,10 +56,6 @@
   color: var(--color-primary);
 }
 
-.logo:hover {
-  color: var(--color-primary-hover);
-}
-
 .nav {
   position: absolute;
   left: 50%;

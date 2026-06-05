@@ -24,7 +24,12 @@ export function MasterCard({ master }: MasterCardProps) {
         <div className={styles.meta}>
           <h3>
             <span className={styles.firstName}>{firstName}</span>
-            {lastName ? <span className={styles.lastName}>{lastName}</span> : null}
+            {lastName ? (
+              <>
+                {' '}
+                <span className={styles.lastName}>{lastName}</span>
+              </>
+            ) : null}
           </h3>
           <p>
             <strong>{master.rating}</strong> <span className={styles.stars}>★★★★★</span> ({master.reviewsCount} отзывов)
