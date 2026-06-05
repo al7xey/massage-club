@@ -22,7 +22,7 @@
 .titlePage,
 .title {
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.12;
   overflow-wrap: break-word;
 }
@@ -39,6 +39,8 @@
   max-width: 700px;
   margin: 8px 0 0;
   color: var(--color-muted);
+  font-size: 18px;
+  line-height: 1.55;
 }
 
 .actions {

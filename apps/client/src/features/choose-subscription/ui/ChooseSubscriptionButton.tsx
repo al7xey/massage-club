@@ -35,7 +35,7 @@ export function ChooseSubscriptionButton({ planId }: ChooseSubscriptionButtonPro
   return (
     <div className={styles.root}>
       <Button data-plan-id={planId} fullWidth onClick={handleClick}>
-        Выбрать тариф
+        Выбрать
       </Button>
     </div>
   );

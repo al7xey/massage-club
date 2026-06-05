@@ -13,7 +13,7 @@
 .title {
   margin: 0;
   font-size: var(--font-h2);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.12;
   letter-spacing: 0;
   overflow-wrap: break-word;
@@ -22,6 +22,7 @@
 .subtitle {
   margin: 8px 0 0;
   color: var(--color-muted);
+  font-size: 18px;
   line-height: 1.55;
 }
 
@@ -53,7 +54,7 @@
 
   .subtitle {
     margin-top: 5px;
-    font-size: 13px;
+    font-size: 15px;
     line-height: 1.4;
   }
 

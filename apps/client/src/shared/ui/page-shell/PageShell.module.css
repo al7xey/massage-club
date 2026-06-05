@@ -22,7 +22,7 @@
 .title {
   margin: 0;
   font-size: var(--font-h1);
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.12;
   letter-spacing: 0;
   overflow-wrap: break-word;
@@ -58,7 +58,7 @@
   }
 
   .description {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.6;
   }
 

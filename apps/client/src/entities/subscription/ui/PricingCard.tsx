@@ -17,14 +17,14 @@ export function PricingCard({ item, actionSlot }: PricingCardProps) {
       </div>
       <div className={styles.priceRow}>
         <strong>{formatPrice(item.priceRub)}</strong>
-        <span>/ {item.periodDays} дней</span>
+        <span>/ месяц</span>
       </div>
       <ul className={styles.features}>
         {item.planMeta.features.map((feature) => (
           <li key={feature}>{feature}</li>
         ))}
       </ul>
-      {actionSlot ?? <Button fullWidth>Выбрать тариф</Button>}
+      {actionSlot ?? <Button fullWidth>Выбрать</Button>}
     </article>
   );
 }

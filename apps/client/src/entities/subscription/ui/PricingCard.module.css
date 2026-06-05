@@ -1,7 +1,7 @@
 .card {
   display: flex;
   height: 100%;
-  min-height: 338px;
+  min-height: 250px;
   flex-direction: column;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
@@ -24,17 +24,13 @@
 }
 
 .title {
-  display: -webkit-box;
-  min-height: 48px;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
   margin: 0;
   color: var(--color-text);
-  font-size: 22px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 700;
   letter-spacing: 0;
-  text-transform: none;
+  line-height: 1.1;
+  text-transform: uppercase;
 }
 
 .priceRow {
@@ -42,86 +38,58 @@
   align-items: baseline;
   gap: 8px;
   margin-top: 18px;
+  flex-wrap: wrap;
 }
 
 .priceRow strong {
   color: var(--color-text);
   font-size: 30px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1;
 }
 
 .priceRow span {
-  color: var(--color-subtle);
-  font-size: 12px;
-  font-weight: 500;
+  color: var(--color-muted);
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .features {
   display: grid;
   flex: 1;
   align-content: start;
-  gap: 11px;
-  margin: 18px 0 16px;
+  gap: 8px;
+  margin: 20px 0 18px;
   border-top: 1px solid var(--color-line);
-  padding: 20px 0 0;
+  padding: 18px 0 0;
   list-style: none;
 }
 
 .features li {
   position: relative;
-  padding-left: 22px;
-  color: var(--color-muted);
-  font-size: 12px;
-  font-weight: 500;
+  padding-left: 16px;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 600;
   line-height: 1.45;
 }
 
 .features li::before {
   position: absolute;
-  top: 7px;
+  top: 0;
   left: 0;
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-round);
-  background: var(--color-primary);
-  content: "";
-}
-
-.features li:first-child {
-  color: var(--color-text);
-  font-weight: 600;
-}
-
-.features li:first-child::before {
-  top: 2px;
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--color-primary);
-  background: transparent;
-}
-
-.features li:first-child::after {
-  position: absolute;
-  top: 6px;
-  left: 4px;
-  width: 6px;
-  height: 3px;
-  border-bottom: 2px solid var(--color-primary);
-  border-left: 2px solid var(--color-primary);
-  content: "";
-  transform: rotate(-45deg);
+  content: "-";
 }
 
 @media (max-width: 760px) {
   .card {
-    min-height: 330px;
+    min-height: 238px;
     padding: 18px;
   }
 
   .title {
     min-height: 0;
-    font-size: 19px;
+    font-size: 21px;
   }
 
   .priceRow {
@@ -130,18 +98,22 @@
   }
 
   .priceRow strong {
-    font-size: 28px;
+    font-size: 27px;
+  }
+
+  .priceRow span {
+    font-size: 14px;
   }
 
   .features {
-    gap: 9px;
+    gap: 7px;
     margin: 14px 0 12px;
     padding-top: 16px;
   }
 
   .features li {
-    padding-left: 18px;
-    font-size: 12px;
+    padding-left: 15px;
+    font-size: 14px;
     line-height: 1.42;
   }
 
