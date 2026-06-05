@@ -215,12 +215,12 @@ export function MainLayout() {
       <footer className={styles.footer}>
         <div className={styles.footerMain}>
           <div>
-            <p className={styles.footerBrand}>
+            <Link className={styles.footerBrand} to={appRoutes.home()} aria-label="RelaxUp, на главную">
               <span className={styles.brandMark} aria-hidden="true">
                 <BrandMark />
               </span>
               RelaxUp
-            </p>
+            </Link>
             <p>{footerText}</p>
           </div>
           <div>
