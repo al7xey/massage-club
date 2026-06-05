@@ -1,6 +1,6 @@
 import { cloneElement, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PricingCard, type TariffItem } from '@/entities/subscription';
+import { getSubscriptionPlanSlug, PricingCard, type TariffItem } from '@/entities/subscription';
 import { ChooseSubscriptionButton } from '@/features/choose-subscription';
 import { appRoutes } from '@/shared/routes';
 import { cx } from '@/shared/ui';
@@ -45,7 +45,7 @@ export function PlansCarousel({
               <PricingCard
                 item={item}
                 actionSlot={<ChooseSubscriptionButton planId={item.id} />}
-                onOpen={() => navigate(appRoutes.subscriptionDetails(item.id))}
+                onOpen={() => navigate(appRoutes.subscriptionDetails(getSubscriptionPlanSlug(item.code)))}
               />
             </div>
           </div>

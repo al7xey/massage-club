@@ -1,102 +1,82 @@
-.hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
-  gap: 22px;
-  align-items: stretch;
+.detailsCard {
+  display: flex;
+  min-height: 620px;
+  flex-direction: column;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card-large);
   background: #ffffff;
   box-shadow: var(--shadow-card);
-  padding: 28px;
+  padding: 34px;
 }
 
-.eyebrow {
-  display: inline-flex;
-  width: fit-content;
-  border-radius: var(--radius-round);
-  background: var(--color-soft);
-  color: var(--color-primary-hover);
-  padding: 7px 12px;
-  font-size: 12px;
-  font-weight: 600;
+.heading {
+  max-width: 780px;
 }
 
-.hero h2 {
-  max-width: 620px;
-  margin: 18px 0 0;
+.heading h2 {
+  margin: 0;
   color: var(--color-text);
-  font-size: clamp(32px, 4vw, 54px);
+  font-size: clamp(38px, 5vw, 68px);
   font-weight: 600;
-  line-height: 1.05;
+  line-height: 1.02;
+  letter-spacing: 0;
 }
 
-.hero p {
-  max-width: 620px;
+.heading p {
+  max-width: 680px;
   margin: 18px 0 0;
   color: var(--color-muted);
-  font-size: 18px;
-  line-height: 1.58;
+  font-size: 19px;
+  line-height: 1.55;
 }
 
-.summary {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  justify-content: center;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-  background: var(--color-surface-soft);
-  padding: 22px;
-}
-
-.summary strong {
-  color: var(--color-text);
-  font-size: 32px;
-  font-weight: 600;
-  line-height: 1;
-}
-
-.summary > span {
-  margin: 8px 0 20px;
-  color: var(--color-muted);
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.infoGrid {
+.conditionList {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 22px;
+  gap: 0;
+  margin-top: 34px;
+  border-top: 1px solid var(--color-line);
 }
 
-.infoCard {
-  display: flex;
-  min-width: 0;
-  gap: 12px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-  background: #ffffff;
-  padding: 18px;
+.conditionRow {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 16px;
+  border-bottom: 1px solid var(--color-line);
+  padding: 20px 0;
 }
 
-.infoCard > span {
+.conditionRow h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.conditionRow p {
+  max-width: 920px;
+  margin: 8px 0 0;
+  color: var(--color-muted);
+  font-size: 16px;
+  line-height: 1.62;
+}
+
+.checkIcon {
   position: relative;
   display: inline-grid;
-  width: 22px;
-  height: 22px;
-  margin-top: 2px;
-  flex: 0 0 22px;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
   border: 2px solid var(--color-primary);
   border-radius: var(--radius-round);
   background: rgba(111, 141, 78, 0.08);
 }
 
-.infoCard > span::after {
+.checkIcon::after {
   position: absolute;
-  top: 6px;
-  left: 5px;
-  width: 9px;
+  top: 7px;
+  left: 6px;
+  width: 10px;
   height: 5px;
   border-bottom: 2px solid var(--color-primary);
   border-left: 2px solid var(--color-primary);
@@ -104,50 +84,54 @@
   transform: rotate(-45deg);
 }
 
-.infoCard h3 {
-  margin: 0;
-  color: var(--color-text);
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.25;
-}
-
-.infoCard p {
-  margin: 8px 0 0;
-  color: var(--color-muted);
-  font-size: 14px;
-  line-height: 1.55;
-}
-
-.explainer {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
-  gap: 16px;
-  margin-top: 22px;
-}
-
-.explainer > div,
-.note {
-  border: 1px solid var(--color-line);
+.howItWorks {
+  margin-top: 28px;
   border-radius: var(--radius-card);
   background: var(--color-soft);
-  padding: 22px;
+  padding: 24px;
 }
 
-.explainer h2,
-.note strong {
-  display: block;
+.howItWorks h3 {
   margin: 0;
   color: var(--color-text);
-  font-size: var(--font-h3);
+  font-size: 22px;
   font-weight: 600;
 }
 
-.explainer p,
-.note p {
-  margin: 10px 0 0;
+.howItWorks p {
+  max-width: 980px;
+  margin: 12px 0 0;
   color: var(--color-muted);
+  font-size: 16px;
   line-height: 1.65;
+}
+
+.purchaseBar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  gap: 18px;
+  align-items: end;
+  margin-top: auto;
+  padding-top: 34px;
+}
+
+.priceBlock {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.priceBlock strong {
+  color: var(--color-text);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.priceBlock span {
+  color: var(--color-muted);
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .backButton {
@@ -190,35 +174,46 @@
   text-align: center;
 }
 
-@media (max-width: 1020px) {
-  .infoGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 760px) {
-  .hero,
-  .explainer {
-    grid-template-columns: 1fr;
+  .detailsCard {
+    min-height: 0;
+    padding: 22px;
   }
 
-  .hero {
-    padding: 20px;
+  .heading h2 {
+    font-size: 42px;
   }
 
-  .hero h2 {
-    font-size: 34px;
-  }
-
-  .hero p {
+  .heading p {
     font-size: 16px;
   }
 
-  .summary {
+  .conditionRow {
+    grid-template-columns: 26px minmax(0, 1fr);
+    gap: 12px;
+    padding: 18px 0;
+  }
+
+  .conditionRow h3 {
+    font-size: 17px;
+  }
+
+  .conditionRow p,
+  .howItWorks p {
+    font-size: 15px;
+  }
+
+  .howItWorks {
     padding: 18px;
   }
 
-  .infoGrid {
+  .purchaseBar {
     grid-template-columns: 1fr;
+    gap: 16px;
+    padding-top: 26px;
+  }
+
+  .priceBlock strong {
+    font-size: 30px;
   }
 }

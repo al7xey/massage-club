@@ -13,16 +13,8 @@
   padding: 20px;
 }
 
-.tariffIntro span {
-  display: inline-flex;
-  color: var(--color-primary-hover);
-  font-size: 12px;
-  font-weight: 600;
-}
-
 .tariffIntro strong {
   display: block;
-  margin-top: 10px;
   color: var(--color-text);
   font-size: 17px;
   font-weight: 600;

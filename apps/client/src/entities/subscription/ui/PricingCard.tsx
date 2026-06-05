@@ -16,6 +16,10 @@ export function PricingCard({ item, actionSlot, onOpen }: PricingCardProps) {
       return;
     }
 
+    if ((event.target as HTMLElement).closest('a, button')) {
+      return;
+    }
+
     event.preventDefault();
     onOpen();
   };
