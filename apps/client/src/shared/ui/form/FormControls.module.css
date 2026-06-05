@@ -38,8 +38,6 @@ input[type='password']::placeholder {
 }
 
 .control.passwordControl {
-  font-size: 28px;
-  font-weight: 900;
   letter-spacing: 0;
   -webkit-text-security: disc;
 }
