@@ -5,6 +5,7 @@ export const appRoutes = {
   masters: () => '/masters',
   masterDetails: (id: string) => `/masters/${id}`,
   subscriptions: () => '/subscriptions',
+  subscriptionDetails: (planId: string) => `/subscriptions/${planId}`,
   subscriptionPurchase: (planId: string) => `/subscriptions/${planId}/purchase`,
   studios: () => '/studios',
   cart: () => '/cart',

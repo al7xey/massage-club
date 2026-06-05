@@ -40,6 +40,24 @@ export function SubscriptionPlansPage() {
 
   return (
     <PageShell title="Тарифы">
+      <section className={styles.tariffIntro} aria-label="Как работают тарифы">
+        <div>
+          <span>01</span>
+          <strong>Визиты включены</strong>
+          <p>Каждый месяц вы получаете 1 или 2 визита, в зависимости от тарифа</p>
+        </div>
+        <div>
+          <span>02</span>
+          <strong>Скидка на услуги</strong>
+          <p>Скидка 20% или 30% применяется к услугам клуба автоматически</p>
+        </div>
+        <div>
+          <span>03</span>
+          <strong>Все прозрачно</strong>
+          <p>На карточке услуги видна разовая цена, а тариф учитывается при записи и в корзине</p>
+        </div>
+      </section>
+
       {user ? (
         userTariffs.length > 0 ? (
           <PlansCarousel title="Рекомендуемые тарифы" items={userTariffs} dotIdPrefix="plans-page-recommended" />

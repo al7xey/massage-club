@@ -1,0 +1,224 @@
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+  gap: 22px;
+  align-items: stretch;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card-large);
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+  padding: 28px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: var(--radius-round);
+  background: var(--color-soft);
+  color: var(--color-primary-hover);
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.hero h2 {
+  max-width: 620px;
+  margin: 18px 0 0;
+  color: var(--color-text);
+  font-size: clamp(32px, 4vw, 54px);
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+.hero p {
+  max-width: 620px;
+  margin: 18px 0 0;
+  color: var(--color-muted);
+  font-size: 18px;
+  line-height: 1.58;
+}
+
+.summary {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-soft);
+  padding: 22px;
+}
+
+.summary strong {
+  color: var(--color-text);
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.summary > span {
+  margin: 8px 0 20px;
+  color: var(--color-muted);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.infoCard {
+  display: flex;
+  min-width: 0;
+  gap: 12px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: #ffffff;
+  padding: 18px;
+}
+
+.infoCard > span {
+  position: relative;
+  display: inline-grid;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  flex: 0 0 22px;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-round);
+  background: rgba(111, 141, 78, 0.08);
+}
+
+.infoCard > span::after {
+  position: absolute;
+  top: 6px;
+  left: 5px;
+  width: 9px;
+  height: 5px;
+  border-bottom: 2px solid var(--color-primary);
+  border-left: 2px solid var(--color-primary);
+  content: "";
+  transform: rotate(-45deg);
+}
+
+.infoCard h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.infoCard p {
+  margin: 8px 0 0;
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.explainer {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.explainer > div,
+.note {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-soft);
+  padding: 22px;
+}
+
+.explainer h2,
+.note strong {
+  display: block;
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-h3);
+  font-weight: 600;
+}
+
+.explainer p,
+.note p {
+  margin: 10px 0 0;
+  color: var(--color-muted);
+  line-height: 1.65;
+}
+
+.backButton {
+  display: inline-grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-round);
+  background: #ffffff;
+  color: var(--color-text);
+  box-shadow: none;
+  transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+}
+
+.backButton:hover {
+  border-color: var(--color-primary);
+  background: var(--color-soft);
+  transform: translateX(-2px);
+}
+
+.backIcon {
+  display: block;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.state {
+  margin: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-soft);
+  color: var(--color-muted);
+  padding: 18px;
+  text-align: center;
+}
+
+@media (max-width: 1020px) {
+  .infoGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .hero,
+  .explainer {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding: 20px;
+  }
+
+  .hero h2 {
+    font-size: 34px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+
+  .summary {
+    padding: 18px;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { reachGoal } from '@/shared/lib/analytics/yandexMetrika';
@@ -14,7 +15,8 @@ export function ChooseSubscriptionButton({ planId }: ChooseSubscriptionButtonPro
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const handleClick = () => {
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
     reachGoal('tariff_select', { planId });
 
     if (!user) {

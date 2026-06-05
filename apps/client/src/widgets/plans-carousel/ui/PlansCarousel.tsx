@@ -1,6 +1,8 @@
 import { cloneElement, isValidElement, type ReactElement, type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PricingCard, type TariffItem } from '@/entities/subscription';
 import { ChooseSubscriptionButton } from '@/features/choose-subscription';
+import { appRoutes } from '@/shared/routes';
 import { cx } from '@/shared/ui';
 import styles from './PlansCarousel.module.css';
 
@@ -23,6 +25,7 @@ export function PlansCarousel({
   topAction,
 }: PlansCarouselProps) {
   const TitleTag = titleLevel;
+  const navigate = useNavigate();
 
   return (
     <section className={styles.section}>
@@ -39,7 +42,11 @@ export function PlansCarousel({
         {items.map((item) => (
           <div className={styles.slide} key={item.id}>
             <div className={styles.slideInner}>
-              <PricingCard item={item} actionSlot={<ChooseSubscriptionButton planId={item.id} />} />
+              <PricingCard
+                item={item}
+                actionSlot={<ChooseSubscriptionButton planId={item.id} />}
+                onOpen={() => navigate(appRoutes.subscriptionDetails(item.id))}
+              />
             </div>
           </div>
         ))}

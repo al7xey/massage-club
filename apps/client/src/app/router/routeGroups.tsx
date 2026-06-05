@@ -46,6 +46,7 @@ import { ReviewsPage } from '@/pages/reviews';
 import { ServiceDetailsPage } from '@/pages/service-details';
 import { ServicesCatalogPage } from '@/pages/services-catalog';
 import { StudiosPage } from '@/pages/studios';
+import { SubscriptionDetailsPage } from '@/pages/subscription-details';
 import { SubscriptionPurchasePage } from '@/pages/subscription-purchase';
 import { SubscriptionPlansPage } from '@/pages/subscription-plans';
 import { SupportTicketsPage } from '@/pages/support-tickets';
@@ -59,6 +60,7 @@ export const publicRoutes: AppRouteConfig[] = [
   { path: 'masters', element: <MastersPage /> },
   { path: 'masters/:id', element: <MasterDetailsPage /> },
   { path: 'subscriptions', element: <SubscriptionPlansPage /> },
+  { path: 'subscriptions/:planId', element: <SubscriptionDetailsPage /> },
   { path: 'studios', element: <StudiosPage /> },
   { path: 'auth', element: <AuthPage /> },
   { path: 'login', element: <LoginPage /> },

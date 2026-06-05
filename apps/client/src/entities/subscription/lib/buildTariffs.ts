@@ -19,7 +19,7 @@ function createPlanMeta(plan: SubscriptionPlanDto): PlanMeta {
     subtitle: `${plan.monthlyPriceRub.toLocaleString('ru-RU')} ₽ / месяц`,
     features: [
       `${plan.includedCredits} ${getVisitWord(plan.includedCredits)} в месяц`,
-      `Скидка ${plan.discountPercent}%`,
+      `Скидка ${plan.discountPercent}% на все услуги`,
     ],
   };
 }
