@@ -1,7 +1,6 @@
 import { type MouseEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { appRoutes } from '@/shared/routes';
-import { fallbackImages } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { LinkButton } from '@/shared/ui';
 import type { StudioCardModel } from '../model/types';
@@ -14,8 +13,7 @@ interface StudioCardProps {
 
 export function StudioCard({ studio, variant = 'full' }: StudioCardProps) {
   const navigate = useNavigate();
-  const fallbackSlides = fallbackImages.studios;
-  const slides = studio.photoUrls.length > 0 ? studio.photoUrls : fallbackSlides;
+  const slides = studio.photoUrls.length > 0 ? studio.photoUrls : studio.photoUrl ? [studio.photoUrl] : [];
   const [activeIndex, setActiveIndex] = useState(0);
   const activeSlide = slides[activeIndex] ?? slides[0];
   const activePhotoUrl = resolveMediaUrl(activeSlide);
@@ -23,6 +21,10 @@ export function StudioCard({ studio, variant = 'full' }: StudioCardProps) {
   const showGalleryControls = !isCompact && slides.length > 1;
   const bookingPath = `${appRoutes.booking()}?studioId=${studio.id}`;
   const goToSlide = (direction: -1 | 1) => {
+    if (slides.length === 0) {
+      return;
+    }
+
     setActiveIndex((current) => (current + direction + slides.length) % slides.length);
   };
   const handleCardClick = (event: MouseEvent<HTMLElement>) => {
@@ -40,7 +42,7 @@ export function StudioCard({ studio, variant = 'full' }: StudioCardProps) {
   return (
     <article className={`${styles.card} ${isCompact ? styles.cardCompact : ''}`} onClick={handleCardClick}>
       <div className={styles.media}>
-        <img src={activePhotoUrl} alt={`${studio.title}, фото ${activeIndex + 1}`} loading="lazy" />
+        {activePhotoUrl ? <img src={activePhotoUrl} alt={`${studio.title}, фото ${activeIndex + 1}`} loading="lazy" /> : <div className={styles.mediaPlaceholder}>{studio.title}</div>}
         {showGalleryControls ? (
           <>
             <button className={styles.navButton} type="button" aria-label="Предыдущее фото" onClick={() => goToSlide(-1)}>
@@ -67,8 +69,8 @@ export function StudioCard({ studio, variant = 'full' }: StudioCardProps) {
       <div className={styles.content}>
         <h3>{studio.title}</h3>
         <p>{studio.address}</p>
-        {!isCompact ? <p>{studio.phone}</p> : null}
-        <p>{studio.openLabel}</p>
+        {!isCompact && studio.phone ? <p>{studio.phone}</p> : null}
+        {studio.openLabel ? <p>{studio.openLabel}</p> : null}
         <LinkButton fullWidth to={bookingPath}>
           Записаться
         </LinkButton>

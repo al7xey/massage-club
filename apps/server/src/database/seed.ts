@@ -5,16 +5,12 @@ import { hash } from 'bcryptjs';
 import { DataSource, Repository } from 'typeorm';
 import { normalizePhone } from '../common/utils/normalize-contact.util';
 import { SystemSetting } from '../modules/admin/entities/system-setting.entity';
-import { GiftCertificate } from '../modules/gift-certificates/entities/gift-certificate.entity';
 import { MasterShift } from '../modules/masters/entities/master-shift.entity';
 import { Master } from '../modules/masters/entities/master.entity';
-import { Payment, PaymentStatus } from '../modules/payments/entities/payment.entity';
 import { ServiceCategory } from '../modules/services/entities/service-category.entity';
 import { Service } from '../modules/services/entities/service.entity';
 import { Studio } from '../modules/studios/entities/studio.entity';
 import { SubscriptionPlan } from '../modules/subscription-plans/entities/subscription-plan.entity';
-import { SubscriptionCredit } from '../modules/subscriptions/entities/subscription-credit.entity';
-import { Subscription, SubscriptionStatus } from '../modules/subscriptions/entities/subscription.entity';
 import { User } from '../modules/users/entities/user.entity';
 
 interface ServiceSeed {
@@ -449,49 +445,12 @@ const serviceSeeds: ServiceSeed[] = [
   },
 ];
 
-// Test images for services by category (from Unsplash)
-const serviceImagesByCategory: Record<string, string[]> = {
-  'spa-programs': [
-    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80',
-  ],
-  'massage': [
-    'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80',
-  ],
-  'massage-men': [
-    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80',
-  ],
-  'body-correction-wraps': [
-    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
-  ],
-  'face-care': [
-    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
-  ],
-  'laser-hair-removal': [
-    'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
-    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
-  ],
-};
+function isMockImageUrl(url?: null | string): boolean {
+  return Boolean(url?.includes('images.unsplash.com/'));
+}
 
-function getServiceImage(categorySlug: string, index: number): string {
-  const images = serviceImagesByCategory[categorySlug] ?? serviceImagesByCategory['spa-programs'];
-  return images[index % images.length];
+function removeMockImageUrls(urls?: string[] | null): string[] {
+  return (urls ?? []).filter((url) => !isMockImageUrl(url));
 }
 
 function normalizeServiceTitle(title: string, categorySlug: string): string {
@@ -516,13 +475,6 @@ function sentenceCase(value: string): string {
 
   return normalized.replace(/^./u, (firstLetter) => firstLetter.toLocaleUpperCase('ru-RU'));
 }
-
-const masterPhotoUrls = [
-  'https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=1200&q=80',
-];
 
 const planSeeds = [
   {
@@ -612,10 +564,6 @@ async function seed() {
   const masters = dataSource.getRepository(Master);
   const shifts = dataSource.getRepository(MasterShift);
   const plans = dataSource.getRepository(SubscriptionPlan);
-  const subscriptions = dataSource.getRepository(Subscription);
-  const subscriptionCredits = dataSource.getRepository(SubscriptionCredit);
-  const certificates = dataSource.getRepository(GiftCertificate);
-  const payments = dataSource.getRepository(Payment);
   const settings = dataSource.getRepository(SystemSetting);
 
   const passwordHash = await hash('password123', 10);
@@ -692,18 +640,23 @@ async function seed() {
     city: 'Москва',
     address: 'Тверская улица, 12',
     phone: '+74950000001',
-    photoUrl: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1600&q=80',
+    photoUrls: [],
     isActive: true,
   }));
 
-  await findOrCreate(studios, { name: 'Massage Club Парк' } as Partial<Studio>, () => ({
+  const studioPark = await findOrCreate(studios, { name: 'Massage Club Парк' } as Partial<Studio>, () => ({
     name: 'Massage Club Парк',
     city: 'Москва',
     address: 'Ленинский проспект, 45',
     phone: '+74950000002',
-    photoUrl: 'https://images.unsplash.com/photo-1519821172141-b5d8e075cde7?auto=format&fit=crop&w=1600&q=80',
+    photoUrls: [],
     isActive: true,
   }));
+  for (const studio of [studioCenter, studioPark]) {
+    studio.photoUrl = isMockImageUrl(studio.photoUrl) ? null : studio.photoUrl;
+    studio.photoUrls = removeMockImageUrls(studio.photoUrls);
+    await studios.save(studio);
+  }
 
   const categoriesBySlug = new Map<string, ServiceCategory>();
   for (const [slug, name, description] of categorySeeds) {
@@ -725,7 +678,6 @@ async function seed() {
 
     const slug = `${item.categorySlug}-${slugify(item.title)}-${index + 1}`;
     activeServiceSlugs.push(slug);
-    const imageUrl = getServiceImage(item.categorySlug, index);
     const title = normalizeServiceTitle(item.title, item.categorySlug);
     const service = await findOrCreate(services, { slug } as Partial<Service>, () => ({
       title,
@@ -736,8 +688,7 @@ async function seed() {
       composition: item.composition,
       priceRub: item.priceRub,
       category,
-      imageUrl,
-      galleryUrls: [imageUrl],
+      galleryUrls: [],
       externalSource: 'seed',
       externalId: `${item.categorySlug}-${index + 1}`,
       isActive: true,
@@ -749,8 +700,8 @@ async function seed() {
     service.composition = item.composition;
     service.priceRub = item.priceRub;
     service.category = category;
-    service.imageUrl = imageUrl;
-    service.galleryUrls = [imageUrl];
+    service.imageUrl = isMockImageUrl(service.imageUrl) ? null : service.imageUrl;
+    service.galleryUrls = removeMockImageUrls(service.galleryUrls);
     service.externalSource = 'seed';
     service.externalId = `${item.categorySlug}-${index + 1}`;
     service.isActive = true;
@@ -765,14 +716,13 @@ async function seed() {
     .where('slug NOT IN (:...activeServiceSlugs)', { activeServiceSlugs })
     .execute();
 
-  for (const [masterIndex, masterSeed] of [
+  for (const masterSeed of [
     ['Екатерина', 'Реснянская'],
     ['Фадиля', 'Каримова'],
     ['Ирина', 'Строкова', 'Александровна'],
     ['Анастасия', 'Афонина', 'Олеговна'],
-  ].entries()) {
+  ]) {
     const [firstName, lastName, patronymic] = masterSeed;
-    const photoUrl = masterPhotoUrls[masterIndex % masterPhotoUrls.length];
     const bio = `${[firstName, patronymic, lastName].filter(Boolean).join(' ')}. Мастер массажа и SPA.`;
     const master = await findOrCreate(masters, { firstName, lastName } as Partial<Master>, () => ({
       firstName,
@@ -780,15 +730,14 @@ async function seed() {
       bio,
       studio: studioCenter,
       services: savedServices,
-      photoUrl,
-      photoUrls: [photoUrl],
+      photoUrls: [],
       isActive: true,
     }));
     master.bio = bio;
     master.studio = studioCenter;
     master.services = savedServices;
-    master.photoUrl = master.photoUrl ?? photoUrl;
-    master.photoUrls = master.photoUrls?.length ? master.photoUrls : [master.photoUrl];
+    master.photoUrl = isMockImageUrl(master.photoUrl) ? null : master.photoUrl;
+    master.photoUrls = removeMockImageUrls(master.photoUrls);
     master.isActive = true;
     await masters.save(master);
   }
@@ -812,100 +761,8 @@ async function seed() {
     },
   }));
 
-  const demoPlan = await plans.findOneByOrFail({ code: 'LADY_SUPER' });
-  const demoUser = await users.findOneByOrFail({ email: 'user@test.ru' });
-  const activeStartsAt = new Date();
-  activeStartsAt.setDate(activeStartsAt.getDate() - 3);
-  const activeEndsAt = new Date(activeStartsAt);
-  activeEndsAt.setDate(activeEndsAt.getDate() + demoPlan.periodDays);
-
-  let demoSubscription = await subscriptions.findOne({
-    where: {
-      user: { id: demoUser.id },
-      status: SubscriptionStatus.ACTIVE,
-    },
-    order: { createdAt: 'DESC' },
-  });
-
-  if (!demoSubscription) {
-    demoSubscription = await subscriptions.save(
-      subscriptions.create({
-        user: demoUser,
-        plan: demoPlan,
-        status: SubscriptionStatus.ACTIVE,
-        startsAt: activeStartsAt,
-        endsAt: activeEndsAt,
-        autoRenewalEnabled: true,
-      }),
-    );
-  } else {
-    demoSubscription.plan = demoPlan;
-    demoSubscription.status = SubscriptionStatus.ACTIVE;
-    demoSubscription.startsAt = activeStartsAt;
-    demoSubscription.endsAt = activeEndsAt;
-    demoSubscription.frozenUntil = undefined;
-    demoSubscription.autoRenewalEnabled = true;
-    demoSubscription.gracePeriodEndsAt = undefined;
-    demoSubscription.nextPaymentRetryAt = undefined;
-    demoSubscription = await subscriptions.save(demoSubscription);
-  }
-
-  const targetRemainingCredits = Math.max(1, demoPlan.includedCredits - 1);
-  const existingCredit = await subscriptionCredits.findOne({
-    where: { subscription: { id: demoSubscription.id } },
-  });
-
-  if (!existingCredit) {
-    await subscriptionCredits.save(
-      subscriptionCredits.create({
-        subscription: demoSubscription,
-        totalCredits: demoPlan.includedCredits,
-        remainingCredits: targetRemainingCredits,
-      }),
-    );
-  } else {
-    existingCredit.totalCredits = demoPlan.includedCredits;
-    existingCredit.remainingCredits = targetRemainingCredits;
-    await subscriptionCredits.save(existingCredit);
-  }
-
-  const existingSubscriptionPayment = await payments.findOne({
-    where: {
-      user: { id: demoUser.id },
-      purpose: `SUBSCRIPTION:${demoPlan.name}`,
-      relatedEntityId: demoSubscription.id,
-    },
-  });
-
-  if (!existingSubscriptionPayment) {
-    await payments.save(
-      payments.create({
-        user: demoUser,
-        amountRub: demoPlan.monthlyPriceRub,
-        purpose: `SUBSCRIPTION:${demoPlan.name}`,
-        relatedEntityId: demoSubscription.id,
-        provider: 'mock',
-        status: PaymentStatus.PAID,
-      }),
-    );
-  }
-
-  if (!(await certificates.findOne({ where: { code: 'GIFT-DEMO01' } }))) {
-    const expiresAt = new Date();
-    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-    await certificates.save(
-      certificates.create({
-        code: 'GIFT-DEMO01',
-        recipientName: 'Демо Получатель',
-        recipientContact: 'demo@example.com',
-        amountRub: 5000,
-        expiresAt,
-      }),
-    );
-  }
-
   await app.close();
-  console.log('Seed data created successfully. Demo logins: user@test.ru/user12345, admin@test.ru/admin12345, admin@massage.local/Admin12345!, superadmin@massage.local/SuperAdmin12345!.');
+  console.log('Seed data created successfully.');
 }
 
 function slugify(value: string) {

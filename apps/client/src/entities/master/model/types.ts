@@ -22,11 +22,6 @@ export interface MasterDto {
 export interface MasterCardModel {
   id: string;
   fullName: string;
-  roleLabel: string;
-  summary: string;
-  experienceLabel: string;
-  rating: number;
-  reviewsCount: number;
-  nextSlots: string[];
+  specialization?: string | null;
   photoUrl?: string | null;
 }

@@ -72,6 +72,21 @@
   box-shadow: 0 14px 28px rgba(31, 41, 55, 0.1);
 }
 
+.imagePlaceholder {
+  display: grid;
+  width: 100%;
+  min-height: 100%;
+  place-items: center;
+  border-radius: 18px;
+  background: var(--color-soft);
+  color: var(--color-muted);
+  padding: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+}
+
 .cardBody {
   display: grid;
   align-content: center;

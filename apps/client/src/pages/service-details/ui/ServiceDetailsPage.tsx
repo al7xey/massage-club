@@ -7,7 +7,6 @@ import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
 import { useAuth } from '@/features/auth';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
-import { getFallbackImage } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
 import { Button, EmptyState, LinkButton } from '@/shared/ui';
@@ -113,11 +112,13 @@ export function ServiceDetailsPage() {
       <section className={styles.top}>
         <div className={styles.visual}>
           <div
-            className={styles.servicePhoto}
+            className={`${styles.servicePhoto} ${activePhoto?.url ? '' : styles.servicePhotoEmpty}`}
             role="img"
             aria-label={`Фото услуги ${title}`}
             style={activePhoto?.url ? { backgroundImage: `url("${activePhoto.url}")` } : undefined}
-          />
+          >
+            {activePhoto?.url ? null : <span>{selected.category?.name ?? title}</span>}
+          </div>
         </div>
 
         <aside className={styles.bookingCard}>
@@ -232,9 +233,8 @@ function PriceRow({
 
 function getServiceGallery(service: ServiceDto | undefined) {
   const urls = uniqueUrls([service?.imageUrl, ...(service?.galleryUrls ?? [])]);
-  const items = urls.length > 0 ? urls : [getFallbackImage('services', service?.category?.slug ?? service?.title ?? 'service')];
 
-  return items.map((url, index) => ({
+  return urls.map((url, index) => ({
     label: `Фото ${index + 1}`,
     url: resolveMediaUrl(url),
   }));

@@ -18,7 +18,7 @@ export class Studio {
   phone?: string;
 
   @Column({ name: 'photo_url', nullable: true })
-  photoUrl?: string;
+  photoUrl?: string | null;
 
   @Column({ name: 'photo_urls', type: 'jsonb', default: () => "'[]'" })
   photoUrls: string[];

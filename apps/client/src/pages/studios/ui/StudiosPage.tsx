@@ -3,7 +3,6 @@ import { createReviewCardModel, useGetReviewsQuery } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
-import { fallbackImages } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
 import { EmptyState, LinkButton } from '@/shared/ui';
@@ -13,17 +12,20 @@ import { ReviewsShowcase } from '@/widgets/reviews-showcase';
 import { ServiceShowcase } from '@/widgets/service-showcase';
 import styles from './StudiosPage.module.css';
 
+type StudioWithCoordinates = ReturnType<typeof createStudioCardModel> & { coordinates: { lat: number; lon: number } };
+
 export function StudiosPage() {
   const { data = [], isLoading } = useGetStudiosQuery();
   const { data: servicesPage } = useGetServicesQuery({ limit: 4, sort: 'popular' });
   const { data: plans = [] } = useGetSubscriptionPlansQuery();
   const { data: reviews = [] } = useGetReviewsQuery();
 
-  const studios = useMemo(() => data.map((studio, index) => createStudioCardModel(studio, index)), [data]);
-  const mapSrc = useMemo(() => buildYandexMapSrc(studios), [studios]);
+  const studios = useMemo(() => data.map((studio) => createStudioCardModel(studio)), [data]);
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const studioTariffs = buildTariffs(plans).slice(0, 4);
   const reviewCards = reviews.slice(0, 3).map(createReviewCardModel);
+  const mappedStudios = useMemo(() => studios.filter(hasCoordinates), [studios]);
+  const mapSrc = useMemo(() => buildYandexMapSrc(mappedStudios), [mappedStudios]);
 
   return (
     <PageShell title="Наши студии">
@@ -35,7 +37,7 @@ export function StudiosPage() {
       <section className={styles.studiosList} aria-label="Список студий">
         {studios.map((studio, index) => (
           <article className={styles.studioSection} key={studio.id}>
-            <StudioGallery photos={getStudioGallery(studio, index)} studioTitle={studio.title} />
+            <StudioGallery photos={getStudioGallery(studio)} studioTitle={studio.title} />
 
             <div className={styles.studioInfo}>
               <h2>{studio.title}</h2>
@@ -43,12 +45,14 @@ export function StudiosPage() {
               <dl>
                 <div>
                   <dt>График</dt>
-                  <dd>{studio.openLabel}</dd>
+                  <dd>{studio.openLabel ?? 'Уточняйте при записи'}</dd>
                 </div>
-                <div>
-                  <dt>Телефон</dt>
-                  <dd>{studio.phone}</dd>
-                </div>
+                {studio.phone ? (
+                  <div>
+                    <dt>Телефон</dt>
+                    <dd>{studio.phone}</dd>
+                  </div>
+                ) : null}
               </dl>
               <LinkButton className={styles.bookButton} to={`${appRoutes.booking()}?studioId=${studio.id}`}>
                 Записаться
@@ -75,14 +79,14 @@ export function StudiosPage() {
 
       <ReviewsShowcase title="Отзывы гостей" subtitle="Мнения гостей клуба" actionLabel="Смотреть все" reviews={reviewCards} />
 
-      {studios.length > 0 ? (
+      {mappedStudios.length > 0 ? (
         <section className={styles.mapSection} id="map">
           <div className={styles.mapFrame}>
             <iframe title="Карта студий RelaxUp" src={mapSrc} loading="lazy" />
           </div>
           <div className={styles.mapList}>
             <h2>Адреса на карте</h2>
-            {studios.map((studio) => (
+            {mappedStudios.map((studio) => (
               <article key={studio.id}>
                 <strong>{studio.title}</strong>
                 <span>{studio.address}</span>
@@ -98,7 +102,7 @@ export function StudiosPage() {
   );
 }
 
-function buildYandexMapSrc(studios: Array<ReturnType<typeof createStudioCardModel>>) {
+function buildYandexMapSrc(studios: StudioWithCoordinates[]) {
   const center = getMapCenter(studios);
   const points = studios.map((studio) => `${studio.coordinates.lon},${studio.coordinates.lat},pm2rdm`).join('~');
   const params = new URLSearchParams({
@@ -115,9 +119,9 @@ function buildYandexRouteUrl(lat: number, lon: number) {
   return `https://yandex.ru/maps/?rtext=~${lat},${lon}&rtt=auto`;
 }
 
-function getMapCenter(studios: Array<ReturnType<typeof createStudioCardModel>>) {
+function getMapCenter(studios: StudioWithCoordinates[]) {
   if (studios.length === 0) {
-    return { lat: 46.3492, lon: 48.0409 };
+    return { lat: 0, lon: 0 };
   }
 
   const total = studios.reduce(
@@ -134,11 +138,10 @@ function getMapCenter(studios: Array<ReturnType<typeof createStudioCardModel>>) 
   };
 }
 
-function getStudioGallery(studio: ReturnType<typeof createStudioCardModel>, index: number) {
+function getStudioGallery(studio: ReturnType<typeof createStudioCardModel>) {
   const photos = uniqueUrls(studio.photoUrls.length > 0 ? studio.photoUrls : [studio.photoUrl]);
-  const items = photos.length > 0 ? photos : fallbackImages.studios;
 
-  return items.map((item, photoIndex) => ({
+  return photos.map((item, photoIndex) => ({
     label: `Фото ${photoIndex + 1}`,
     url: resolveMediaUrl(item),
   }));
@@ -170,11 +173,13 @@ function StudioGallery({
   return (
     <div className={styles.gallery} aria-label={`Фото студии ${studioTitle}`}>
       <div
-        className={styles.photo}
+        className={`${styles.photo} ${activePhoto?.url ? '' : styles.photoEmpty}`}
         role="img"
         aria-label={`${studioTitle}, фото ${activeIndex + 1}`}
         style={activePhoto?.url ? { backgroundImage: `url("${activePhoto.url}")` } : undefined}
-      />
+      >
+        {activePhoto?.url ? null : <span>{studioTitle}</span>}
+      </div>
       {hasMultiplePhotos ? (
         <>
           <div className={styles.galleryControls}>
@@ -229,4 +234,8 @@ function getStudioAddress(studio: ReturnType<typeof createStudioCardModel>) {
   }
 
   return `${studio.cityChip}, ${studio.address}`;
+}
+
+function hasCoordinates(studio: ReturnType<typeof createStudioCardModel>): studio is StudioWithCoordinates {
+  return Boolean(studio.coordinates);
 }

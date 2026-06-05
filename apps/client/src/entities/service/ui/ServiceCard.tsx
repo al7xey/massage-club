@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { appRoutes } from '@/shared/routes';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
-import { getFallbackImage } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { Button } from '@/shared/ui';
 import type { ServiceCardModel } from '../model/types';
@@ -17,14 +16,14 @@ interface ServiceCardProps {
 
 export function ServiceCard({ cartCount = 0, isActionDisabled = false, onAddToCart, onBook, service }: ServiceCardProps) {
   const detailsPath = appRoutes.serviceDetails(service.id);
-  const imageUrl = resolveMediaUrl(service.imageUrl ?? service.galleryUrls?.[0]) || getFallbackImage('services', service.category?.slug ?? service.title);
+  const imageUrl = resolveMediaUrl(service.imageUrl ?? service.galleryUrls?.[0]);
   const isInCart = cartCount > 0;
 
   return (
     <article className={styles.card}>
       <Link className={styles.link} to={detailsPath}>
         <div className={styles.media} aria-hidden="true">
-          <img src={imageUrl} alt="" loading="lazy" />
+          {imageUrl ? <img src={imageUrl} alt="" loading="lazy" /> : <div className={styles.mediaPlaceholder}>{service.categoryLabel}</div>}
           <span className={styles.timeBadge}>{service.badgeText}</span>
         </div>
         <div className={styles.body}>

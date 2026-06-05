@@ -4,7 +4,7 @@ export interface StudioDto {
   address: string;
   city: string;
   phone?: string;
-  photoUrl?: string;
+  photoUrl?: string | null;
   photoUrls?: string[];
   isActive?: boolean;
   coordinates?: {
@@ -17,12 +17,12 @@ export interface StudioCardModel {
   id: string;
   title: string;
   address: string;
-  phone: string;
-  openLabel: string;
+  phone?: string;
+  openLabel?: string;
   cityChip: string;
-  photoUrl?: string;
+  photoUrl?: string | null;
   photoUrls: string[];
-  coordinates: {
+  coordinates?: {
     lat: number;
     lon: number;
   };

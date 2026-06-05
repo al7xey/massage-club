@@ -6,7 +6,6 @@ import type { CartItemDto } from '@/entities/cart';
 import { getSubscriptionPlanTitle, useGetMySubscriptionQuery } from '@/entities/subscription';
 import { useAuth } from '@/features/auth';
 import { formatPrice } from '@/shared/lib/currency/formatPrice';
-import { getFallbackImage } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { formatServiceCount } from '@/shared/lib/text/formatServiceCount';
 import { appRoutes } from '@/shared/routes';
@@ -107,7 +106,11 @@ export function CartPage() {
           {groupedRows.map((row) => (
             <article className={styles.card} key={row.service.id}>
               <div className={styles.imageWrap}>
-                <img className={styles.image} src={getServiceImageUrl(row.service)} alt="" loading="lazy" />
+                {getServiceImageUrl(row.service) ? (
+                  <img className={styles.image} src={getServiceImageUrl(row.service)} alt="" loading="lazy" />
+                ) : (
+                  <div className={styles.imagePlaceholder}>{row.service.category?.name ?? row.service.title}</div>
+                )}
               </div>
 
               <div className={styles.cardBody}>
@@ -215,9 +218,8 @@ function getSuperPrice(priceRub: number) {
   return Math.round(Math.max(0, priceRub) * 0.7);
 }
 
-function getServiceImageUrl(service: { category?: { slug?: string } | null; galleryUrls?: string[] | null; imageUrl?: string | null }) {
-  const uploadedUrl = resolveMediaUrl(service.imageUrl ?? service.galleryUrls?.[0]);
-  return uploadedUrl || getFallbackImage('services', service.category?.slug ?? 'service');
+function getServiceImageUrl(service: { category?: { name?: string; slug?: string } | null; galleryUrls?: string[] | null; imageUrl?: string | null }) {
+  return resolveMediaUrl(service.imageUrl ?? service.galleryUrls?.[0]);
 }
 
 function TrashIcon() {

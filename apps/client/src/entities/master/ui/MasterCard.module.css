@@ -61,6 +61,18 @@
   object-fit: cover;
 }
 
+.mediaPlaceholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--color-soft);
+  color: var(--color-muted);
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1;
+}
+
 .meta {
   display: grid;
   gap: 6px;
@@ -83,11 +95,6 @@
   color: var(--color-muted);
   font-size: 14px;
   line-height: 1.35;
-}
-
-.stars {
-  color: var(--color-accent);
-  font-weight: 600;
 }
 
 .meta p strong {

@@ -41,7 +41,7 @@ export function CertificatesPage() {
           <div className={styles.statusPanel}>
             <h2>Проверить сертификат</h2>
             <p>Введите код сертификата, чтобы посмотреть номинал, срок действия и текущий статус.</p>
-            <TextField label="Код сертификата" placeholder="Например: GIFT-DEMO01" value={lookupValue} onChange={(event) => setLookupValue(event.target.value)} />
+            <TextField label="Код сертификата" placeholder="Введите код сертификата" value={lookupValue} onChange={(event) => setLookupValue(event.target.value)} />
             <Button isLoading={isFetching} loadingText="Проверяем..." onClick={() => setSubmittedCode(lookupValue.trim().toUpperCase())}>
               Проверить
             </Button>

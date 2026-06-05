@@ -30,6 +30,17 @@
   background-size: cover;
 }
 
+.photoEmpty {
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  color: var(--color-muted);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+}
+
 .galleryControls {
   position: absolute;
   right: 16px;

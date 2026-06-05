@@ -6,7 +6,7 @@ import styles from './MastersPage.module.css';
 
 export function MastersPage() {
   const { data = [], isLoading } = useGetMastersQuery();
-  const cards = useMemo(() => data.map((master, index) => createMasterCardModel(master, index)), [data]);
+  const cards = useMemo(() => data.map((master) => createMasterCardModel(master)), [data]);
 
   return (
     <PageShell title="Наши мастера">

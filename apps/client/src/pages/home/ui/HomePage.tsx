@@ -2,7 +2,6 @@ import { createReviewCardModel, useGetReviewsQuery } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
 import { buildTariffs, useGetSubscriptionPlansQuery } from '@/entities/subscription';
-import { fallbackImages } from '@/shared/lib/fallbackImages';
 import { appRoutes } from '@/shared/routes';
 import { LinkButton } from '@/shared/ui';
 import { PlansCarousel } from '@/widgets/plans-carousel';
@@ -36,12 +35,6 @@ export function HomePage() {
             <LinkButton to={appRoutes.services()} variant="secondary">
               Посмотреть услуги
             </LinkButton>
-          </div>
-        </div>
-        <div className={styles.heroMedia} style={{ backgroundImage: `url("${fallbackImages.hero}")` }}>
-          <div className={styles.heroBadge}>
-            <span>★★★★★</span>
-            <strong>15 000+ довольных клиентов</strong>
           </div>
         </div>
       </section>

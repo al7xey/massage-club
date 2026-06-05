@@ -4,7 +4,6 @@ import { useGetMasterQuery } from '@/entities/master';
 import { createReviewCardModel, useGetReviewsQuery } from '@/entities/review';
 import { createServiceCardModel, useGetServicesQuery } from '@/entities/service';
 import { createStudioCardModel, useGetStudiosQuery } from '@/entities/studio';
-import { getFallbackImage } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { appRoutes } from '@/shared/routes';
 import { EmptyState, LinkButton } from '@/shared/ui';
@@ -28,18 +27,19 @@ export function MasterDetailsPage() {
   }, [id]);
 
   const fullName = master ? `${master.firstName} ${master.lastName}` : 'Мастер';
-  const summary = master?.bio?.trim() || 'Мастер массажа и SPA, который подбирает темп, давление и формат процедуры под состояние гостя.';
-  const stats = getMasterStats(id);
+  const summary = master?.bio?.trim() || 'Информация о мастере скоро появится.';
   const popularServices = (servicesPage?.items ?? []).map((service) => createServiceCardModel(service));
   const studioCards = studios.slice(0, 2).map(createStudioCardModel);
   const reviewCards = reviews.slice(0, 3).map(createReviewCardModel);
   const photos = useMemo(
     () => {
       const urls = uniqueUrls([master?.photoUrl, ...(master?.photoUrls ?? [])]);
-      return (urls.length > 0 ? urls : [getFallbackImage('masters', id)]).map(resolveMediaUrl);
+      return urls.map(resolveMediaUrl);
     },
-    [id, master],
+    [master],
   );
+  const activePhoto = photos[activePhotoIndex];
+  const initials = getInitials(fullName);
 
   useEffect(() => {
     setActivePhotoIndex(0);
@@ -72,8 +72,9 @@ export function MasterDetailsPage() {
           className={styles.portrait}
           aria-label={`Фото мастера ${fullName}`}
           role="img"
-          style={photos[activePhotoIndex] ? { backgroundImage: `url("${photos[activePhotoIndex]}")` } : undefined}
+          style={activePhoto ? { backgroundImage: `url("${activePhoto}")` } : undefined}
         >
+          {activePhoto ? null : <div className={styles.portraitPlaceholder}>{initials}</div>}
           {photos.length > 1 ? (
             <div className={styles.galleryControls}>
               <button type="button" aria-label="Предыдущее фото" onClick={() => setActivePhotoIndex((index) => (index === 0 ? photos.length - 1 : index - 1))}>
@@ -90,23 +91,25 @@ export function MasterDetailsPage() {
         </div>
 
         <div className={styles.profile}>
-          <span className={styles.roleLabel}>Мастер массажа и SPA</span>
+          {master.specialization ? <span className={styles.roleLabel}>{master.specialization}</span> : null}
           <p className={styles.lead}>{summary}</p>
 
-          <div className={styles.stats}>
-            <div>
-              <span>Стаж</span>
-              <strong>{stats.experience}</strong>
+          {master.services?.length || master.studio?.name ? (
+            <div className={styles.stats}>
+              {master.services?.length ? (
+                <div>
+                  <span>Услуги</span>
+                  <strong>{master.services.length}</strong>
+                </div>
+              ) : null}
+              {master.studio?.name ? (
+                <div>
+                  <span>Студия</span>
+                  <strong>{master.studio.name}</strong>
+                </div>
+              ) : null}
             </div>
-            <div>
-              <span>Отзывы</span>
-              <strong>{stats.rating} · {stats.reviewsCount} отзывов</strong>
-            </div>
-            <div>
-              <span>Студия</span>
-              <strong>{master.studio?.name ?? 'Massage Club'}</strong>
-            </div>
-          </div>
+          ) : null}
 
           <div className={styles.actions}>
             <LinkButton fullWidth to={appRoutes.booking()}>
@@ -157,19 +160,16 @@ function ArrowIcon({ direction }: { direction: 'left' | 'right' }) {
   );
 }
 
-function getMasterStats(id: string) {
-  const seed = Array.from(id).reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  const experience = 5 + (seed % 4);
-  const reviewsCount = 42 + (seed % 30);
-  const rating = seed % 3 === 0 ? '5.0' : '4.9';
-
-  return {
-    experience: `Стаж ${experience}+ лет`,
-    rating,
-    reviewsCount,
-  };
-}
-
 function uniqueUrls(values: Array<string | null | undefined>) {
   return Array.from(new Set(values.map((url) => url?.trim()).filter(Boolean))) as string[];
+}
+
+function getInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
 }

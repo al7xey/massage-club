@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { appRoutes } from '@/shared/routes';
-import { getFallbackImage } from '@/shared/lib/fallbackImages';
 import { resolveMediaUrl } from '@/shared/lib/media';
 import { LinkButton } from '@/shared/ui';
 import type { MasterCardModel } from '../model/types';
@@ -11,15 +10,16 @@ interface MasterCardProps {
 }
 
 export function MasterCard({ master }: MasterCardProps) {
-  const photoUrl = resolveMediaUrl(master.photoUrl) || getFallbackImage('masters', master.id);
+  const photoUrl = resolveMediaUrl(master.photoUrl);
   const [firstName, ...lastNameParts] = master.fullName.trim().split(/\s+/);
   const lastName = lastNameParts.join(' ');
+  const initials = getInitials(master.fullName);
 
   return (
     <article className={styles.card}>
       <Link className={styles.cardLink} to={appRoutes.masterDetails(master.id)}>
         <div className={styles.media} aria-label={master.fullName} role="img">
-          <img src={photoUrl} alt="" loading="lazy" />
+          {photoUrl ? <img src={photoUrl} alt="" loading="lazy" /> : <div className={styles.mediaPlaceholder}>{initials}</div>}
         </div>
         <div className={styles.meta}>
           <h3>
@@ -31,9 +31,7 @@ export function MasterCard({ master }: MasterCardProps) {
               </>
             ) : null}
           </h3>
-          <p>
-            <strong>{master.rating}</strong> <span className={styles.stars}>★★★★★</span> ({master.reviewsCount} отзывов)
-          </p>
+          {master.specialization ? <p>{master.specialization}</p> : null}
         </div>
       </Link>
       <div className={styles.actions}>
@@ -47,6 +45,16 @@ export function MasterCard({ master }: MasterCardProps) {
       </div>
     </article>
   );
+}
+
+function getInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
 }
 
 function ActionArrow() {

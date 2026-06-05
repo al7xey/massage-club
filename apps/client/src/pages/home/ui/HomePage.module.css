@@ -6,7 +6,7 @@
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 460px);
+  grid-template-columns: minmax(0, 720px);
   gap: 48px;
   align-items: center;
   min-height: 500px;
@@ -45,42 +45,6 @@
   flex-wrap: wrap;
   gap: 14px;
   margin-top: 30px;
-}
-
-.heroMedia {
-  position: relative;
-  min-height: 400px;
-  overflow: hidden;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-  background: var(--color-soft-strong);
-  background-position: center;
-  background-size: cover;
-  box-shadow: var(--shadow-card);
-}
-
-.heroBadge {
-  position: absolute;
-  z-index: 1;
-  bottom: 34px;
-  left: 28px;
-  display: grid;
-  gap: 4px;
-  border-radius: var(--radius-card-small);
-  background: #ffffff;
-  padding: 14px 18px;
-  box-shadow: var(--shadow-card);
-}
-
-.heroBadge span {
-  color: var(--color-accent);
-  font-size: 13px;
-  line-height: 1;
-}
-
-.heroBadge strong {
-  color: var(--color-text);
-  font-size: 12px;
 }
 
 .giftBanner {
@@ -209,13 +173,6 @@
     gap: 34px;
   }
 
-  .heroMedia {
-    min-height: 360px;
-  }
-
-  .heroBadge {
-    left: 18px;
-  }
 }
 
 @media (max-width: 760px) {
@@ -237,10 +194,6 @@
     min-height: 0;
     align-items: start;
     padding: 22px 0 20px;
-  }
-
-  .heroMedia {
-    display: none;
   }
 
   .heroActions {
