@@ -6,7 +6,7 @@
 .header {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 120;
   width: 100%;
   border-bottom: 0;
   background: rgba(255, 255, 255, 0.92);
@@ -333,8 +333,9 @@
   }
 
   .header {
-    position: relative;
-    top: auto;
+    position: sticky;
+    top: 0;
+    z-index: 120;
     border-bottom: 0;
     box-shadow: none;
   }
