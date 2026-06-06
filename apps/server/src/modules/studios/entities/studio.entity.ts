@@ -17,7 +17,7 @@ export class Studio {
   @Column({ nullable: true })
   phone?: string;
 
-  @Column({ name: 'photo_url', nullable: true })
+  @Column({ name: 'photo_url', type: 'text', nullable: true })
   photoUrl?: string | null;
 
   @Column({ name: 'photo_urls', type: 'jsonb', default: () => "'[]'" })
